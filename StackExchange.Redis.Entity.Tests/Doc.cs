@@ -7,8 +7,10 @@ public static class Doc
     public static class Fields
     {
         public static readonly RedisValue EndDate = RedisEntity<Document>.GetField(nameof(Document.EndDate));
-        public static readonly RedisValue Price = "3";
-        public static readonly RedisValue IsDeleted = "4";
+        public static readonly RedisValue Price = RedisEntity<Document>.GetField(nameof(Document.Price));
+        public static readonly RedisValue IsDeleted = RedisEntity<Document>.GetField(nameof(Document.IsDeleted));
+
+        public static readonly RedisValue[] EndDate_IsDeleted = new[] { EndDate, IsDeleted };
     }
 
     public static readonly RedisKey Key1 = "doc:1";

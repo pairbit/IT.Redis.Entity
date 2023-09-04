@@ -2,7 +2,14 @@
 
 public class RedisEntity<T>
 {
+    public static readonly RedisValue[] Fields;
+
     public static void GetEntity(HashEntry[] entries, T entity)
+    {
+        throw new NotImplementedException();
+    }
+
+    public static void GetEntity(RedisValue[] values, RedisValue[] fields, T entity)
     {
         throw new NotImplementedException();
     }
@@ -22,7 +29,7 @@ public class RedisEntity<T>
         throw new NotImplementedException();
     }
 
-    public static RedisValue[] GetFields(string propName)
+    public static RedisValue[] GetFields(params string[] propNames)
     {
         throw new NotImplementedException();
     }
