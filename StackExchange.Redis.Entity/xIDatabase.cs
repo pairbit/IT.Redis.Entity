@@ -35,18 +35,37 @@ public static class xIDatabase
         return entity;
     }
 
-    public static T EntityGet<T>(this IDatabase db, RedisKey key, RedisValue[] fields, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None) where T : new()
+    public static T? EntityGet<T>(this IDatabase db, RedisKey key, RedisValue[] fields, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None) where T : new()
     {
+        var values = db.HashGet(key, fields, flags);
+
+        int i = 0;
+        RedisValue value;
+
+        for (; i < values.Length; i++)
+        {
+            value = values[i];
+            if (!value.IsNull) goto write;
+        }
+        return default;
+    write:
+        writer ??= RedisEntity<T>.Writer;
+
         var entity = new T();
-        (writer ?? RedisEntity<T>.Writer).Write(entity, db.HashGet(key, fields, flags), fields);
+
+        writer.Write(entity, in fields[i++], in value);
+
+        for (; i < values.Length; i++)
+        {
+            value = values[i];
+            if (!value.IsNull) writer.Write(entity, in fields[i], in value);
+        }
         return entity;
     }
 
-    public static T EntityGet<T>(this IDatabase db, RedisKey key, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None) where T : new()
+    public static T? EntityGet<T>(this IDatabase db, RedisKey key, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None) where T : new()
     {
-        var entity = new T();
         writer ??= RedisEntity<T>.Writer;
-        writer.Write(entity, writer.Fields.All, db.HashGet(key, writer.Fields.All, flags));
-        return entity;
+        return db.EntityGet(key, writer.Fields.All, writer, flags);
     }
 }

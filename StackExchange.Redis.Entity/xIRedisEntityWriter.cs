@@ -17,7 +17,8 @@ public static class xIRedisEntityWriter
 
         for (int i = 0; i < fields.Length; i++)
         {
-            writer.Write(entity, fields[i], values[i]);
+            var value = values[i];
+            if (!value.IsNull) writer.Write(entity, in fields[i], in value);
         }
     }
 }
