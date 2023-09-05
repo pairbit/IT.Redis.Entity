@@ -107,6 +107,15 @@ public class RedisEntityTest
 
         Assert.That(doc2, Is.EqualTo(doc3));
 
+        doc2.IsDeleted = true;
+        var field_IsDeleted = reader.Fields[nameof(Document.IsDeleted)];
+
+        _db.HashSet(Doc.Key1, field_IsDeleted, reader.Read(doc2, field_IsDeleted));
+
+        writer.Write(doc3, field_IsDeleted, _db.HashGet(Doc.Key1, field_IsDeleted));
+
+        Assert.That(doc2, Is.EqualTo(doc3));
+
         Assert.IsTrue(_db.KeyDelete(Doc.Key1));
     }
 
