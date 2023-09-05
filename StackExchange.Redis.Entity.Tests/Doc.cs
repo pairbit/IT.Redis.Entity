@@ -22,4 +22,6 @@ public static class Doc
         Price = 274_620_500,
         Size = DocumentSize.Medium
     };
+
+    public static readonly ReadOnlyDocument ReadOnlyData1 = new(Data1);
 }
