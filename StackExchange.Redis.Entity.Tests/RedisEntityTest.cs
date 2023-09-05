@@ -54,11 +54,13 @@ public class RedisEntityTest
     {
         var EndDate_Modified = new RedisValue[] { reader.Fields[nameof(Document.EndDate)], reader.Fields[nameof(Document.Modified)] };
 
-        _db.HashSet(Doc.Key1, reader.ReadAllFields(Doc.Data1));
-
         var doc2 = new Document();
 
-        writer.Write(doc2, _db.HashGetAll(Doc.Key1));
+        Assert.That(writer.Write(doc2, _db.HashGetAll(Doc.Key1)), Is.False);
+
+        _db.HashSet(Doc.Key1, reader.ReadAllFields(Doc.Data1));
+
+        Assert.That(writer.Write(doc2, _db.HashGetAll(Doc.Key1)), Is.True);
 
         Assert.That(doc2, Is.EqualTo(Doc.Data1));
 
