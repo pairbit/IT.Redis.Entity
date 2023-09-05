@@ -5,6 +5,9 @@ namespace ExternalLib;
 [DataContract]
 public record Document
 {
+    [DataMember(Order = 8)]
+    public Guid Id { get; set; }
+
     [DataMember(Order = 0)]
     public string Name { get; set; } = null!;
 
@@ -22,4 +25,10 @@ public record Document
 
     [DataMember(Order = 5)]
     public DocumentSize Size { get; set; }
+
+    [DataMember(Order = 6)]
+    public DateTime Created { get; set; }
+
+    [DataMember(Order = 7)]
+    public DateTime? Modified { get; set; }
 }

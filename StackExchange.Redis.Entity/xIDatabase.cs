@@ -19,7 +19,7 @@ public static class xIDatabase
     public static void EntityLoad<T>(this IDatabase db, T entity, RedisKey key, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None)
     {
         writer ??= RedisEntity<T>.Writer;
-        writer.Write(entity, writer.Fields, db.HashGet(key, writer.Fields, flags));
+        writer.Write(entity, writer.Fields.All, db.HashGet(key, writer.Fields.All, flags));
     }
 
     public static T? EntityGetAll<T>(this IDatabase db, RedisKey key, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None) where T : new()
@@ -46,7 +46,7 @@ public static class xIDatabase
     {
         var entity = new T();
         writer ??= RedisEntity<T>.Writer;
-        writer.Write(entity, writer.Fields, db.HashGet(key, writer.Fields, flags));
+        writer.Write(entity, writer.Fields.All, db.HashGet(key, writer.Fields.All, flags));
         return entity;
     }
 }

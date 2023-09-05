@@ -9,7 +9,7 @@ public static class xIRedisEntityReader
         for (int i = 0; i < entries.Length; i++)
         {
             var field = fields[i];
-            var value = reader.Read(entity, field);
+            var value = reader.Read(entity, in field);
 
             entries[i] = new HashEntry(field, value);
         }
@@ -17,5 +17,5 @@ public static class xIRedisEntityReader
         return entries;
     }
 
-    public static HashEntry[] ReadAllFields<T>(this IRedisEntityReader<T> reader, T entity) => reader.ReadFields(entity, reader.Fields);
+    public static HashEntry[] ReadAllFields<T>(this IRedisEntityReader<T> reader, T entity) => reader.ReadFields(entity, reader.Fields.All);
 }

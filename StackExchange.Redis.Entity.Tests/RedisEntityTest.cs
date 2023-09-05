@@ -74,8 +74,8 @@ public class RedisEntityTest
     [Test]
     public void HashSetGet_Custom()
     {
-        var redisDocument = new RedisDocument();
-        HashSetGet(redisDocument, redisDocument);
+        var readerWriter = new RedisDocumentReaderWriter();
+        HashSetGet(readerWriter, readerWriter);
     }
 
     private void HashSetGet(IRedisEntityWriter<Document> writer, IRedisEntityReader<Document> reader)
@@ -89,19 +89,21 @@ public class RedisEntityTest
         Assert.That(doc2, Is.EqualTo(Doc.Data1));
 
         doc2.EndDate = new DateOnly(2022, 03, 20);
-        doc2.IsDeleted = true;
+        doc2.Modified = DateTime.UtcNow;
 
-        _db.HashSet(Doc.Key1, reader.ReadFields(doc2, Doc.Fields.EndDate_IsDeleted));
+        var EndDate_Modified = new RedisValue[] { reader.Fields[nameof(Document.EndDate)], reader.Fields[nameof(Document.Modified)], };
+
+        _db.HashSet(Doc.Key1, reader.ReadFields(doc2, EndDate_Modified));
 
         var doc3 = new Document();
 
-        writer.Write(doc3, Doc.Fields.EndDate_IsDeleted, _db.HashGet(Doc.Key1, Doc.Fields.EndDate_IsDeleted));
+        writer.Write(doc3, EndDate_Modified, _db.HashGet(Doc.Key1, EndDate_Modified));
 
         Assert.That(doc2, Is.Not.EqualTo(doc3));
         Assert.That(doc2.EndDate, Is.EqualTo(doc3.EndDate));
-        Assert.That(doc2.IsDeleted, Is.EqualTo(doc3.IsDeleted));
+        Assert.That(doc2.Modified, Is.EqualTo(doc3.Modified));
 
-        writer.Write(doc3, writer.Fields, _db.HashGet(Doc.Key1, writer.Fields));
+        writer.Write(doc3, writer.Fields.All, _db.HashGet(Doc.Key1, writer.Fields.All));
 
         Assert.That(doc2, Is.EqualTo(doc3));
 

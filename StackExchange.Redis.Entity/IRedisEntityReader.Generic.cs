@@ -2,7 +2,7 @@
 
 public interface IRedisEntityReader<T>
 {
-    RedisValue[] Fields { get; }
+    IRedisEntityFields Fields { get; }
 
-    RedisValue Read(T entity, RedisValue field);
+    RedisValue Read(T entity, in RedisValue field);
 }

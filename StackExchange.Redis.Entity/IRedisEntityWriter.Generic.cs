@@ -2,7 +2,7 @@
 
 public interface IRedisEntityWriter<T>
 {
-    RedisValue[] Fields { get; }
+    IRedisEntityFields Fields { get; }
 
-    void Write(T entity, RedisValue field, RedisValue value);
+    void Write(T entity, in RedisValue field, in RedisValue value);
 }
