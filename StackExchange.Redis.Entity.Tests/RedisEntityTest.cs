@@ -63,6 +63,30 @@ public class RedisEntityTest
     }
 
     [Test]
+    public void HashGet_Multi()
+    {
+        var readerWriter = new RedisDocumentReaderWriter();
+
+        _db.EntitySet(Doc.Key1, Doc.Data1, readerWriter);
+
+        var documents = new Document?[10];
+
+        var entries = _db.HashGetAll(Doc.Key1);
+
+        for (int i = 0; i < documents.Length; i++)
+        {
+            documents[i] = readerWriter.GetEntity(entries);
+        }
+
+        var first = documents[0];
+
+        for (int i = 1; i < documents.Length; i++)
+        {
+            Assert.That(first, Is.EqualTo(documents[i]));
+        }
+    }
+
+    [Test]
     public void HashSetGet_Custom()
     {
         var readerWriter = new RedisDocumentReaderWriter();
