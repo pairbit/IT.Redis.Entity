@@ -17,7 +17,7 @@ public static class xIRedisEntityWriter
         if (fields.Length != values.Length) throw new ArgumentOutOfRangeException(nameof(values));
 
         var writen = false;
-        for (int i = 0; i < fields.Length; i++)
+        for (int i = 0; i < values.Length; i++)
         {
             var value = values[i];
             if (!value.IsNull)

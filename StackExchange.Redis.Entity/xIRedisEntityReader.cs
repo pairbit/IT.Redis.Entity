@@ -21,7 +21,7 @@ public static class xIRedisEntityReader
     {
         var entries = new HashEntry[fields.Length];
 
-        for (int i = 0; i < entries.Length; i++)
+        for (int i = 0; i < fields.Length; i++)
         {
             var field = fields[i];
             var value = reader.Read(entity, in field);
