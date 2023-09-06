@@ -84,6 +84,8 @@ public class RedisEntityTest
         {
             Assert.That(first, Is.EqualTo(documents[i]));
         }
+
+        Assert.IsTrue(_db.KeyDelete(Doc.Key1));
     }
 
     [Test]
