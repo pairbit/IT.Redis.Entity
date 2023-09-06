@@ -54,6 +54,10 @@ public class RedisEntityTest
     {
         var EndDate_Modified = new RedisValue[] { reader.Fields[nameof(Document.EndDate)], reader.Fields[nameof(Document.Modified)] };
 
+        Assert.IsNull(writer.Get(_db.HashGetAll(Doc.Key1)));
+        Assert.IsNull(writer.Get(EndDate_Modified, _db.HashGet(Doc.Key1, EndDate_Modified)));
+        Assert.IsNull(writer.Get(writer.Fields.All, _db.HashGet(Doc.Key1, writer.Fields.All)));
+
         var doc2 = new Document();
 
         Assert.That(writer.Write(doc2, _db.HashGetAll(Doc.Key1)), Is.False);
