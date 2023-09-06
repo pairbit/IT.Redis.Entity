@@ -117,6 +117,8 @@ public class RedisEntityTest
         Assert.That(writer.Write(doc2, EndDate_Modified, _db.HashGet(Doc.Key1, EndDate_Modified)), Is.False);
         Assert.That(writer.Write(doc2, Field_IsDeleted, _db.HashGet(Doc.Key1, Field_IsDeleted)), Is.False);
 
+        Assert.That(doc2, Is.EqualTo(Doc.Empty));
+
         _db.HashSet(Doc.Key1, reader.GetEntries(Doc.Data1));
 
         Assert.That(writer.Write(doc2, _db.HashGetAll(Doc.Key1)), Is.True);
@@ -172,6 +174,8 @@ public class RedisEntityTest
         Assert.That(_db.EntityLoad(doc2, Doc.Key1, Field_IsDeleted, writer), Is.False);
         Assert.That(_db.EntityLoad(doc2, Doc.Key1, EndDate_Modified), Is.False);
         Assert.That(_db.EntityLoad(doc2, Doc.Key1, writer), Is.False);
+
+        Assert.That(doc2, Is.EqualTo(Doc.Empty));
 
         _db.EntitySet(Doc.Key1, Doc.Data1, reader);
 

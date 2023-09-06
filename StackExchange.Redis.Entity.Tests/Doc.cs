@@ -15,7 +15,8 @@ public static class Doc
 
     public static readonly RedisKey Key1 = "doc:0";
     public static readonly RedisKey Prefix = "doc:";
-
+    
+    public static readonly Document Empty = new();
     public static readonly Document Deleted = new() { IsDeleted = true };
     public static readonly Document Data1 = new()
     {
