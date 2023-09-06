@@ -116,12 +116,16 @@ public class RedisEntityTest
         Assert.That(doc2, Is.EqualTo(doc3));
 
         doc2.IsDeleted = true;
- 
-        _db.HashSet(Doc.Key1, Field_IsDeleted, reader.Read(doc2, Field_IsDeleted));
+
+        Assert.That(doc2, Is.Not.EqualTo(doc3));
+
+        Assert.That(_db.HashSet(Doc.Key1, Field_IsDeleted, reader.Read(doc2, Field_IsDeleted)), Is.False);
 
         Assert.That(writer.Write(doc3, Field_IsDeleted, _db.HashGet(Doc.Key1, Field_IsDeleted)), Is.True);
 
         Assert.That(doc2, Is.EqualTo(doc3));
+
+        Assert.That(writer.GetEntity(Field_IsDeleted, _db.HashGet(Doc.Key1, Field_IsDeleted)), Is.EqualTo(Doc.Deleted));
 
         Assert.IsTrue(_db.KeyDelete(Doc.Key1));
     }
@@ -129,14 +133,17 @@ public class RedisEntityTest
     private void EntitySetGet(IRedisEntityWriter<Document> writer, IRedisEntityReader<Document> reader)
     {
         var EndDate_Modified = new RedisValue[] { reader.Fields[nameof(Document.EndDate)], reader.Fields[nameof(Document.Modified)] };
-        
+        var Field_IsDeleted = reader.Fields[nameof(Document.IsDeleted)];
+
         Assert.IsNull(_db.EntityGetAll<Document>(Doc.Key1));
+        Assert.IsNull(_db.EntityGet<Document>(Doc.Key1, Field_IsDeleted));
         Assert.IsNull(_db.EntityGet<Document>(Doc.Key1, EndDate_Modified));
         Assert.IsNull(_db.EntityGet<Document>(Doc.Key1, writer));
 
         var doc2 = new Document();
 
         Assert.That(_db.EntityLoadAll(doc2, Doc.Key1), Is.False);
+        Assert.That(_db.EntityLoad(doc2, Doc.Key1, Field_IsDeleted, writer), Is.False);
         Assert.That(_db.EntityLoad(doc2, Doc.Key1, EndDate_Modified), Is.False);
         Assert.That(_db.EntityLoad(doc2, Doc.Key1, writer), Is.False);
 
@@ -162,10 +169,22 @@ public class RedisEntityTest
         Assert.That(_db.EntityGet(Doc.Key1, EndDate_Modified, writer), Is.EqualTo(doc3));
         //Assert.That(_db.EntityGet<Document, IDocumentView>(Doc.Key1), Is.EqualTo(doc3));
 
+        Assert.That(_db.EntityGet(Doc.Key1, writer), Is.EqualTo(doc2));
         Assert.That(_db.EntityLoad(doc3, Doc.Key1, writer), Is.True);
 
-        Assert.That(doc3, Is.EqualTo(doc2));
-        Assert.That(_db.EntityGet(Doc.Key1, writer), Is.EqualTo(doc2));
+        Assert.That(doc2, Is.EqualTo(doc3));
+
+        doc2.IsDeleted = true;
+
+        Assert.That(doc2, Is.Not.EqualTo(doc3));
+
+        Assert.That(_db.EntitySet(Doc.Key1, doc2, Field_IsDeleted, reader), Is.False);
+
+        Assert.That(_db.EntityLoad(doc3, Doc.Key1, Field_IsDeleted, writer), Is.True);
+
+        Assert.That(doc2, Is.EqualTo(doc3));
+
+        Assert.That(_db.EntityGet(Doc.Key1, Field_IsDeleted, writer), Is.EqualTo(Doc.Deleted));
 
         Assert.IsTrue(_db.KeyDelete(Doc.Key1));
     }

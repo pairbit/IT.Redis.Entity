@@ -67,4 +67,15 @@ public static class xIRedisEntityWriter
         }
         return entity;
     }
+
+    public static T? GetEntity<T>(this IRedisEntityWriter<T> writer, in RedisValue field, in RedisValue value) where T : new()
+    {
+        if (value.IsNull) return default;
+
+        var entity = new T();
+
+        writer.Write(entity, in field, in value);
+
+        return entity;
+    }
 }
