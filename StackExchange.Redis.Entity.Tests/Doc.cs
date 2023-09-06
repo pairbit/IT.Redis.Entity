@@ -34,7 +34,7 @@ public static class Doc
 
         doc.Id = Guid.NewGuid();
         doc.Name = $"Самый важный документ для сдачи проекта №{i}";
-        doc.StartDate = new DateOnly(random.Next(2000, 2024), random.Next(12), random.Next(28));
+        doc.StartDate = new DateOnly(random.Next(2000, 2024), random.Next(1, 13), random.Next(1, 29));
         doc.Price = random.NextInt64(1_000_000, 1_000_000_000);
         doc.Size = (DocumentSize)random.Next(0, 3);
         doc.Created = DateTime.UtcNow;

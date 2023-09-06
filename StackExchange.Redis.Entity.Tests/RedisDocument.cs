@@ -36,8 +36,9 @@ public class RedisDocumentReaderWriter : IRedisEntityWriter<Document>, IRedisEnt
         throw new InvalidOperationException();
     }
 
-    public void Write(Document entity, in RedisValue field, in RedisValue value)
+    public bool Write(Document entity, in RedisValue field, in RedisValue value)
     {
+        if (value.IsNull) return false;
         var no = (int)field;
 
         if (no == 0) entity.Name = (string?)value;
@@ -50,5 +51,7 @@ public class RedisDocumentReaderWriter : IRedisEntityWriter<Document>, IRedisEnt
         else if (no == 7) entity.Modified = value.IsNullOrEmpty ? null : new DateTime((long)value);
         else if (no == 8) entity.Id = new Guid(((ReadOnlyMemory<byte>)value).Span);
         else throw new InvalidOperationException();
+
+        return true;
     }
 }
