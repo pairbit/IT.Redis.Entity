@@ -29,7 +29,7 @@ public static class xIRedisEntityWriter
         return writen;
     }
 
-    public static T? Get<T>(this IRedisEntityWriter<T> writer, HashEntry[] entries) where T : new()
+    public static T? GetEntity<T>(this IRedisEntityWriter<T> writer, HashEntry[] entries) where T : new()
     {
         if (entries.Length == 0) return default;
 
@@ -44,7 +44,7 @@ public static class xIRedisEntityWriter
         return entity;
     }
 
-    public static T? Get<T>(this IRedisEntityWriter<T> writer, RedisValue[] fields, RedisValue[] values) where T : new()
+    public static T? GetEntity<T>(this IRedisEntityWriter<T> writer, RedisValue[] fields, RedisValue[] values) where T : new()
     {
         int i = 0;
         RedisValue value;

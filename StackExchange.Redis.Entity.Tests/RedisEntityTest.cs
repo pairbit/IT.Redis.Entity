@@ -19,7 +19,7 @@ public class RedisEntityTest
         var reader = RedisEntity<ReadOnlyDocument>.Reader;
         var writer = RedisEntity<Document>.Writer;
 
-        _db.HashSet(Doc.Key1, reader.ReadAllFields(Doc.ReadOnlyData1));
+        _db.HashSet(Doc.Key1, reader.GetEntries(Doc.ReadOnlyData1));
 
         var doc = new Document();
 
@@ -34,6 +34,31 @@ public class RedisEntityTest
     public void HashSetGet_Default()
     {
         HashSetGet(RedisEntity<Document>.Writer, RedisEntity<Document>.Reader);
+    }
+
+    [Test]
+    public void HashSet_Multi()
+    {
+        var readerWriter = new RedisDocumentReaderWriter();
+        var entries = new HashEntry[readerWriter.Fields.All.Length];
+        var document = new Document();
+
+        for (int i = 1; i < 10; i++)
+        {
+            Doc.New(document, i);
+
+            readerWriter.Read(entries, document);
+
+            var key = Doc.Prefix.Append(i.ToString());
+            _db.HashSet(key, entries);
+
+            Assert.That(readerWriter.GetEntity(_db.HashGetAll(key)), Is.EqualTo(document));
+        }
+
+        for (int i = 1; i < 10; i++)
+        {
+            Assert.IsTrue(_db.KeyDelete(Doc.Prefix.Append(i.ToString())));
+        }
     }
 
     [Test]
@@ -54,15 +79,15 @@ public class RedisEntityTest
     {
         var EndDate_Modified = new RedisValue[] { reader.Fields[nameof(Document.EndDate)], reader.Fields[nameof(Document.Modified)] };
 
-        Assert.IsNull(writer.Get(_db.HashGetAll(Doc.Key1)));
-        Assert.IsNull(writer.Get(EndDate_Modified, _db.HashGet(Doc.Key1, EndDate_Modified)));
-        Assert.IsNull(writer.Get(writer.Fields.All, _db.HashGet(Doc.Key1, writer.Fields.All)));
+        Assert.IsNull(writer.GetEntity(_db.HashGetAll(Doc.Key1)));
+        Assert.IsNull(writer.GetEntity(EndDate_Modified, _db.HashGet(Doc.Key1, EndDate_Modified)));
+        Assert.IsNull(writer.GetEntity(writer.Fields.All, _db.HashGet(Doc.Key1, writer.Fields.All)));
 
         var doc2 = new Document();
 
         Assert.That(writer.Write(doc2, _db.HashGetAll(Doc.Key1)), Is.False);
 
-        _db.HashSet(Doc.Key1, reader.ReadAllFields(Doc.Data1));
+        _db.HashSet(Doc.Key1, reader.GetEntries(Doc.Data1));
 
         Assert.That(writer.Write(doc2, _db.HashGetAll(Doc.Key1)), Is.True);
 
@@ -71,7 +96,7 @@ public class RedisEntityTest
         doc2.EndDate = new DateOnly(2022, 03, 20);
         doc2.Modified = DateTime.UtcNow;
 
-        _db.HashSet(Doc.Key1, reader.ReadFields(doc2, EndDate_Modified));
+        _db.HashSet(Doc.Key1, reader.GetEntries(doc2, EndDate_Modified));
 
         var doc3 = new Document();
 
