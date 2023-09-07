@@ -18,8 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ExternalLib\ExternalLib.csproj" />
-    <ProjectReference Include="..\StackExchange.Redis.Entity\StackExchange.Redis.Entity.csproj" />
+    <ProjectReference Include="..\lib\DocLib.RedisEntity\DocLib.RedisEntity.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,7 @@
-﻿using ExternalLib;
+﻿using StackExchange.Redis;
+using StackExchange.Redis.Entity;
 
-namespace StackExchange.Redis.Entity.Tests;
+namespace DocLib.RedisEntity;
 
 public class RedisDocumentReaderWriter : IRedisEntityWriter<Document>, IRedisEntityReader<Document>
 {

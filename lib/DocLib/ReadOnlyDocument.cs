@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace ExternalLib;
+namespace DocLib;
 
 public record ReadOnlyDocument
 {

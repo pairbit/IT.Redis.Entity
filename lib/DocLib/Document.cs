@@ -1,24 +1,13 @@
-﻿using ExternalLib;
+﻿using System.Runtime.Serialization;
 
-namespace StackExchange.Redis.Entity.Tests;
+namespace DocLib;
 
-public static class Doc
+[DataContract]
+public record Document
 {
-    //public static class Fields
-    //{
-    //    public static readonly RedisValue EndDate = RedisEntity<Document>.Fields[nameof(Document.EndDate)];
-    //    public static readonly RedisValue Price = RedisEntity<Document>.Fields[nameof(Document.Price)];
-    //    public static readonly RedisValue IsDeleted = RedisEntity<Document>.Fields[nameof(Document.IsDeleted)];
-
-    //    public static readonly RedisValue[] EndDate_IsDeleted = new[] { EndDate, IsDeleted };
-    //}
-
-    public static readonly RedisKey Key1 = "doc:0";
-    public static readonly RedisKey Prefix = "doc:";
-    
     public static readonly Document Empty = new();
     public static readonly Document Deleted = new() { IsDeleted = true };
-    public static readonly Document Data1 = new()
+    public static readonly Document Data = new()
     {
         Id = Guid.NewGuid(),
         Name = "Самый важный документ для сдачи проекта 2015",
@@ -28,7 +17,34 @@ public static class Doc
         Created = DateTime.UtcNow
     };
 
-    public static readonly ReadOnlyDocument ReadOnlyData1 = new(Data1);
+    public static readonly ReadOnlyDocument ReadOnlyData = new(Data);
+
+    [DataMember(Order = 8)]
+    public Guid Id { get; set; }
+
+    [DataMember(Order = 0)]
+    public string Name { get; set; } = null!;
+
+    [DataMember(Order = 1)]
+    public DateOnly StartDate { get; set; }
+
+    [DataMember(Order = 2)]
+    public DateOnly? EndDate { get; set; }
+
+    [DataMember(Order = 3)]
+    public long Price { get; set; }
+
+    [DataMember(Order = 4)]
+    public bool IsDeleted { get; set; }
+
+    [DataMember(Order = 5)]
+    public DocumentSize Size { get; set; }
+
+    [DataMember(Order = 6)]
+    public DateTime Created { get; set; }
+
+    [DataMember(Order = 7)]
+    public DateTime? Modified { get; set; }
 
     public static void New(Document doc, int i)
     {

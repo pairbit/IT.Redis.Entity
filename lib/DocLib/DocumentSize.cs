@@ -1,4 +1,4 @@
-﻿namespace ExternalLib;
+﻿namespace DocLib;
 
 public enum DocumentSize
 {
