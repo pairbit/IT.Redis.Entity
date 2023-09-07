@@ -4,7 +4,7 @@ namespace StackExchange.Redis.Entity.Tests;
 
 public class RedisEntityCustomTest : RedisEntityTest
 {
-    private static readonly RedisDocumentReaderWriter ReaderWriter = new();
+    private static readonly RedisDocument ReaderWriter = new();
 
     public RedisEntityCustomTest() : base(ReaderWriter, ReaderWriter)
     {

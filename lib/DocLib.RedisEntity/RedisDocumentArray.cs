@@ -3,10 +3,7 @@ using StackExchange.Redis.Entity;
 
 namespace DocLib.RedisEntity;
 
-public delegate RedisValue RedisValueReader(Document entity);
-public delegate void RedisValueWriter(Document entity, RedisValue value);
-
-public class RedisDocumentReaderWriterArray : IRedisEntityWriter<Document>, IRedisEntityReader<Document>
+public class RedisDocumentArray : IRedisEntity<Document>
 {
     private static readonly IRedisEntityFields _fields = new RedisEntityFields(new Dictionary<string, RedisValue>
     {
@@ -23,10 +20,10 @@ public class RedisDocumentReaderWriterArray : IRedisEntityWriter<Document>, IRed
 
     public IRedisEntityFields Fields => _fields;
 
-    private readonly RedisValueReader[] _readers = new RedisValueReader[9];
-    private readonly RedisValueWriter[] _writers = new RedisValueWriter[9];
+    private readonly Func<Document, RedisValue>[] _readers = new Func<Document, RedisValue>[9];
+    private readonly Action<Document, RedisValue>[] _writers = new Action<Document, RedisValue>[9];
 
-    public RedisDocumentReaderWriterArray()
+    public RedisDocumentArray()
     {
         _readers[0] = x => x.Name;
         _writers[0] = (x, v) => x.Name = v;
