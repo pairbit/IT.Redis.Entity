@@ -62,15 +62,13 @@ public record DocumentDepend
         doc.IsDeleted = false;
         doc.Character = char.MaxValue;
 
-        var content = new byte[1024];
-        random.NextBytes(content);
-        doc.Content = null;
+        doc.Content = new byte[] { 0 };
 
-        content = new byte[1024 * 10];
+        var content = new byte[1024];
         random.NextBytes(content);
         doc.MemoryBytes = content;
 
-        doc.RedisValNull = true; //RedisValue.Null;
+        doc.RedisValNull = RedisValue.Null;
         doc.RedisValEmpty = RedisValue.EmptyString;
         doc.RedisValNum = random.NextInt64();
 

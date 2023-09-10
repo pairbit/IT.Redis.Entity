@@ -3,7 +3,7 @@ using StackExchange.Redis.Entity.Internal;
 
 namespace StackExchange.Redis.Entity;
 
-public static class RedisValueFormatter
+public static class RedisValueFormatterRegistry
 {
     static class Cache<T>
     {
@@ -14,10 +14,11 @@ public static class RedisValueFormatter
 
     public static IRedisValueFormatter Default => _default;
 
-    static RedisValueFormatter()
+    static RedisValueFormatterRegistry()
     {
         Register(StringFormatter.Default);
         Register(ByteArrayFormatter.Default);
+        Register(RedisValueFormatter.Default);
 
         Register(SByteFormatter.Default);
         Register(ByteFormatter.Default);
