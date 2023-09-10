@@ -10,10 +10,12 @@ namespace StackExchange.Redis.Entity.Benchmarks;
 [Orderer(SummaryOrderPolicy.FastestToSlowest, MethodOrderPolicy.Declared)]
 public class Benchmark
 {
-    private static readonly IRedisEntity<Document> _doc3 = new RedisDocumentArrayExpression();
-    private static readonly IRedisEntity<Document> _doc2 = new RedisDocumentArray();
-    private static readonly IRedisEntity<Document> _doc1 = new RedisDocument();
-    private static readonly HashEntry[] _entries = _doc1.GetEntries(Document.Data);
+    private static readonly IRedisEntityReaderWriter<Document> _rw3 = new RedisDocumentArrayExpression();
+    private static readonly IRedisEntityReaderWriter<Document> _rw2 = new RedisDocumentArray();
+    private static readonly IRedisEntityReaderWriter<Document> _rw1 = new RedisDocument();
+    private static readonly IRedisEntityReaderWriter<Document> _rw = RedisEntity<Document>.ReaderWriter;
+
+    private static readonly HashEntry[] _entries = _rw.GetEntries(Document.Data);
 
     public Benchmark()
     {
@@ -21,20 +23,26 @@ public class Benchmark
     }
 
     [Benchmark]
-    public HashEntry[] GetEntries() => _doc1.GetEntries(Document.Data);
+    public HashEntry[] GetEntries() => _rw.GetEntries(Document.Data);
 
     [Benchmark]
-    public HashEntry[] GetEntries_Array() => _doc2.GetEntries(Document.Data);
+    public HashEntry[] GetEntries_Manual() => _rw1.GetEntries(Document.Data);
 
     [Benchmark]
-    public HashEntry[] GetEntries_ArrayExpression() => _doc3.GetEntries(Document.Data);
+    public HashEntry[] GetEntries_Array() => _rw2.GetEntries(Document.Data);
 
     [Benchmark]
-    public Document? GetEntity() => _doc1.GetEntity(_entries);
+    public HashEntry[] GetEntries_ArrayExpression() => _rw3.GetEntries(Document.Data);
 
     [Benchmark]
-    public Document? GetEntity_Array() => _doc2.GetEntity(_entries);
+    public Document? GetEntity() => _rw.GetEntity(_entries);
 
     [Benchmark]
-    public Document? GetEntity_ArrayExpression() => _doc3.GetEntity(_entries);
+    public Document? GetEntity_Manual() => _rw1.GetEntity(_entries);
+
+    [Benchmark]
+    public Document? GetEntity_Array() => _rw2.GetEntity(_entries);
+
+    [Benchmark]
+    public Document? GetEntity_ArrayExpression() => _rw3.GetEntity(_entries);
 }

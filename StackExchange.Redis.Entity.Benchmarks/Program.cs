@@ -1,4 +1,7 @@
-﻿BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(StackExchange.Redis.Entity.Benchmarks.Benchmark));
+﻿using StackExchange.Redis.Entity.Benchmarks;
+
+var bench = new Benchmark();
+BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(StackExchange.Redis.Entity.Benchmarks.Benchmark));
 
 //using DocLib;
 //using DocLib.RedisEntity;

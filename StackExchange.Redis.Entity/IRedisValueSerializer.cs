@@ -2,5 +2,5 @@
 
 public interface IRedisValueSerializer
 {
-    RedisValue Serialize(object? value);
+    RedisValue Serialize<T>(in T? value);
 }

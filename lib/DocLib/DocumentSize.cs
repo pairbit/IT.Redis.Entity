@@ -1,6 +1,6 @@
 ﻿namespace DocLib;
 
-public enum DocumentSize
+public enum DocumentSize : sbyte
 {
     Small, 
     Medium, 

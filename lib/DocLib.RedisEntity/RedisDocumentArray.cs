@@ -3,7 +3,7 @@ using StackExchange.Redis.Entity;
 
 namespace DocLib.RedisEntity;
 
-public class RedisDocumentArray : IRedisEntity<Document>
+public class RedisDocumentArray : IRedisEntityReaderWriter<Document>
 {
     private static readonly IRedisEntityFields _fields = new RedisEntityFields(new Dictionary<string, RedisValue>
     {

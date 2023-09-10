@@ -1,13 +1,11 @@
 ﻿using StackExchange.Redis;
 using StackExchange.Redis.Entity;
-using StackExchange.Redis.Entity.Serializers;
 using System.Linq.Expressions;
 
 namespace DocLib.RedisEntity;
 
-public class RedisDocumentArrayExpression : IRedisEntity<Document>
+public class RedisDocumentArrayExpression : IRedisEntityReaderWriter<Document>
 {
-    private static readonly IRedisValueDeserializer _guidBytesDeserializer = new GuidBytesSerializer();
     private static readonly IRedisEntityFields _fields = new RedisEntityFields(new Dictionary<string, RedisValue>
     {
         { nameof(Document.Name), 0 },
@@ -53,24 +51,18 @@ public class RedisDocumentArrayExpression : IRedisEntity<Document>
         _writers[7] = Compile(x => x.Modified, v => v.IsNullOrEmpty ? null : new DateTime((long)v));
 
         _readers[8] = Compile(x => x.Id.ToByteArray());
-        _writers[8] = Compile(x => x.Id, v => ((IRedisValueDeserializer<Guid>)_guidBytesDeserializer).Deserialize(in v));
+        _writers[8] = Compile(x => x.Id, v => RedisValueToGuid(in v));
     }
 
     private static Func<Document, RedisValue> Compile(Expression<Func<Document, RedisValue>> reader) => reader.Compile();
+
+    private static Guid RedisValueToGuid(in RedisValue value) => new(((ReadOnlyMemory<byte>)value).Span);
 
     private static Action<Document, RedisValue> Compile<T>(Expression<Func<Document, T>> setter, Expression<Func<RedisValue, T>> getValue)
     {
         var set = MakeSet(setter).Compile();
         var value = getValue.Compile();
         return (doc, redisValue) => set(doc, value(redisValue));
-    }
-
-    private static void UpdateFeature<T, TResult>(T feature, Expression<Func<T, TResult>> e, TResult newValue)
-    {
-        var x = e.Parameters[0];
-        var exp = Expression.Assign(e.Body, Expression.Constant(newValue));
-        var lambda = Expression.Lambda<Action<T>>(exp, x);
-        lambda.Compile()(feature);
     }
 
     private static Expression<Action<M, R>> MakeSet<M, R>(Expression<Func<M, R>> fetcherExp)

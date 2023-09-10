@@ -1,17 +1,24 @@
-﻿namespace StackExchange.Redis.Entity;
+﻿using System.Reflection;
 
-public delegate RedisValue RedisValueReader<T>(T entity);
-public delegate void RedisValueWriter<T>(T entity, RedisValue value);
+namespace StackExchange.Redis.Entity;
 
-public class RedisEntity<T> : IRedisEntity<T>
+public class RedisEntity<T>
 {
-    #region static
+    public static readonly PropertyInfo[] Properties = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
-    private static IRedisEntity<T> _default = new RedisEntity<T>();
-    private static Lazy<IRedisEntityReader<T>> _reader = new(_default);
-    private static Lazy<IRedisEntityWriter<T>> _writer = new(_default);
+    private static Lazy<IRedisEntityReaderWriter<T>> _readerWriter = new(() => RedisEntity.Factory.NewReaderWriter<T>());
+    private static Lazy<IRedisEntityReader<T>> _reader = new(() => _readerWriter.Value);
+    private static Lazy<IRedisEntityWriter<T>> _writer = new(() => _readerWriter.Value);
 
-    //public static IRedisEntityFields Fields { get; }
+    public static Func<IRedisEntityReaderWriter<T>> ReaderWriterFactory
+    {
+        set
+        {
+            _readerWriter = new(value ?? throw new ArgumentNullException(nameof(value)));
+            _reader = new(() => _readerWriter.Value);
+            _writer = new(() => _readerWriter.Value);
+        }
+    }
 
     public static Func<IRedisEntityReader<T>> ReaderFactory
     {
@@ -23,45 +30,9 @@ public class RedisEntity<T> : IRedisEntity<T>
         set => _writer = new(value ?? throw new ArgumentNullException(nameof(value)));
     }
 
-    public static IRedisEntity<T> Default => _default;
+    public static IRedisEntityReaderWriter<T> ReaderWriter => _readerWriter.Value;
 
     public static IRedisEntityReader<T> Reader => _reader.Value;
 
     public static IRedisEntityWriter<T> Writer => _writer.Value;
-
-    #endregion static
-
-    public IRedisEntityFields Fields => throw new NotImplementedException();
-
-    private readonly RedisValueReader<T>[] _readers;
-    private readonly RedisValueWriter<T>[] _writers;
-
-    public RedisEntity()
-    {
-
-    }
-
-    public RedisValue Read(T entity, in RedisValue field)
-    {
-        var i = (int)field;
-        var readers = _readers;
-
-        if (i < 0 || i > readers.Length) throw new ArgumentOutOfRangeException(nameof(field));
-
-        return readers[i](entity);
-    }
-
-    public bool Write(T entity, in RedisValue field, in RedisValue value)
-    {
-        if (value.IsNull) return false;
-
-        var i = (int)field;
-        var writers = _writers;
-
-        if (i < 0 || i > writers.Length) throw new ArgumentOutOfRangeException(nameof(field));
-
-        writers[i](entity, value);
-
-        return true;
-    }
 }

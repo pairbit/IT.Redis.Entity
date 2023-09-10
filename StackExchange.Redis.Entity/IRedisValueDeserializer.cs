@@ -2,5 +2,5 @@
 
 public interface IRedisValueDeserializer
 {
-    void Deserialize(in RedisValue redisValue, ref object? value);
+    void Deserialize<T>(in RedisValue redisValue, ref T? value);
 }
