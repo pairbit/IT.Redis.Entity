@@ -19,24 +19,29 @@ public class DocumentDependTest
     [Test]
     public void DependData()
     {
-        var doc = new DocumentDepend();
-        DocumentDepend.New(doc, 1);
-
-        _db.EntitySet(Key, doc);
-
-        var doc2 = _db.EntityGet<DocumentDepend>(Key)!;
-
-        if (doc.Content != null && doc2.Content != null)
+        try
         {
-            Assert.That(doc.Content!.SequenceEqual(doc2.Content!), Is.True);
-            doc2.Content = doc.Content;
+            var doc = new DocumentDepend();
+            DocumentDepend.New(doc, 1);
+
+            _db.EntitySet(Key, doc);
+
+            var doc2 = _db.EntityGet<DocumentDepend>(Key)!;
+
+            if (doc.Content != null && doc2.Content != null)
+            {
+                Assert.That(doc.Content!.SequenceEqual(doc2.Content!), Is.True);
+                doc2.Content = doc.Content;
+            }
+
+            Assert.That(doc.MemoryBytes.Span.SequenceEqual(doc2.MemoryBytes.Span), Is.True);
+
+            doc2.MemoryBytes = doc.MemoryBytes;
+            Assert.That(doc, Is.EqualTo(doc2));
         }
-
-        Assert.That(doc.MemoryBytes.Span.SequenceEqual(doc2.MemoryBytes.Span), Is.True);
-
-        doc2.MemoryBytes = doc.MemoryBytes;
-        Assert.That(doc, Is.EqualTo(doc2));
-
-        _db.KeyDelete(Key);
+        finally
+        {
+            _db.KeyDelete(Key);
+        }
     }
 }

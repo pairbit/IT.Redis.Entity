@@ -43,8 +43,12 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
 
             if (!field.IsNull)
             {
-                var formatter = configuration.GetFormatter(property);
                 var name = property.Name;
+
+                if (!set.Add(field)) throw new InvalidOperationException($"Propery '{name}' has duplicate '{field}'");
+
+                var formatter = configuration.GetFormatter(property);
+                
                 if (property.SetMethod != null)
                 {
                     writerInfos.Add(field, new WriterInfo
@@ -64,8 +68,6 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
                     });
                     readerFields.Add(name, field);
                 }
-
-                if (!set.Add(field)) throw new InvalidOperationException($"Propery '{name}' has duplicate '{field}'");
             }
         }
 

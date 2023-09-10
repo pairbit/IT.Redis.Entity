@@ -33,7 +33,7 @@ public static class xIRedisEntityWriter
     {
         if (entries.Length == 0) return default;
 
-        var entity = new T();
+        var entity = new T();//TODO: Instance if value exists
 
         for (int i = 0; i < entries.Length; i++)
         {

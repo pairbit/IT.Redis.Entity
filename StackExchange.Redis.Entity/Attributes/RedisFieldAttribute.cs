@@ -3,9 +3,9 @@
 [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
 public class RedisFieldAttribute : Attribute
 {
-    public int Id { get; set; } = -1;
+    public int Id { get; } = -1;
 
-    public string? Name { get; set; }
+    public string? Name { get; }
 
     public RedisFieldAttribute(int id)
     {

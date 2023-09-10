@@ -13,6 +13,8 @@ public record DocumentDepend
 
     public string? Name { get; set; }
 
+    public char Character { get; set; }
+
     public DateOnly StartDate { get; set; }
 
     public DateOnly? EndDate { get; set; }
@@ -26,9 +28,11 @@ public record DocumentDepend
     public DateTime Created { get; set; }
 
     public DateTime? Modified { get; set; }
-
+    
+    [RedisField(9)]
     public byte[]? Content { get; set; }
 
+    [RedisField("mem")]
     public ReadOnlyMemory<byte> MemoryBytes { get; set; }
 
     public RedisValue RedisValNull { get; set; }
@@ -39,6 +43,7 @@ public record DocumentDepend
 
     public IntPtr IntPtrValue { get; set; }
 
+    //[RedisFieldIgnore]
     public UIntPtr UIntPtrValue { get; set; }
 
     public static void New(DocumentDepend doc, int i)
@@ -47,7 +52,7 @@ public record DocumentDepend
 
         doc.Id = Guid.NewGuid();
         doc.ClientId = Guid.NewGuid();
-        doc.Name = $"Самый важный документ для сдачи проекта №{i}";
+        doc.Name = null;// $"Самый важный документ для сдачи проекта №{i}";
         doc.StartDate = new DateOnly(random.Next(2000, 2024), random.Next(1, 13), random.Next(1, 29));
         doc.Price = random.NextInt64(1_000_000, 1_000_000_000);
         doc.Size = (DocumentSize)random.Next(0, 3);
@@ -55,10 +60,11 @@ public record DocumentDepend
         doc.Modified = null;
         doc.EndDate = null;
         doc.IsDeleted = false;
+        doc.Character = char.MaxValue;
 
         var content = new byte[1024];
         random.NextBytes(content);
-        doc.Content = content;
+        doc.Content = null;
 
         content = new byte[1024 * 10];
         random.NextBytes(content);
