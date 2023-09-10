@@ -5,6 +5,7 @@ namespace StackExchange.Redis.Entity.Internal;
 
 internal static class Compiler
 {
+    private static readonly Type RedisValueType = typeof(RedisValue);
     private static readonly MethodInfo MethodDeserialize = typeof(RedisValueDeserializerProxy).GetMethod(nameof(RedisValueDeserializerProxy.Deserialize))!;
     private static readonly MethodInfo MethodSerialize = typeof(IRedisValueSerializer).GetMethod(nameof(IRedisValueSerializer.Serialize))!;
 
@@ -24,15 +25,24 @@ internal static class Compiler
 
         var propertyType = property.PropertyType;
 
-        if (propertyType.IsEnum)
+        Expression eBody;
+
+        if (propertyType.Equals(RedisValueType))
         {
-            propertyType = propertyType.GetEnumUnderlyingType();
-            eProperty = Expression.ConvertChecked(eProperty, propertyType);
+            eBody = eProperty;
+        }
+        else
+        {
+            if (propertyType.IsEnum)
+            {
+                propertyType = propertyType.GetEnumUnderlyingType();
+                eProperty = Expression.ConvertChecked(eProperty, propertyType);
+            }
+
+            eBody = Expression.Call(ParameterSerializer, MethodSerialize.MakeGenericMethod(propertyType), eProperty);
         }
 
-        var eCall = Expression.Call(ParameterSerializer, MethodSerialize.MakeGenericMethod(propertyType), eProperty);
-
-        var lambda = Expression.Lambda<RedisValueReader<T>>(eCall, pEntity, ParameterSerializer);
+        var lambda = Expression.Lambda<RedisValueReader<T>>(eBody, pEntity, ParameterSerializer);
 
         return lambda.Compile();
     }
@@ -61,6 +71,10 @@ internal static class Compiler
             var call = Expression.Call(ParameterDeserializer, MethodDeserialize.MakeGenericMethod(enumType), ParameterRedisValue, eConvert);
 
             eRight = Expression.ConvertChecked(call, propertyType);
+        }
+        else if (propertyType.Equals(RedisValueType))
+        {
+            eRight = ParameterRedisValue;
         }
         else
         {

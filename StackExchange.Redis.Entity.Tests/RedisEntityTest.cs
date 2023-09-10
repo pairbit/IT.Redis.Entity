@@ -13,7 +13,7 @@ public abstract class RedisEntityTest
 
     public RedisEntityTest(IRedisEntityWriter<Document> writer, IRedisEntityReader<Document> reader)
     {
-        var connection = ConnectionMultiplexer.Connect(GetConnectionString(6381));
+        var connection = ConnectionMultiplexer.Connect("localhost:6381,defaultDatabase=0,syncTimeout=5000,allowAdmin=False,connectTimeout=5000,ssl=False,abortConnect=False");
         _db = connection.GetDatabase()!;
         _writer = writer;
         _reader = reader;
@@ -214,6 +214,4 @@ public abstract class RedisEntityTest
 
         Assert.IsTrue(_db.KeyDelete(Key));
     }
-
-    static string GetConnectionString(int port = 6379, int db = 0) => $"localhost:{port},defaultDatabase={db},syncTimeout=5000,allowAdmin=False,connectTimeout=5000,ssl=False,abortConnect=False";
 }
