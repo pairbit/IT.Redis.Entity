@@ -1,5 +1,6 @@
 ﻿using StackExchange.Redis;
 using StackExchange.Redis.Entity.Attributes;
+using System.Collections;
 using System.Numerics;
 
 namespace DocLib.RedisEntity;
@@ -58,6 +59,8 @@ public record DocumentDepend
     //[RedisFieldIgnore]
     public UIntPtr UIntPtrValue { get; set; }
 
+    public int[] Nums { get; set; }
+
     public static void New(DocumentDepend doc, int i)
     {
         var random = Random.Shared;
@@ -93,6 +96,6 @@ public record DocumentDepend
         var bytes = new byte[32];
         random.NextBytes(bytes);
         doc.BigInteger = new BigInteger(bytes);
-
+        doc.Nums = new int[] { 12, 9, 122, 999, 0, 2 };
     }
 }

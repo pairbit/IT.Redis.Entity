@@ -48,6 +48,8 @@ public static class RedisValueFormatterRegistry
         Register(ReadOnlyMemoryByteFormatter.Default);
         Register(DateOnlyFormatter.Default);
         Register(TimeOnlyFormatter.Default);
+
+        Register(new UnmanagedArrayFormatter<Int32>());
     }
 
     public static void Register<T>(IRedisValueFormatter<T> formatter)
