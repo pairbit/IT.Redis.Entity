@@ -25,26 +25,15 @@ internal static class Compiler
 
         var propertyType = property.PropertyType;
 
-        Expression eBody;
+        if (propertyType.IsEnum)
+        {
+            propertyType = propertyType.GetEnumUnderlyingType();
+            eProperty = Expression.ConvertChecked(eProperty, propertyType);
+        }
 
-        //if (propertyType.Equals(RedisValueType))
-        //{
-        //    Expression<Func<RedisValue, RedisValue>> a = (RedisValue redisValue) => redisValue.IsNull ? RedisValues.Null : redisValue;
+        var eCall = Expression.Call(ParameterSerializer, MethodSerialize.MakeGenericMethod(propertyType), eProperty);
 
-        //    eBody = eProperty;
-        //}
-        //else
-        //{
-            if (propertyType.IsEnum)
-            {
-                propertyType = propertyType.GetEnumUnderlyingType();
-                eProperty = Expression.ConvertChecked(eProperty, propertyType);
-            }
-
-            eBody = Expression.Call(ParameterSerializer, MethodSerialize.MakeGenericMethod(propertyType), eProperty);
-        //}
-
-        var lambda = Expression.Lambda<RedisValueReader<T>>(eBody, pEntity, ParameterSerializer);
+        var lambda = Expression.Lambda<RedisValueReader<T>>(eCall, pEntity, ParameterSerializer);
 
         return lambda.Compile();
     }
@@ -74,14 +63,6 @@ internal static class Compiler
 
             eRight = Expression.ConvertChecked(call, propertyType);
         }
-        //else if (propertyType.Equals(RedisValueType))
-        //{
-        //    //Expression<Func<RedisValue, RedisValue>> a = (RedisValue redisValue) => redisValue.IsNull ? RedisValues.Null : redisValue;
-
-        //    //Expression.Condition()
-
-        //    eRight = ParameterRedisValue;
-        //}
         else
         {
             eRight = Expression.Call(ParameterDeserializer, MethodDeserialize.MakeGenericMethod(propertyType), ParameterRedisValue, eProperty);
