@@ -29,19 +29,35 @@ public static class xIDatabase
         return writer.Write(entity, fields, db.HashGet(key, fields, flags));
     }
 
+    public static TEntity? EntityGetAll<TEntity, IEntity>(this IDatabase db, RedisKey key, IRedisEntityWriter<IEntity>? writer = null, CommandFlags flags = CommandFlags.None) where TEntity : IEntity, new()
+        => (writer ?? RedisEntity<IEntity>.Writer).GetEntity<TEntity, IEntity>(db.HashGetAll(key, flags));
+
+    public static TEntity? EntityGet<TEntity, IEntity>(this IDatabase db, RedisKey key, RedisValue field, IRedisEntityWriter<IEntity>? writer = null, CommandFlags flags = CommandFlags.None) where TEntity : IEntity, new()
+        => (writer ?? RedisEntity<IEntity>.Writer).GetEntity<TEntity, IEntity>(in field, db.HashGet(key, field, flags));
+
+    public static TEntity? EntityGet<TEntity, IEntity>(this IDatabase db, RedisKey key, RedisValue[] fields, IRedisEntityWriter<IEntity>? writer = null, CommandFlags flags = CommandFlags.None) where TEntity : IEntity, new()
+        => (writer ?? RedisEntity<IEntity>.Writer).GetEntity<TEntity, IEntity>(fields, db.HashGet(key, fields, flags));
+
+    public static TEntity? EntityGet<TEntity, IEntity>(this IDatabase db, RedisKey key, IRedisEntityWriter<IEntity>? writer = null, CommandFlags flags = CommandFlags.None) where TEntity : IEntity, new()
+    {
+        writer ??= RedisEntity<IEntity>.Writer;
+        var fields = writer.Fields.All;
+        return writer.GetEntity<TEntity, IEntity>(fields, db.HashGet(key, fields, flags));
+    }
+
     public static T? EntityGetAll<T>(this IDatabase db, RedisKey key, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None) where T : new()
-        => (writer ?? RedisEntity<T>.Writer).GetEntity(db.HashGetAll(key, flags));
+        => (writer ?? RedisEntity<T>.Writer).GetEntity<T, T>(db.HashGetAll(key, flags));
 
     public static T? EntityGet<T>(this IDatabase db, RedisKey key, RedisValue field, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None) where T : new()
-        => (writer ?? RedisEntity<T>.Writer).GetEntity(in field, db.HashGet(key, field, flags));
+        => (writer ?? RedisEntity<T>.Writer).GetEntity<T, T>(in field, db.HashGet(key, field, flags));
 
     public static T? EntityGet<T>(this IDatabase db, RedisKey key, RedisValue[] fields, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None) where T : new()
-        => (writer ?? RedisEntity<T>.Writer).GetEntity(fields, db.HashGet(key, fields, flags));
+        => (writer ?? RedisEntity<T>.Writer).GetEntity<T, T>(fields, db.HashGet(key, fields, flags));
 
     public static T? EntityGet<T>(this IDatabase db, RedisKey key, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None) where T : new()
     {
         writer ??= RedisEntity<T>.Writer;
         var fields = writer.Fields.All;
-        return writer.GetEntity(fields, db.HashGet(key, fields, flags));
+        return writer.GetEntity<T, T>(fields, db.HashGet(key, fields, flags));
     }
 }

@@ -29,11 +29,11 @@ public static class xIRedisEntityWriter
         return writen;
     }
 
-    public static T? GetEntity<T>(this IRedisEntityWriter<T> writer, HashEntry[] entries) where T : new()
+    public static TEntity? GetEntity<TEntity, IEntity>(this IRedisEntityWriter<IEntity> writer, HashEntry[] entries) where TEntity : IEntity, new()
     {
         if (entries.Length == 0) return default;
 
-        var entity = new T();//TODO: Instance if value exists
+        var entity = new TEntity();//TODO: Instance if value exists
 
         for (int i = 0; i < entries.Length; i++)
         {
@@ -44,7 +44,7 @@ public static class xIRedisEntityWriter
         return entity;
     }
 
-    public static T? GetEntity<T>(this IRedisEntityWriter<T> writer, RedisValue[] fields, RedisValue[] values) where T : new()
+    public static TEntity? GetEntity<TEntity, IEntity>(this IRedisEntityWriter<IEntity> writer, RedisValue[] fields, RedisValue[] values) where TEntity : IEntity, new()
     {
         int i = 0;
         RedisValue value;
@@ -56,7 +56,7 @@ public static class xIRedisEntityWriter
         }
         return default;
     write:
-        var entity = new T();
+        var entity = new TEntity();
 
         writer.Write(entity, in fields[i++], in value);
 
@@ -68,14 +68,23 @@ public static class xIRedisEntityWriter
         return entity;
     }
 
-    public static T? GetEntity<T>(this IRedisEntityWriter<T> writer, in RedisValue field, in RedisValue value) where T : new()
+    public static TEntity? GetEntity<TEntity, IEntity>(this IRedisEntityWriter<IEntity> writer, in RedisValue field, in RedisValue value) where TEntity : IEntity, new()
     {
         if (value.IsNull) return default;
 
-        var entity = new T();
+        var entity = new TEntity();
 
         writer.Write(entity, in field, in value);
 
         return entity;
     }
+
+    public static T? GetEntity<T>(this IRedisEntityWriter<T> writer, HashEntry[] entries) where T : new()
+        => writer.GetEntity<T, T>(entries);
+
+    public static T? GetEntity<T>(this IRedisEntityWriter<T> writer, RedisValue[] fields, RedisValue[] values) where T : new()
+        => writer.GetEntity<T, T>(fields, values);
+
+    public static T? GetEntity<T>(this IRedisEntityWriter<T> writer, in RedisValue field, in RedisValue value) where T : new()
+        => writer.GetEntity<T, T>(field, value);
 }

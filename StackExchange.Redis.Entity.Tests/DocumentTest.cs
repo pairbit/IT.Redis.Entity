@@ -22,14 +22,36 @@ public class DocumentTest
     }
 
     [Test]
-    public void ReadOnlySetTest()
+    public void IReadOnlyDocument_SetTest()
     {
         var doc = DocumentGenerator.New<DocumentPOCO>();
         try
         {
-            _db.EntitySet(Key, doc);
+            _db.EntitySet<IReadOnlyDocument>(Key, doc);
 
-            
+            var doc2 = _db.EntityGet<DocumentPOCO, IDocument>(Key);
+
+            Assert.That(ReferenceEquals(doc, doc2), Is.False);
+            Assert.That(DocumentEqualityComparer.Default.Equals(doc, doc2), Is.True);
+        }
+        finally
+        {
+            _db.KeyDelete(Key);
+        }
+    }
+
+    [Test]
+    public void ReadOnlyDocument_SetTest()
+    {
+        var doc = DocumentGenerator.New<DocumentPOCO>();
+        try
+        {
+            _db.EntitySet<IReadOnlyDocument>(Key, new ReadOnlyDocument(doc));
+
+            var doc2 = _db.EntityGet<DocumentPOCO, IDocument>(Key);
+
+            Assert.That(ReferenceEquals(doc, doc2), Is.False);
+            Assert.That(DocumentEqualityComparer.Default.Equals(doc, doc2), Is.True);
         }
         finally
         {

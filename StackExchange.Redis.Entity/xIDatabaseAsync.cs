@@ -29,19 +29,35 @@ public static class xIDatabaseAsync
         return writer.Write(entity, fields, await db.HashGetAsync(key, fields, flags).ConfigureAwait(false));
     }
 
+    public static async Task<TEntity?> EntityGetAllAsync<TEntity, IEntity>(this IDatabaseAsync db, RedisKey key, IRedisEntityWriter<IEntity>? writer = null, CommandFlags flags = CommandFlags.None) where TEntity : IEntity, new()
+        => (writer ?? RedisEntity<IEntity>.Writer).GetEntity<TEntity, IEntity>(await db.HashGetAllAsync(key, flags).ConfigureAwait(false));
+
+    public static async Task<TEntity?> EntityGetAsync<TEntity, IEntity>(this IDatabaseAsync db, RedisKey key, RedisValue field, IRedisEntityWriter<IEntity>? writer = null, CommandFlags flags = CommandFlags.None) where TEntity : IEntity, new()
+        => (writer ?? RedisEntity<IEntity>.Writer).GetEntity<TEntity, IEntity>(in field, await db.HashGetAsync(key, field, flags).ConfigureAwait(false));
+
+    public static async Task<TEntity?> EntityGetAsync<TEntity, IEntity>(this IDatabaseAsync db, RedisKey key, RedisValue[] fields, IRedisEntityWriter<IEntity>? writer = null, CommandFlags flags = CommandFlags.None) where TEntity : IEntity, new()
+        => (writer ?? RedisEntity<IEntity>.Writer).GetEntity<TEntity, IEntity>(fields, await db.HashGetAsync(key, fields, flags).ConfigureAwait(false));
+
+    public static async Task<TEntity?> EntityGetAsync<TEntity, IEntity>(this IDatabaseAsync db, RedisKey key, IRedisEntityWriter<IEntity>? writer = null, CommandFlags flags = CommandFlags.None) where TEntity : IEntity, new()
+    {
+        writer ??= RedisEntity<IEntity>.Writer;
+        var fields = writer.Fields.All;
+        return writer.GetEntity<TEntity, IEntity>(fields, await db.HashGetAsync(key, fields, flags).ConfigureAwait(false));
+    }
+
     public static async Task<T?> EntityGetAllAsync<T>(this IDatabaseAsync db, RedisKey key, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None) where T : new()
-        => (writer ?? RedisEntity<T>.Writer).GetEntity(await db.HashGetAllAsync(key, flags).ConfigureAwait(false));
+        => (writer ?? RedisEntity<T>.Writer).GetEntity<T, T>(await db.HashGetAllAsync(key, flags).ConfigureAwait(false));
 
     public static async Task<T?> EntityGetAsync<T>(this IDatabaseAsync db, RedisKey key, RedisValue field, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None) where T : new()
-        => (writer ?? RedisEntity<T>.Writer).GetEntity(in field, await db.HashGetAsync(key, field, flags).ConfigureAwait(false));
+        => (writer ?? RedisEntity<T>.Writer).GetEntity<T, T>(in field, await db.HashGetAsync(key, field, flags).ConfigureAwait(false));
 
     public static async Task<T?> EntityGetAsync<T>(this IDatabaseAsync db, RedisKey key, RedisValue[] fields, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None) where T : new()
-        => (writer ?? RedisEntity<T>.Writer).GetEntity(fields, await db.HashGetAsync(key, fields, flags).ConfigureAwait(false));
+        => (writer ?? RedisEntity<T>.Writer).GetEntity<T, T>(fields, await db.HashGetAsync(key, fields, flags).ConfigureAwait(false));
 
     public static async Task<T?> EntityGetAsync<T>(this IDatabaseAsync db, RedisKey key, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None) where T : new()
     {
         writer ??= RedisEntity<T>.Writer;
         var fields = writer.Fields.All;
-        return writer.GetEntity(fields, await db.HashGetAsync(key, fields, flags).ConfigureAwait(false));
+        return writer.GetEntity<T, T>(fields, await db.HashGetAsync(key, fields, flags).ConfigureAwait(false));
     }
 }
