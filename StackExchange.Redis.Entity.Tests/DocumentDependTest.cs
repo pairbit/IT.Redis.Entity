@@ -17,6 +17,40 @@ public class DocumentDependTest
     }
 
     [Test]
+    public void Nullable_NotNullable()
+    {
+        try
+        {
+            _db.EntitySet(Key, new DocumentNullable());
+
+            var doc2 = _db.EntityGet<DocumentNotNullable>(Key)!;
+
+            _db.EntitySet(Key, doc2);
+
+            var doc = _db.EntityGet<DocumentNullable>(Key)!;
+        }
+        finally
+        {
+            _db.KeyDelete(Key);
+        }
+    }
+    
+    [Test]
+    public void RedisValue_Zero()
+    {
+        RedisValue zero = RedisValue.EmptyString;
+
+        byte[] zeroBytes = zero;
+        byte[]? zeroBytesNull = zero;
+
+        string zeroString = zero;
+        string? zeroStringNull = zero;
+
+        ReadOnlyMemory<byte> memBytes = zero;
+        ReadOnlyMemory<byte>? memBytesNull = zero;
+    }
+    
+    [Test]
     public void DependData()
     {
         try

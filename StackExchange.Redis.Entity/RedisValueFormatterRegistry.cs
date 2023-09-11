@@ -54,7 +54,7 @@ public static class RedisValueFormatterRegistry
         Cache<T>._formatter = formatter ?? throw new ArgumentNullException(nameof(formatter));
     }
 
-    public static void Register<T>(NullableFormatter<T> formatter) where T : struct
+    public static void Register<T>(IStructFormatter<T> formatter) where T : struct
     {
         if (formatter == null) throw new ArgumentNullException(nameof(formatter));
         Cache<T>._formatter = formatter;

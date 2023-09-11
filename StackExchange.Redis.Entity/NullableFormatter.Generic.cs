@@ -1,6 +1,6 @@
 ﻿namespace StackExchange.Redis.Entity;
 
-public abstract class NullableFormatter<T> : IRedisValueFormatter<T?>, IRedisValueFormatter<T> where T : struct
+public abstract class NullableFormatter<T> : IStructFormatter<T> where T : struct
 {
     public virtual void Deserialize(in RedisValue redisValue, ref T? value)
     {
@@ -11,14 +11,26 @@ public abstract class NullableFormatter<T> : IRedisValueFormatter<T?>, IRedisVal
         else
         {
             T valueNotNull = default;
-            Deserialize(in redisValue, ref valueNotNull);
+            DeserializeNotNull(in redisValue, ref valueNotNull);
             value = valueNotNull;
         }
     }
 
-    public abstract void Deserialize(in RedisValue redisValue, ref T value);
+    public virtual void Deserialize(in RedisValue redisValue, ref T value)
+    {
+        if (redisValue.IsNullOrEmpty)
+        {
+            value = default;
+        }
+        else
+        {
+            DeserializeNotNull(in redisValue, ref value);
+        }
+    }
 
-    public virtual RedisValue Serialize(in T? value) => value.HasValue ? Serialize(value.Value) : RedisValue.EmptyString;
+    public abstract void DeserializeNotNull(in RedisValue redisValue, ref T value);
+
+    public virtual RedisValue Serialize(in T? value) => value == null ? RedisValue.EmptyString : Serialize(value.Value);
 
     public abstract RedisValue Serialize(in T value);
 }
