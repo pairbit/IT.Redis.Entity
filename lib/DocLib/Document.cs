@@ -17,8 +17,6 @@ public record Document
         Created = DateTime.UtcNow
     };
 
-    public static readonly ReadOnlyDocument ReadOnlyData = new(Data);
-
     [DataMember(Order = 8)]
     public Guid Id { get; set; }
 

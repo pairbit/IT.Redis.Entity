@@ -1,31 +1,41 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Numerics;
 
 namespace DocLib;
 
-public record ReadOnlyDocument
+public class ReadOnlyDocument : IReadOnlyDocument
 {
-    private readonly Document _document;
+    private readonly IReadOnlyDocument _document;
 
-    public ReadOnlyDocument(Document document)
+    public ReadOnlyDocument(IReadOnlyDocument document)
     {
-        _document = document;
+        _document = document ?? throw new ArgumentNullException(nameof(document));
     }
 
-    [DataMember(Order = 0)]
-    public string Name => _document.Name;
+    public Guid Id => _document.Id;
 
-    [DataMember(Order = 1)]
+    public Guid ExternalId => _document.ExternalId;
+
+    public string? Name => _document.Name;
+
+    public char Character => _document.Character;
+
     public DateOnly StartDate => _document.StartDate;
 
-    [DataMember(Order = 2)]
     public DateOnly? EndDate => _document.EndDate;
 
-    [DataMember(Order = 3)]
     public long Price => _document.Price;
 
-    [DataMember(Order = 4)]
     public bool IsDeleted => _document.IsDeleted;
 
-    [DataMember(Order = 5)]
     public DocumentSize Size => _document.Size;
+
+    public DateTime Created => _document.Created;
+
+    public DateTime? Modified => _document.Modified;
+
+    public byte[]? Content => _document.Content;
+
+    public ReadOnlyMemory<byte>? MemoryBytes => _document.MemoryBytes;
+
+    public BigInteger BigInteger => _document.BigInteger;
 }

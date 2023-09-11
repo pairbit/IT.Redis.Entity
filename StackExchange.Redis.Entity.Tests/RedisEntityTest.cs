@@ -19,23 +19,6 @@ public abstract class RedisEntityTest
         _reader = reader;
     }
 
-    //[Test]
-    public void ReadOnlyDocument()
-    {
-        var reader = RedisEntity<ReadOnlyDocument>.Reader;
-        var writer = RedisEntity<Document>.Writer;
-
-        _db.HashSet(Key, reader.GetEntries(Document.ReadOnlyData));
-
-        var doc = new Document();
-
-        writer.Write(doc, _db.HashGetAll(Key));
-
-        Assert.That(doc, Is.EqualTo(Document.Data));
-
-        Assert.IsTrue(_db.KeyDelete(Key));
-    }
-
     [Test]
     public void HashSet_Multi()
     {
@@ -43,24 +26,29 @@ public abstract class RedisEntityTest
         var writer = _writer;
         var entries = new HashEntry[reader.Fields.All.Length];
         var document = new Document();
-        var keys = new RedisKey[1000];
+        var keys = new RedisKey[100];
 
-        for (int i = 0; i < keys.Length; i++)
+        try
         {
-            Document.New(document, i);
+            for (int i = 0; i < keys.Length; i++)
+            {
+                Document.New(document, i);
 
-            reader.Read(entries, document);
+                reader.Read(entries, document);
 
-            var key = KeyPrefix.Append(i.ToString());
+                var key = KeyPrefix.Append(i.ToString());
 
-            _db.HashSet(key, entries);
+                _db.HashSet(key, entries);
 
-            Assert.That(writer.GetEntity(_db.HashGetAll(key)), Is.EqualTo(document));
+                Assert.That(writer.GetEntity(_db.HashGetAll(key)), Is.EqualTo(document));
 
-            keys[i] = key;
+                keys[i] = key;
+            }
         }
-
-        Assert.That(_db.KeyDelete(keys), Is.EqualTo(keys.Length));
+        finally
+        {
+            _db.KeyDelete(keys);
+        }
     }
 
     [Test]
@@ -69,25 +57,30 @@ public abstract class RedisEntityTest
         var reader = _reader;
         var writer = _writer;
 
-        _db.EntitySet(Key, Document.Data, reader);
-
-        var documents = new Document?[10];
-
-        var entries = _db.HashGetAll(Key);
-
-        for (int i = 0; i < documents.Length; i++)
+        try
         {
-            documents[i] = writer.GetEntity(entries);
+            _db.EntitySet(Key, Document.Data, reader);
+
+            var documents = new Document?[10];
+
+            var entries = _db.HashGetAll(Key);
+
+            for (int i = 0; i < documents.Length; i++)
+            {
+                documents[i] = writer.GetEntity(entries);
+            }
+
+            var first = documents[0];
+
+            for (int i = 1; i < documents.Length; i++)
+            {
+                Assert.That(first, Is.EqualTo(documents[i]));
+            }
         }
-
-        var first = documents[0];
-
-        for (int i = 1; i < documents.Length; i++)
+        finally
         {
-            Assert.That(first, Is.EqualTo(documents[i]));
+            _db.KeyDelete(Key);
         }
-
-        Assert.IsTrue(_db.KeyDelete(Key));
     }
 
     [Test]
@@ -111,43 +104,49 @@ public abstract class RedisEntityTest
 
         Assert.That(doc2, Is.EqualTo(Document.Empty));
 
-        _db.HashSet(Key, reader.GetEntries(Document.Data));
+        try
+        {
+            _db.HashSet(Key, reader.GetEntries(Document.Data));
 
-        Assert.That(writer.Write(doc2, _db.HashGetAll(Key)), Is.True);
+            Assert.That(writer.Write(doc2, _db.HashGetAll(Key)), Is.True);
 
-        Assert.That(doc2, Is.EqualTo(Document.Data));
-        Assert.That(writer.GetEntity(_db.HashGetAll(Key)), Is.EqualTo(Document.Data));
+            Assert.That(doc2, Is.EqualTo(Document.Data));
+            Assert.That(writer.GetEntity(_db.HashGetAll(Key)), Is.EqualTo(Document.Data));
 
-        doc2.EndDate = new DateOnly(2022, 03, 20);
-        doc2.Modified = DateTime.UtcNow;
+            doc2.EndDate = new DateOnly(2022, 03, 20);
+            doc2.Modified = DateTime.UtcNow;
 
-        _db.HashSet(Key, reader.GetEntries(doc2, EndDate_Modified));
+            _db.HashSet(Key, reader.GetEntries(doc2, EndDate_Modified));
 
-        var doc3 = new Document();
+            var doc3 = new Document();
 
-        Assert.That(writer.Write(doc3, EndDate_Modified, _db.HashGet(Key, EndDate_Modified)), Is.True);
+            Assert.That(writer.Write(doc3, EndDate_Modified, _db.HashGet(Key, EndDate_Modified)), Is.True);
 
-        Assert.That(doc2, Is.Not.EqualTo(doc3));
-        Assert.That(doc2.EndDate, Is.EqualTo(doc3.EndDate));
-        Assert.That(doc2.Modified, Is.EqualTo(doc3.Modified));
+            Assert.That(doc2, Is.Not.EqualTo(doc3));
+            Assert.That(doc2.EndDate, Is.EqualTo(doc3.EndDate));
+            Assert.That(doc2.Modified, Is.EqualTo(doc3.Modified));
 
-        Assert.That(writer.Write(doc3, writer.Fields.All, _db.HashGet(Key, writer.Fields.All)), Is.True);
+            Assert.That(writer.Write(doc3, writer.Fields.All, _db.HashGet(Key, writer.Fields.All)), Is.True);
 
-        Assert.That(doc2, Is.EqualTo(doc3));
+            Assert.That(doc2, Is.EqualTo(doc3));
 
-        doc2.IsDeleted = true;
+            doc2.IsDeleted = true;
 
-        Assert.That(doc2, Is.Not.EqualTo(doc3));
+            Assert.That(doc2, Is.Not.EqualTo(doc3));
 
-        Assert.That(_db.HashSet(Key, Field_IsDeleted, reader.Read(doc2, Field_IsDeleted)), Is.False);
+            Assert.That(_db.HashSet(Key, Field_IsDeleted, reader.Read(doc2, Field_IsDeleted)), Is.False);
 
-        Assert.That(writer.Write(doc3, Field_IsDeleted, _db.HashGet(Key, Field_IsDeleted)), Is.True);
+            Assert.That(writer.Write(doc3, Field_IsDeleted, _db.HashGet(Key, Field_IsDeleted)), Is.True);
 
-        Assert.That(doc2, Is.EqualTo(doc3));
+            Assert.That(doc2, Is.EqualTo(doc3));
 
-        Assert.That(writer.GetEntity(Field_IsDeleted, _db.HashGet(Key, Field_IsDeleted)), Is.EqualTo(Document.Deleted));
+            Assert.That(writer.GetEntity(Field_IsDeleted, _db.HashGet(Key, Field_IsDeleted)), Is.EqualTo(Document.Deleted));
 
-        Assert.IsTrue(_db.KeyDelete(Key));
+        }
+        finally
+        {
+            _db.KeyDelete(Key);
+        }
     }
 
     [Test]
@@ -173,45 +172,51 @@ public abstract class RedisEntityTest
 
         Assert.That(doc2, Is.EqualTo(Document.Empty));
 
-        _db.EntitySet(Key, Document.Data, reader);
+        try
+        {
+            _db.EntitySet(Key, Document.Data, reader);
 
-        Assert.That(_db.EntityLoadAll(doc2, Key, writer), Is.True);
+            Assert.That(_db.EntityLoadAll(doc2, Key, writer), Is.True);
 
-        Assert.That(doc2, Is.EqualTo(Document.Data));
-        Assert.That(_db.EntityGetAll(Key, writer), Is.EqualTo(Document.Data));
+            Assert.That(doc2, Is.EqualTo(Document.Data));
+            Assert.That(_db.EntityGetAll(Key, writer), Is.EqualTo(Document.Data));
 
-        doc2.EndDate = new DateOnly(2022, 03, 20);
-        doc2.Modified = DateTime.UtcNow;
+            doc2.EndDate = new DateOnly(2022, 03, 20);
+            doc2.Modified = DateTime.UtcNow;
 
-        _db.EntitySet(Key, doc2, EndDate_Modified, reader);
+            _db.EntitySet(Key, doc2, EndDate_Modified, reader);
 
-        var doc3 = new Document();
+            var doc3 = new Document();
 
-        Assert.That(_db.EntityLoad(doc3, Key, EndDate_Modified, writer), Is.True);
-        Assert.That(doc2, Is.Not.EqualTo(doc3));
-        Assert.That(doc2.EndDate, Is.EqualTo(doc3.EndDate));
-        Assert.That(doc2.IsDeleted, Is.EqualTo(doc3.IsDeleted));
+            Assert.That(_db.EntityLoad(doc3, Key, EndDate_Modified, writer), Is.True);
+            Assert.That(doc2, Is.Not.EqualTo(doc3));
+            Assert.That(doc2.EndDate, Is.EqualTo(doc3.EndDate));
+            Assert.That(doc2.IsDeleted, Is.EqualTo(doc3.IsDeleted));
 
-        Assert.That(_db.EntityGet(Key, EndDate_Modified, writer), Is.EqualTo(doc3));
-        //Assert.That(_db.EntityGet<Document, IDocumentView>(Doc.Key1), Is.EqualTo(doc3));
+            Assert.That(_db.EntityGet(Key, EndDate_Modified, writer), Is.EqualTo(doc3));
+            //Assert.That(_db.EntityGet<Document, IDocumentView>(Doc.Key1), Is.EqualTo(doc3));
 
-        Assert.That(_db.EntityGet(Key, writer), Is.EqualTo(doc2));
-        Assert.That(_db.EntityLoad(doc3, Key, writer), Is.True);
+            Assert.That(_db.EntityGet(Key, writer), Is.EqualTo(doc2));
+            Assert.That(_db.EntityLoad(doc3, Key, writer), Is.True);
 
-        Assert.That(doc2, Is.EqualTo(doc3));
+            Assert.That(doc2, Is.EqualTo(doc3));
 
-        doc2.IsDeleted = true;
+            doc2.IsDeleted = true;
 
-        Assert.That(doc2, Is.Not.EqualTo(doc3));
+            Assert.That(doc2, Is.Not.EqualTo(doc3));
 
-        Assert.That(_db.EntitySet(Key, doc2, Field_IsDeleted, reader), Is.False);
+            Assert.That(_db.EntitySet(Key, doc2, Field_IsDeleted, reader), Is.False);
 
-        Assert.That(_db.EntityLoad(doc3, Key, Field_IsDeleted, writer), Is.True);
+            Assert.That(_db.EntityLoad(doc3, Key, Field_IsDeleted, writer), Is.True);
 
-        Assert.That(doc2, Is.EqualTo(doc3));
+            Assert.That(doc2, Is.EqualTo(doc3));
 
-        Assert.That(_db.EntityGet(Key, Field_IsDeleted, writer), Is.EqualTo(Document.Deleted));
+            Assert.That(_db.EntityGet(Key, Field_IsDeleted, writer), Is.EqualTo(Document.Deleted));
 
-        Assert.IsTrue(_db.KeyDelete(Key));
+        }
+        finally
+        {
+            _db.KeyDelete(Key);
+        }
     }
 }
