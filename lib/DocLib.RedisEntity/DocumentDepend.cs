@@ -39,6 +39,9 @@ public record DocumentDepend
     [RedisField("mem")]
     public ReadOnlyMemory<byte> MemoryBytes { get; set; }
 
+    [RedisField("mem-null")]
+    public ReadOnlyMemory<byte>? MemoryBytesNull { get; set; }
+
     public RedisValue RedisValNull { get; set; }
 
     public RedisValue? RedisValNullable { get; set; }
@@ -74,6 +77,7 @@ public record DocumentDepend
         var content = new byte[1024];
         random.NextBytes(content);
         doc.MemoryBytes = content;
+        doc.MemoryBytesNull = null;
 
         doc.RedisValNull = RedisValue.Null;
         doc.RedisValNullable = null;

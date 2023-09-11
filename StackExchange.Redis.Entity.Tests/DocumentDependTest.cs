@@ -34,6 +34,12 @@ public class DocumentDependTest
                 doc2.Content = doc.Content;
             }
 
+            if (doc.MemoryBytesNull != null && doc2.MemoryBytesNull != null)
+            {
+                Assert.That(doc.MemoryBytesNull.Value.Span.SequenceEqual(doc2.MemoryBytesNull.Value.Span), Is.True);
+                doc2.MemoryBytesNull = doc.MemoryBytesNull;
+            }
+
             Assert.That(doc.MemoryBytes.Span.SequenceEqual(doc2.MemoryBytes.Span), Is.True);
 
             doc2.MemoryBytes = doc.MemoryBytes;
