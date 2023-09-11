@@ -50,6 +50,7 @@ public static class RedisValueFormatterRegistry
         Register(TimeOnlyFormatter.Default);
 
         Register(new UnmanagedArrayFormatter<Int32>());
+        Register(new UnmanagedICollectionFormatter<Int32>());
     }
 
     public static void Register<T>(IRedisValueFormatter<T> formatter)

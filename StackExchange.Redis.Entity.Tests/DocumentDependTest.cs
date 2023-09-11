@@ -1,5 +1,4 @@
 ﻿using DocLib.RedisEntity;
-using System;
 
 namespace StackExchange.Redis.Entity.Tests;
 
@@ -60,7 +59,10 @@ public class DocumentDependTest
 
             _db.EntitySet(Key, doc);
 
-            var doc2 = _db.EntityGet<DocumentDepend>(Key)!;
+            var doc2 = new DocumentDepend();
+            doc2.NumCollection = new List<int>() { 4};
+            
+            _db.EntityLoad(doc2, Key);
 
             if (doc.Content != null && doc2.Content != null)
             {
@@ -77,6 +79,13 @@ public class DocumentDependTest
             Assert.That(doc.MemoryBytes.Span.SequenceEqual(doc2.MemoryBytes.Span), Is.True);
 
             doc2.MemoryBytes = doc.MemoryBytes;
+
+            Assert.That(doc.NumCollection.SequenceEqual(doc2.NumCollection), Is.True);
+            doc.NumCollection = doc2.NumCollection;
+
+            Assert.That(doc.Nums.SequenceEqual(doc2.Nums), Is.True);
+            doc.Nums = doc2.Nums;
+
             Assert.That(doc, Is.EqualTo(doc2));
         }
         finally

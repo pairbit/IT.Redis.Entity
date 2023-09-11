@@ -61,6 +61,8 @@ public record DocumentDepend
 
     public int[] Nums { get; set; }
 
+    public ICollection<int> NumCollection { get; set; }
+
     public static void New(DocumentDepend doc, int i)
     {
         var random = Random.Shared;
@@ -97,5 +99,6 @@ public record DocumentDepend
         random.NextBytes(bytes);
         doc.BigInteger = new BigInteger(bytes);
         doc.Nums = new int[] { 12, 9, 122, 999, 0, 2 };
+        doc.NumCollection = new int[] { 2, 4, 43, 1, 40, 453, 88, 3 };
     }
 }

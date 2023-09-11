@@ -33,11 +33,6 @@ public class UnmanagedArrayFormatter<T> : IRedisValueFormatter<T[]> where T : un
         }
     }
 
-    public void Deserialize(in RedisValue redisValue, ref T?[]? value)
-    {
-        throw new NotImplementedException();
-    }
-
     public RedisValue Serialize(in T[]? value)
     {
         if (value == null) return RedisValues.Zero;
@@ -52,10 +47,5 @@ public class UnmanagedArrayFormatter<T> : IRedisValueFormatter<T[]> where T : un
         }
 
         return bytes;
-    }
-
-    public RedisValue Serialize(in T?[]? value)
-    {
-        throw new NotImplementedException();
     }
 }
