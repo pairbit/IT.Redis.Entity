@@ -33,6 +33,7 @@ public static class RedisValueFormatterRegistry
         Register(SingleFormatter.Default);
         Register(DoubleFormatter.Default);
         Register(DecimalFormatter.Default);
+        Register(BigIntegerFormatter.Default);
 
         Register(CharFormatter.Default);
         Register(BooleanFormatter.Default);

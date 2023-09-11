@@ -1,5 +1,6 @@
 ﻿using StackExchange.Redis;
 using StackExchange.Redis.Entity.Attributes;
+using System.Numerics;
 
 namespace DocLib.RedisEntity;
 
@@ -52,6 +53,8 @@ public record DocumentDepend
 
     public IntPtr IntPtrValue { get; set; }
 
+    public BigInteger BigInteger { get; set; }
+
     //[RedisFieldIgnore]
     public UIntPtr UIntPtrValue { get; set; }
 
@@ -86,5 +89,10 @@ public record DocumentDepend
 
         doc.IntPtrValue = (IntPtr)random.NextInt64();
         doc.UIntPtrValue = (UIntPtr)random.NextInt64();
+
+        var bytes = new byte[32];
+        random.NextBytes(bytes);
+        doc.BigInteger = new BigInteger(bytes);
+
     }
 }
