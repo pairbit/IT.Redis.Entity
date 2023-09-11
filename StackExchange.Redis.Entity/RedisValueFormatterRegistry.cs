@@ -17,7 +17,9 @@ public static class RedisValueFormatterRegistry
     static RedisValueFormatterRegistry()
     {
         Register(StringFormatter.Default);
+        Register(EnumFormatter.Default);
         Register(ByteArrayFormatter.Default);
+
         Register(RedisValueFormatter.Default);
 
         Register(SByteFormatter.Default);

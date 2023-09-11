@@ -25,6 +25,10 @@ public record DocumentDepend
 
     public DocumentSize Size { get; set; }
 
+    public DocumentSize? SizeNullable { get; set; }
+
+    //public Enum SizeEnum { get; set; } = null!;
+
     public DateTime Created { get; set; }
 
     public DateTime? Modified { get; set; }
@@ -36,6 +40,8 @@ public record DocumentDepend
     public ReadOnlyMemory<byte> MemoryBytes { get; set; }
 
     public RedisValue RedisValNull { get; set; }
+
+    public RedisValue? RedisValNullable { get; set; }
 
     public RedisValue RedisValEmpty { get; set; }
 
@@ -56,13 +62,14 @@ public record DocumentDepend
         doc.StartDate = new DateOnly(random.Next(2000, 2024), random.Next(1, 13), random.Next(1, 29));
         doc.Price = random.NextInt64(1_000_000, 1_000_000_000);
         doc.Size = (DocumentSize)random.Next(0, 3);
+        //doc.SizeEnum = doc.Size;
         doc.Created = DateTime.UtcNow;
         doc.Modified = null;
         doc.EndDate = null;
         doc.IsDeleted = false;
         doc.Character = char.MaxValue;
 
-        doc.Content = new byte[] { 0 };
+        doc.Content = Array.Empty<byte>();
 
         var content = new byte[1024];
         random.NextBytes(content);

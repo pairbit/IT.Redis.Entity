@@ -53,7 +53,7 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
                 {
                     writerInfos.Add(field, new WriterInfo
                     {
-                        Writer = Compiler.CompileWriter<T>(property),
+                        Writer = Compiler.GetWriter<T>(property),
                         Deserializer = new RedisValueDeserializerProxy(formatter)
                     });
                     writerFields.Add(name, field);
@@ -63,7 +63,7 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
                 {
                     readerInfos.Add(field, new ReaderInfo
                     {
-                        Reader = Compiler.CompileReader<T>(property),
+                        Reader = Compiler.GetReader<T>(property),
                         Serializer = formatter
                     });
                     readerFields.Add(name, field);

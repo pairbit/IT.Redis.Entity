@@ -6,6 +6,7 @@ namespace StackExchange.Redis.Entity.Internal;
 internal static class Compiler
 {
     private static readonly Type RedisValueType = typeof(RedisValue);
+    private static readonly Type NullableType = typeof(Nullable<>);
     private static readonly MethodInfo MethodDeserialize = typeof(RedisValueDeserializerProxy).GetMethod(nameof(RedisValueDeserializerProxy.Deserialize))!;
     private static readonly MethodInfo MethodSerialize = typeof(IRedisValueSerializer).GetMethod(nameof(IRedisValueSerializer.Serialize))!;
 
@@ -17,7 +18,7 @@ internal static class Compiler
      Expression<Func<Document, IRedisValueSerializer, RedisValue>> exp =
             (Document entity, IRedisValueSerializer serializer) => serializer.Serialize(entity.Name);
      */
-    internal static RedisValueReader<T> CompileReader<T>(PropertyInfo property)
+    internal static RedisValueReader<T> GetReader<T>(PropertyInfo property)
     {
         var pEntity = Expression.Parameter(typeof(T), "entity");
 
@@ -29,6 +30,15 @@ internal static class Compiler
         {
             propertyType = propertyType.GetEnumUnderlyingType();
             eProperty = Expression.ConvertChecked(eProperty, propertyType);
+        } 
+        else if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition().Equals(NullableType))
+        {
+            var genericArgument = propertyType.GetGenericArguments()[0];
+            if (genericArgument.IsEnum)
+            {
+                propertyType = NullableType.MakeGenericType(genericArgument.GetEnumUnderlyingType());
+                eProperty = Expression.ConvertChecked(eProperty, propertyType);
+            }
         }
 
         var eCall = Expression.Call(ParameterSerializer, MethodSerialize.MakeGenericMethod(propertyType), eProperty);
@@ -43,7 +53,7 @@ internal static class Compiler
             (Document entity, RedisValue redisValue, RedisValueDeserializerProxy deserializer)
             => deserializer.Deserialize(in redisValue, entity.Name);
      */
-    internal static RedisValueWriter<T> CompileWriter<T>(PropertyInfo property)
+    internal static RedisValueWriter<T> GetWriter<T>(PropertyInfo property)
     {
         var pEntity = Expression.Parameter(typeof(T), "entity");
 
@@ -62,6 +72,24 @@ internal static class Compiler
             var call = Expression.Call(ParameterDeserializer, MethodDeserialize.MakeGenericMethod(enumType), ParameterRedisValue, eConvert);
 
             eRight = Expression.ConvertChecked(call, propertyType);
+        } 
+        else if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition().Equals(NullableType))
+        {
+            var genericArgument = propertyType.GetGenericArguments()[0];
+            if (genericArgument.IsEnum)
+            {
+                var enumType = NullableType.MakeGenericType(genericArgument.GetEnumUnderlyingType());
+
+                var eConvert = Expression.ConvertChecked(eProperty, enumType);
+
+                var call = Expression.Call(ParameterDeserializer, MethodDeserialize.MakeGenericMethod(enumType), ParameterRedisValue, eConvert);
+
+                eRight = Expression.ConvertChecked(call, propertyType);
+            }
+            else
+            {
+                eRight = Expression.Call(ParameterDeserializer, MethodDeserialize.MakeGenericMethod(propertyType), ParameterRedisValue, eProperty);
+            }
         }
         else
         {

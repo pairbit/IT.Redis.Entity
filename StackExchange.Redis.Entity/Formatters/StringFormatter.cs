@@ -7,8 +7,8 @@ public class StringFormatter : IRedisValueFormatter<string>
     public static readonly StringFormatter Default = new();
 
     public void Deserialize(in RedisValue redisValue, ref string? value)
-        => value = redisValue == RedisValues.False ? (string?)null : redisValue;
+        => value = redisValue == RedisValues.Zero ? (string?)null : redisValue;
 
     public RedisValue Serialize(in string? value)
-        => value == null ? RedisValues.False : value;
+        => value == null ? RedisValues.Zero : value;
 }

@@ -2,7 +2,7 @@
 
 internal static class RedisValues
 {
-    public static readonly RedisValue False = false;
+    public static readonly RedisValue Zero = 0;
 
     public static readonly RedisValue Null = "[null]";
 }
