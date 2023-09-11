@@ -76,6 +76,7 @@ public record DocumentDepend
         doc.MemoryBytes = content;
 
         doc.RedisValNull = RedisValue.Null;
+        doc.RedisValNullable = null;
         doc.RedisValEmpty = RedisValue.EmptyString;
         doc.RedisValNum = random.NextInt64();
 

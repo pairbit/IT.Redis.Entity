@@ -2,7 +2,7 @@
 
 public abstract class NullableFormatter<T> : IRedisValueFormatter<T?>, IRedisValueFormatter<T> where T : struct
 {
-    public void Deserialize(in RedisValue redisValue, ref T? value)
+    public virtual void Deserialize(in RedisValue redisValue, ref T? value)
     {
         if (redisValue.IsNullOrEmpty)
         {
@@ -18,7 +18,7 @@ public abstract class NullableFormatter<T> : IRedisValueFormatter<T?>, IRedisVal
 
     public abstract void Deserialize(in RedisValue redisValue, ref T value);
 
-    public RedisValue Serialize(in T? value) => value.HasValue ? Serialize(value.Value) : RedisValue.EmptyString;
+    public virtual RedisValue Serialize(in T? value) => value.HasValue ? Serialize(value.Value) : RedisValue.EmptyString;
 
     public abstract RedisValue Serialize(in T value);
 }
