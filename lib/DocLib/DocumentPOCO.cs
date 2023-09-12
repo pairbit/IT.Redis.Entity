@@ -45,5 +45,5 @@ public record DocumentPOCO : IDocument
 
     public List<Guid?>? TagIds { get; set; }
 
-    IReadOnlyList<Guid?>? IReadOnlyDocument.TagIds => TagIds;
+    IReadOnlyList<Guid?>? IReadOnlyDocument.TagIds => TagIds?.AsReadOnly();
 }
