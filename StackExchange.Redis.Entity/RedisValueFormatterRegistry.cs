@@ -45,7 +45,10 @@ public static class RedisValueFormatterRegistry
         Register(DateOnlyFormatter.Default);
         Register(TimeOnlyFormatter.Default);
 
+        Register(VersionFormatter.Default);
         Register(EnumFormatter.Default);
+        Register(UriFormatter.Default);
+
         Register(StringFormatter.Default);
         Register(ByteArrayFormatter.Default);
         Register(BitArrayFormatter.Default);

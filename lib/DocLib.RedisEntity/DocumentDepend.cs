@@ -23,6 +23,10 @@ public record DocumentDepend
 
     public long Price { get; set; }
 
+    public Uri Url { get; set; }
+
+    public Version Version { get; set; }
+
     public bool IsDeleted { get; set; }
 
     public DocumentSize Size { get; set; }
@@ -71,6 +75,8 @@ public record DocumentDepend
 
         doc.Id = Guid.NewGuid();
         doc.ClientId = Guid.NewGuid();
+        doc.Url = new Uri("https://www.youtube.com/");
+        doc.Version = new Version(1, 2);
         doc.Name = null;// $"Самый важный документ для сдачи проекта №{i}";
         doc.StartDate = new DateOnly(random.Next(2000, 2024), random.Next(1, 13), random.Next(1, 29));
         doc.Price = random.NextInt64(1_000_000, 1_000_000_000);
