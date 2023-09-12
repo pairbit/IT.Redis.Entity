@@ -63,4 +63,9 @@ public class DocumentDataContract : IDocument
 
     [DataMember(Order = 18)]
     public int?[]? IntArrayN { get; set; }
+
+    [DataMember(Order = 19)]
+    public List<Guid?>? TagIds { get; set; }
+
+    IReadOnlyList<Guid?>? IReadOnlyDocument.TagIds => TagIds;
 }

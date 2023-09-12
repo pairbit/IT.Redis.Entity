@@ -42,4 +42,8 @@ public record DocumentPOCO : IDocument
     public int[]? IntArray { get; set; }
 
     public int?[]? IntArrayN { get; set; }
+
+    public List<Guid?>? TagIds { get; set; }
+
+    IReadOnlyList<Guid?>? IReadOnlyDocument.TagIds => TagIds;
 }
