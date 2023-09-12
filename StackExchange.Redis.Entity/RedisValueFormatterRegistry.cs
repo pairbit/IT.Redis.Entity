@@ -54,6 +54,7 @@ public static class RedisValueFormatterRegistry
         Register(BitArrayFormatter.Default);
 
         RegisterUnmanagedArray<Int32>();
+        RegisterUnmanagedArray<Guid>();
     }
 
     public static void Register<T>(IRedisValueFormatter<T> formatter)

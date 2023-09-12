@@ -68,7 +68,7 @@ public class UnmanagedArrayFormatter<T> : IRedisValueFormatter<T[]>, IRedisValue
         var size = Unsafe.SizeOf<T>();
         var bytes = new byte[size * value.Length];
 
-        for (int i = 0, b = 0; i < value.Length; i++, b+= size)
+        for (int i = 0, b = 0; i < value.Length; i++, b += size)
         {
             Unsafe.WriteUnaligned(ref bytes[b], value[i]);
         }
@@ -86,8 +86,7 @@ public class UnmanagedArrayFormatter<T> : IRedisValueFormatter<T[]>, IRedisValue
 
         for (int i = 0, b = 0; i < value.Length; i++, b += size)
         {
-            var item = value[i];
-            Unsafe.WriteUnaligned(ref bytes[b], item);
+            Unsafe.WriteUnaligned(ref bytes[b], value[i]);
         }
 
         return bytes;
