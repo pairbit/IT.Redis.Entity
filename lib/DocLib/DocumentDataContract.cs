@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Collections;
+using System.Numerics;
 using System.Runtime.Serialization;
 
 namespace DocLib;
@@ -47,4 +48,16 @@ public class DocumentDataContract : IDocument
 
     [DataMember(Order = 13)]
     public BigInteger BigInteger { get; set; }
+
+    [DataMember(Order = 14)]
+    public BitArray? Bits { get; set; }
+
+    [DataMember(Order = 15)]
+    public Version? Version { get; set; }
+
+    [DataMember(Order = 16)]
+    public Uri? Url { get; set; }
+
+    [DataMember(Order = 17)]
+    public int[]? IntArray { get; set; }
 }

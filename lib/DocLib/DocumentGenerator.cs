@@ -28,6 +28,8 @@ public static class DocumentGenerator
         doc.Id = Guid.NewGuid();
         doc.ExternalId = Guid.NewGuid();
         doc.Name = $"Самый важный документ для сдачи проекта №{i}";
+        doc.Url = new Uri("https://www.youtube.com/");
+        doc.Version = new Version(12, 3, 23332, 33);
         doc.StartDate = new DateOnly(random.Next(2000, 2024), random.Next(1, 13), random.Next(1, 29));
         doc.EndDate = new DateOnly(random.Next(2010, 2030), random.Next(1, 13), random.Next(1, 29));
         doc.Price = random.NextInt64(1_000_000, 1_000_000_000);
@@ -45,5 +47,7 @@ public static class DocumentGenerator
         bytes = new byte[4024];
         random.NextBytes(bytes);
         doc.MemoryBytes = bytes;
+        doc.Bits = new System.Collections.BitArray(new int[2] { random.Next(), random.Next() });
+        doc.IntArray = new int[4] { random.Next(), random.Next(), random.Next(), random.Next() };
     }
 }

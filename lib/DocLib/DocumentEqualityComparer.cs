@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 namespace DocLib;
 
@@ -17,16 +18,28 @@ public class DocumentEqualityComparer : IEqualityComparer<IReadOnlyDocument>
         x.Size == y.Size &&
         x.Price == y.Price &&
         x.Character == y.Character &&
-        (ReferenceEquals(x.Content, y.Content) || (x.Content != null && y.Content != null && x.Content.SequenceEqual(y.Content))) &&
-        ((x.MemoryBytes == null && y.MemoryBytes == null) || (x.MemoryBytes != null && y.MemoryBytes != null && x.MemoryBytes.Value.Span.SequenceEqual(y.MemoryBytes.Value.Span))) &&
+        Seq(x.Content, y.Content) &&
+        Seq(x.MemoryBytes, y.MemoryBytes) &&
         x.StartDate == y.StartDate &&
         x.EndDate == y.EndDate &&
         x.IsDeleted == y.IsDeleted &&
-        x.Created == y.Created
+        x.Created == y.Created &&
+        Eq(x.Url, y.Url) &&
+        Eq(x.Version, y.Version) &&
+        Seq<bool>(x.Bits, y.Bits) &&
+        Seq(x.IntArray, y.IntArray)
         );
 
     public int GetHashCode([DisallowNull] IReadOnlyDocument obj)
     {
         throw new NotImplementedException();
     }
+
+    private static bool Eq<T>(T? x, T? y) => ReferenceEquals(x, y) || (x != null && y != null && x.Equals(y));
+
+    private static bool Seq<T>(IEnumerable<T>? x, IEnumerable<T>? y) => ReferenceEquals(x, y) || (x != null && y != null && x.SequenceEqual(y));
+
+    private static bool Seq<T>(ReadOnlyMemory<T>? x, ReadOnlyMemory<T>? y) => (x == null && y == null) || (x != null && y != null && x.Value.Span.SequenceEqual(y.Value.Span));
+
+    private static bool Seq<T>(IEnumerable? x, IEnumerable? y) => ReferenceEquals(x, y) || (x != null && y != null && x.Cast<T>().SequenceEqual(y.Cast<T>()));
 }

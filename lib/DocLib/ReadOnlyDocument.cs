@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Collections;
+using System.Numerics;
 
 namespace DocLib;
 
@@ -38,4 +39,12 @@ public class ReadOnlyDocument : IReadOnlyDocument
     public ReadOnlyMemory<byte>? MemoryBytes => _document.MemoryBytes;
 
     public BigInteger BigInteger => _document.BigInteger;
+
+    public BitArray? Bits => _document.Bits;
+
+    public Version? Version => _document.Version;
+
+    public Uri? Url => _document.Url;
+
+    public int[]? IntArray => _document.IntArray;
 }
