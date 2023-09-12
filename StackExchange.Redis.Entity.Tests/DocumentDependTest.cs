@@ -86,6 +86,9 @@ public class DocumentDependTest
             Assert.That(doc.Nums.SequenceEqual(doc2.Nums), Is.True);
             doc.Nums = doc2.Nums;
 
+            Assert.That(doc.Bits.Cast<bool>().SequenceEqual(doc2.Bits.Cast<bool>()), Is.True);
+            doc.Bits = doc2.Bits;
+
             Assert.That(doc, Is.EqualTo(doc2));
         }
         finally

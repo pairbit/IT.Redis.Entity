@@ -16,10 +16,6 @@ public static class RedisValueFormatterRegistry
 
     static RedisValueFormatterRegistry()
     {
-        Register(StringFormatter.Default);
-        Register(EnumFormatter.Default);
-        Register(ByteArrayFormatter.Default);
-
         Register(RedisValueFormatter.Default);
 
         Register(SByteFormatter.Default);
@@ -48,6 +44,11 @@ public static class RedisValueFormatterRegistry
         Register(ReadOnlyMemoryByteFormatter.Default);
         Register(DateOnlyFormatter.Default);
         Register(TimeOnlyFormatter.Default);
+
+        Register(EnumFormatter.Default);
+        Register(StringFormatter.Default);
+        Register(ByteArrayFormatter.Default);
+        Register(BitArrayFormatter.Default);
 
         Register(new UnmanagedArrayFormatter<Int32>());
         Register(new UnmanagedICollectionFormatter<Int32>());
