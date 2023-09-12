@@ -27,7 +27,8 @@ public class DocumentEqualityComparer : IEqualityComparer<IReadOnlyDocument>
         Eq(x.Url, y.Url) &&
         Eq(x.Version, y.Version) &&
         Seq<bool>(x.Bits, y.Bits) &&
-        Seq(x.IntArray, y.IntArray)
+        Seq(x.IntArray, y.IntArray) &&
+        Seq(x.IntArrayN, y.IntArrayN)
         );
 
     public int GetHashCode([DisallowNull] IReadOnlyDocument obj)

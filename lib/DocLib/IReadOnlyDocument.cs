@@ -40,4 +40,6 @@ public interface IReadOnlyDocument
     public Uri? Url { get; }
 
     public int[]? IntArray { get; }
+
+    public int?[]? IntArrayN { get; }
 }

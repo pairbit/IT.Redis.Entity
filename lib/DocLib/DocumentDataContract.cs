@@ -60,4 +60,7 @@ public class DocumentDataContract : IDocument
 
     [DataMember(Order = 17)]
     public int[]? IntArray { get; set; }
+
+    [DataMember(Order = 18)]
+    public int?[]? IntArrayN { get; set; }
 }

@@ -53,8 +53,7 @@ public static class RedisValueFormatterRegistry
         Register(ByteArrayFormatter.Default);
         Register(BitArrayFormatter.Default);
 
-        Register(new UnmanagedArrayFormatter<Int32>());
-        Register(new UnmanagedICollectionFormatter<Int32>());
+        RegisterUnmanagedArray<Int32>();
     }
 
     public static void Register<T>(IRedisValueFormatter<T> formatter)
@@ -67,6 +66,19 @@ public static class RedisValueFormatterRegistry
         if (formatter == null) throw new ArgumentNullException(nameof(formatter));
         Cache<T>._formatter = formatter;
         Cache<T?>._formatter = formatter;
+    }
+
+    public static void RegisterUnmanagedArray<T>() where T : unmanaged
+    {
+        var arrayFormatter = new UnmanagedArrayFormatter<T>();
+        
+        Cache<T[]>._formatter = arrayFormatter;
+        Cache<T?[]>._formatter = arrayFormatter;
+
+        var iCollectionFormatter = new UnmanagedICollectionFormatter<T>();
+
+        Cache<ICollection<T>>._formatter = iCollectionFormatter;
+        //Cache<ICollection<T>>._formatter = iCollectionFormatter;
     }
 
     public static void Register(IRedisValueFormatter formatter)

@@ -47,4 +47,6 @@ public class ReadOnlyDocument : IReadOnlyDocument
     public Uri? Url => _document.Url;
 
     public int[]? IntArray => _document.IntArray;
+
+    public int?[]? IntArrayN => _document.IntArrayN;
 }

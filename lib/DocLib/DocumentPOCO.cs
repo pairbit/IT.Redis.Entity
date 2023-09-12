@@ -40,4 +40,6 @@ public record DocumentPOCO : IDocument
     public Uri? Url { get; set; }
 
     public int[]? IntArray { get; set; }
+
+    public int?[]? IntArrayN { get; set; }
 }

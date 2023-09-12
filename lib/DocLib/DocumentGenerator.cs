@@ -49,5 +49,6 @@ public static class DocumentGenerator
         doc.MemoryBytes = bytes;
         doc.Bits = new System.Collections.BitArray(new int[2] { random.Next(), random.Next() });
         doc.IntArray = new int[4] { random.Next(), random.Next(), random.Next(), random.Next() };
+        doc.IntArrayN = new int?[5] { random.Next(), null, random.Next(), null, null };
     }
 }
