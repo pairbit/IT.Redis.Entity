@@ -1,14 +1,14 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Runtime.InteropServices;
 
 namespace DocLib;
 
-[DataContract]
+[StructLayout(LayoutKind.Explicit)]
 public readonly record struct DocumentVersionInfo
 {
-    private readonly Guid _id;
-    private readonly Guid _authodId;
-    private readonly DateTime _date;
-    private readonly long _number;
+    [FieldOffset(0)] private readonly Guid _id;
+    [FieldOffset(16)] private readonly Guid _authodId;
+    [FieldOffset(32)] private readonly DateTime _date;
+    [FieldOffset(40)] private readonly long _number;
 
     public DocumentVersionInfo(Guid id, Guid authodId, DateTime date, long number)
     {
@@ -18,15 +18,11 @@ public readonly record struct DocumentVersionInfo
         _number = number;
     }
 
-    [DataMember(Order = 0)]
     public Guid Id => _id;
 
-    [DataMember(Order = 1)]
     public DateTime Date => _date;
 
-    [DataMember(Order = 2)]
     public Guid AuthodId => _authodId;
 
-    [DataMember(Order = 3)]
     public long Number => _number;
 }
