@@ -30,6 +30,7 @@ public static class DocumentGenerator
         doc.Name = $"Самый важный документ для сдачи проекта №{i}";
         doc.Url = new Uri("https://www.youtube.com/");
         doc.Version = new Version(12, 3, 23332, 33);
+        doc.VersionInfo = new DocumentVersionInfo(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow.AddDays(-random.Next(1, 365)), random.Next(1, 100));
         doc.StartDate = new DateOnly(random.Next(2000, 2024), random.Next(1, 13), random.Next(1, 29));
         doc.EndDate = new DateOnly(random.Next(2010, 2030), random.Next(1, 13), random.Next(1, 29));
         doc.Price = random.NextInt64(1_000_000, 1_000_000_000);

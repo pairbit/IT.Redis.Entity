@@ -1,4 +1,5 @@
 ﻿using DocLib;
+using StackExchange.Redis.Entity.Formatters;
 
 namespace StackExchange.Redis.Entity.Tests;
 
@@ -13,6 +14,8 @@ public class DocumentTest
     {
         var connection = ConnectionMultiplexer.Connect("localhost:6381,defaultDatabase=0,syncTimeout=5000,allowAdmin=False,connectTimeout=5000,ssl=False,abortConnect=False");
         _db = connection.GetDatabase()!;
+
+        RedisValueFormatterRegistry.Register(new UnmanagedFormatter<DocumentVersionInfo>());
     }
 
     [Test]

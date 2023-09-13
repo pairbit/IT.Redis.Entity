@@ -24,12 +24,13 @@ public class DocumentEqualityComparer : IEqualityComparer<IReadOnlyDocument>
         x.EndDate == y.EndDate &&
         x.IsDeleted == y.IsDeleted &&
         x.Created == y.Created &&
+        x.VersionInfo == y.VersionInfo &&
         Eq(x.Url, y.Url) &&
         Eq(x.Version, y.Version) &&
         Seq<bool>(x.Bits, y.Bits) &&
         Seq(x.IntArray, y.IntArray) &&
         Seq(x.IntArrayN, y.IntArrayN) &&
-        Seq(x.TagIds, y.TagIds)
+        Seq(x.TagIds, y.TagIds) 
         );
 
     public int GetHashCode([DisallowNull] IReadOnlyDocument obj)

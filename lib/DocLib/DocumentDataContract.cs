@@ -67,5 +67,8 @@ public class DocumentDataContract : IDocument
     [DataMember(Order = 19)]
     public List<Guid?>? TagIds { get; set; }
 
+    [IgnoreDataMember]//TODO:????
+    public DocumentVersionInfo? VersionInfo { get; set; }
+
     IReadOnlyList<Guid?>? IReadOnlyDocument.TagIds => TagIds;
 }

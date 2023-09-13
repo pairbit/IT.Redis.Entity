@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Numerics;
+using System.Runtime.Serialization;
 
 namespace DocLib;
 
@@ -44,6 +45,9 @@ public record DocumentPOCO : IDocument
     public int?[]? IntArrayN { get; set; }
 
     public List<Guid?>? TagIds { get; set; }
+
+    [IgnoreDataMember]//TODO:????
+    public DocumentVersionInfo? VersionInfo { get; set; }
 
     IReadOnlyList<Guid?>? IReadOnlyDocument.TagIds => TagIds?.AsReadOnly();
 }

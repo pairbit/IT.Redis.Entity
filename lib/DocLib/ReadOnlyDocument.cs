@@ -51,4 +51,6 @@ public class ReadOnlyDocument : IReadOnlyDocument
     public int?[]? IntArrayN => _document.IntArrayN;
 
     public IReadOnlyList<Guid?>? TagIds => _document.TagIds;
+
+    public DocumentVersionInfo? VersionInfo => _document.VersionInfo;
 }
