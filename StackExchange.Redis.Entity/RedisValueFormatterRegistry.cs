@@ -131,6 +131,11 @@ public static class RedisValueFormatterRegistry
         _default = formatter ?? throw new ArgumentNullException(nameof(formatter));
     }
 
+    public static void RegisterResolver(IRedisValueFormatterResolver resolver)
+    {
+        _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+    }
+
     public static IRedisValueFormatter<T>? GetFormatter<T>() => Cache<T>._formatter;
 
     public static bool IsRegistered<T>() => Check<T>._registered;
