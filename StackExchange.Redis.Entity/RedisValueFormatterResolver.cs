@@ -16,10 +16,11 @@ public class RedisValueFormatterResolver : IRedisValueFormatterResolver
         var isNullable = isGenericType && genericType!.Equals(NullableType);
         var firstGenericType = isGenericType ? type.GetGenericArguments()[0] : null;
         var notNullableType = isNullable ? firstGenericType! : type;
-
+        var isUnmanagedType = !RuntimeHelpers.IsReferenceOrContainsReferences<T>();
+        
         Type? formatterType = null;
 
-        if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+        if (isUnmanagedType)
         {
             formatterType = UnmanagedFormatterType.MakeGenericType(notNullableType);
         }
