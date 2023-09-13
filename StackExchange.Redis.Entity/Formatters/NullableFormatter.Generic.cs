@@ -1,4 +1,4 @@
-﻿namespace StackExchange.Redis.Entity;
+﻿namespace StackExchange.Redis.Entity.Formatters;
 
 public abstract class NullableFormatter<T> : IStructFormatter<T> where T : struct
 {

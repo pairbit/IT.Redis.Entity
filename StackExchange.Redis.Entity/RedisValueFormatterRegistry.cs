@@ -6,11 +6,30 @@ namespace StackExchange.Redis.Entity;
 
 public static class RedisValueFormatterRegistry
 {
+    static class Check<T>
+    {
+        public static bool _registered;
+    }
+
     static class Cache<T>
     {
         public static IRedisValueFormatter<T>? _formatter;
+
+        static Cache()
+        {
+            if (Check<T>._registered) return;
+
+            var formatter = _resolver.GetFormatter<T>();
+
+            if (formatter != null)
+            {
+                Cache<T>._formatter = formatter;
+                Check<T>._registered = true;
+            }
+        }
     }
 
+    private static IRedisValueFormatterResolver _resolver = new RedisValueFormatterResolver();
     private static IRedisValueFormatter _default = new RedisValueFormatterNotRegistered();
 
     public static IRedisValueFormatter Default => _default;
@@ -60,14 +79,16 @@ public static class RedisValueFormatterRegistry
 
     public static void Register<T>(IRedisValueFormatter<T> formatter)
     {
-        Cache<T>._formatter = formatter ?? throw new ArgumentNullException(nameof(formatter));
+        if (formatter == null) throw new ArgumentNullException(nameof(formatter));
+
+        Check<T>._registered = true;
+        Cache<T>._formatter = formatter;
     }
 
     public static void Register<T>(IStructFormatter<T> formatter) where T : struct
     {
-        if (formatter == null) throw new ArgumentNullException(nameof(formatter));
-        Cache<T>._formatter = formatter;
-        Cache<T?>._formatter = formatter;
+        Register((IRedisValueFormatter<T>)formatter);
+        Register((IRedisValueFormatter<T?>)formatter);
     }
 
     public static void RegisterUnmanagedList<TList, T>(NewList<TList, T> factory)
@@ -80,29 +101,29 @@ public static class RedisValueFormatterRegistry
     public static void RegisterUnmanagedEnumerable<T>() where T : unmanaged
     {
         var enumerableFormatter = new UnmanagedEnumerableFormatter<T>();
-        
-        Cache<T[]>._formatter = enumerableFormatter;
-        Cache<T?[]>._formatter = enumerableFormatter;
-        Cache<IEnumerable<T>>._formatter = enumerableFormatter;
-        Cache<IReadOnlyCollection<T>>._formatter = enumerableFormatter;
-        Cache<IReadOnlyList<T>>._formatter = enumerableFormatter;
-        Cache<IReadOnlyList<T?>>._formatter = enumerableFormatter;
-        Cache<IReadOnlySet<T>>._formatter = enumerableFormatter;
-        Cache<ICollection<T>>._formatter = enumerableFormatter;
-        Cache<IList<T>>._formatter = enumerableFormatter;
-        Cache<IList<T?>>._formatter = enumerableFormatter;
-        Cache<ISet<T>>._formatter = enumerableFormatter;
-        Cache<ReadOnlyCollection<T>>._formatter = enumerableFormatter;
-        Cache<Collection<T>>._formatter = enumerableFormatter;
-        Cache<List<T>>._formatter = enumerableFormatter;
-        Cache<List<T?>>._formatter = enumerableFormatter;
-        Cache<LinkedList<T>>._formatter = enumerableFormatter;
-        Cache<HashSet<T>>._formatter = enumerableFormatter;
-        Cache<SortedSet<T>>._formatter = enumerableFormatter;
-        Cache<Queue<T>>._formatter = enumerableFormatter;
-        Cache<Stack<T>>._formatter = enumerableFormatter;
-        Cache<ReadOnlyObservableCollection<T>>._formatter = enumerableFormatter;
-        Cache<ObservableCollection<T>>._formatter = enumerableFormatter;
+
+        Register<T[]>(enumerableFormatter);
+        Register<T?[]>(enumerableFormatter);
+        Register<IEnumerable<T>>(enumerableFormatter);
+        Register<IReadOnlyCollection<T>>(enumerableFormatter);
+        Register<IReadOnlyList<T>>(enumerableFormatter);
+        Register<IReadOnlyList<T?>>(enumerableFormatter);
+        Register<IReadOnlySet<T>>(enumerableFormatter);
+        Register<ICollection<T>>(enumerableFormatter);
+        Register<IList<T>>(enumerableFormatter);
+        Register<IList<T?>>(enumerableFormatter);
+        Register<ISet<T>>(enumerableFormatter);
+        Register<ReadOnlyCollection<T>>(enumerableFormatter);
+        Register<Collection<T>>(enumerableFormatter);
+        Register<List<T>>(enumerableFormatter);
+        Register<List<T?>>(enumerableFormatter);
+        Register<LinkedList<T>>(enumerableFormatter);
+        Register<HashSet<T>>(enumerableFormatter);
+        Register<SortedSet<T>>(enumerableFormatter);
+        Register<Queue<T>>(enumerableFormatter);
+        Register<Stack<T>>(enumerableFormatter);
+        Register<ReadOnlyObservableCollection<T>>(enumerableFormatter);
+        Register<ObservableCollection<T>>(enumerableFormatter);
     }
 
     public static void Register(IRedisValueFormatter formatter)
@@ -111,4 +132,6 @@ public static class RedisValueFormatterRegistry
     }
 
     public static IRedisValueFormatter<T>? GetFormatter<T>() => Cache<T>._formatter;
+
+    public static bool IsRegistered<T>() => Check<T>._registered;
 }
