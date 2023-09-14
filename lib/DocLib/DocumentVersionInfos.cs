@@ -1,8 +1,8 @@
 ﻿namespace DocLib;
 
-public class DocumentVersionInfos : List<DocumentVersionInfo?>
+public class DocumentVersionInfos : List<DocumentVersionInfo>
 {
-    public DocumentVersionInfos(int size) : base(size)
+    public DocumentVersionInfos(int capacity) : base(capacity)
     {
     }
 }

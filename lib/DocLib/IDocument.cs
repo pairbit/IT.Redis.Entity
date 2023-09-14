@@ -46,4 +46,6 @@ public interface IDocument : IReadOnlyDocument
     public new List<Guid?>? TagIds { get; set; }
 
     public new DocumentVersionInfo? VersionInfo { get; set; }
+
+    public new DocumentVersionInfos? VersionInfos { get; set; }
 }

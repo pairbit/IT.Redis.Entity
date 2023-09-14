@@ -53,4 +53,6 @@ public class ReadOnlyDocument : IReadOnlyDocument
     public IReadOnlyList<Guid?>? TagIds => _document.TagIds;
 
     public DocumentVersionInfo? VersionInfo => _document.VersionInfo;
+
+    public DocumentVersionInfos? VersionInfos => _document.VersionInfos;
 }

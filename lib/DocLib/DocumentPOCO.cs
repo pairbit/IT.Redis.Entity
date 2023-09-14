@@ -49,5 +49,8 @@ public record DocumentPOCO : IDocument
     [IgnoreDataMember]//TODO:????
     public DocumentVersionInfo? VersionInfo { get; set; }
 
+    [IgnoreDataMember]
+    public DocumentVersionInfos? VersionInfos { get; set; }
+
     IReadOnlyList<Guid?>? IReadOnlyDocument.TagIds => TagIds?.AsReadOnly();
 }

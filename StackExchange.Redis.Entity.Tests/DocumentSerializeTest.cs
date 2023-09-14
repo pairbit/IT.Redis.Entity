@@ -20,6 +20,7 @@ public class DocumentSerializeTest
         var doc2 = MessagePackSerializer.Deserialize<DocumentPOCO>(bytes, ContractlessStandardResolver.Options);
 
         doc.VersionInfo = null;//IGNORE
+        doc.VersionInfos = null;
         Assert.That(ReferenceEquals(doc, doc2), Is.False);
         Assert.That(DocumentEqualityComparer.Default.Equals(doc, doc2), Is.True);
     }
@@ -42,6 +43,7 @@ public class DocumentSerializeTest
             var doc2 = MessagePackSerializer.Deserialize<DocumentDataContract>(bytes);
 
             doc.VersionInfo = null;//IGNORE
+            doc.VersionInfos = null;
             Assert.That(DocumentEqualityComparer.Default.Equals(doc, doc2), Is.True);
         }
     }

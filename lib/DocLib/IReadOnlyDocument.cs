@@ -46,4 +46,6 @@ public interface IReadOnlyDocument
     public IReadOnlyList<Guid?>? TagIds { get; }
 
     public DocumentVersionInfo? VersionInfo { get; }
+
+    public DocumentVersionInfos? VersionInfos { get; }
 }
