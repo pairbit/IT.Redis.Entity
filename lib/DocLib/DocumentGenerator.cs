@@ -51,7 +51,7 @@ public static class DocumentGenerator
         doc.Bits = new System.Collections.BitArray(new int[2] { random.Next(), random.Next() });
         doc.IntArray = new int[] { random.Next(), random.Next(), random.Next(), random.Next() };
         doc.IntArrayN = new int?[] { random.Next(), null, random.Next(), null, null };
-        doc.TagIds = new List<Guid?>() { Guid.NewGuid(), null, Guid.NewGuid(), Guid.NewGuid(), null };
+        doc.TagIds = new EquatableList<Guid?>() { Guid.NewGuid(), null, Guid.NewGuid(), Guid.NewGuid(), null };
         doc.VersionInfos = new DocumentVersionInfos(2)
         {
             new DocumentVersionInfo(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow.AddDays(-random.Next(1, 365)), random.Next(1, 100)),

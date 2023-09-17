@@ -14,6 +14,11 @@ public class EquatableList<T> : List<T>, IEquatable<EquatableList<T>>
         _comparer = comparer;
     }
 
+    public EquatableList(IEnumerable<T> collection, IEqualityComparer<T>? comparer = null) : base(collection)
+    {
+        _comparer = comparer;
+    }
+
     public override bool Equals(object? obj) => Equals(obj as EquatableList<T>);
 
     public bool Equals(EquatableList<T>? other) => ReferenceEquals(this, other) || other is not null && this.SequenceEqual(other, _comparer);
