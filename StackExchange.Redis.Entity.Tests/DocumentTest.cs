@@ -3,21 +3,6 @@ using StackExchange.Redis.Entity.Formatters;
 
 namespace StackExchange.Redis.Entity.Tests;
 
-public class CustomEnumerableFactory : EnumerableFactory
-{
-    public override TEnumerable New<TEnumerable, T>(int capacity)
-    {
-        var type = typeof(TEnumerable);
-
-        if (type == typeof(DocumentVersionInfos)) return (TEnumerable)(object)new DocumentVersionInfos(capacity);
-
-        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(EquatableList<>))
-            return (TEnumerable)(object)new EquatableList<TEnumerable>(capacity);
-
-        return base.New<TEnumerable, T>(capacity);
-    }
-}
-
 public class DocumentTest
 {
     private readonly IDatabase _db;
@@ -36,9 +21,9 @@ public class DocumentTest
         //RedisValueFormatterRegistry.RegisterGenericType(typeof(IList<>), typeof(UnmanagedEquatableList<>));
         //RedisValueFormatterRegistry.RegisterGenericType(typeof(List<>), typeof(UnmanagedEquatableList<>));
         
-        RedisValueFormatterRegistry.RegisterUnmanagedEnumerableGenericType(typeof(EquatableList<>));
-
-        RedisValueFormatterRegistry.Register(new UnmanagedEnumerableFormatter<DocumentVersionInfos, DocumentVersionInfo>(new CustomEnumerableFactory()));
+        //RedisValueFormatterRegistry.RegisterUnmanagedEnumerableGenericType(typeof(EquatableList<>));
+        
+        RedisValueFormatterRegistry.Register(new UnmanagedEnumerableFormatter<DocumentVersionInfos, DocumentVersionInfo>(x => new DocumentVersionInfos(x)));
     }
 
     [Test]

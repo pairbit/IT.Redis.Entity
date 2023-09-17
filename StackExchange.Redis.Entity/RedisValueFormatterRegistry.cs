@@ -1,7 +1,7 @@
-﻿using StackExchange.Redis.Entity.Formatters;
+﻿using StackExchange.Redis.Entity.Factories;
+using StackExchange.Redis.Entity.Formatters;
 using StackExchange.Redis.Entity.Internal;
 using System.Collections.Concurrent;
-using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 
 namespace StackExchange.Redis.Entity;
@@ -34,29 +34,16 @@ public static class RedisValueFormatterRegistry
     static readonly Type NullableType = typeof(Nullable<>);
     static readonly Type UnmanagedFormatterType = typeof(UnmanagedFormatter<>);
 
-    private static readonly Type UnmanagedEnumerableFormatterType = typeof(UnmanagedEnumerableFormatter<,>);
-    private static readonly Type UnmanagedEnumerableNullableFormatterType = typeof(UnmanagedEnumerableNullableFormatter<,>);
-    private static readonly Type EnumerableType = typeof(IEnumerable<>);
+    static readonly Type UnmanagedArrayFormatterType = typeof(UnmanagedArrayFormatter<>);
+    static readonly Type UnmanagedEnumerableFormatterType = typeof(UnmanagedEnumerableFormatter<,>);
+    static readonly Type UnmanagedEnumerableNullableFormatterType = typeof(UnmanagedEnumerableNullableFormatter<,>);
+    static readonly Type EnumerableFactoryProxyType = typeof(EnumerableFactoryProxy<,>);
 
     static readonly ConcurrentDictionary<Type, Type> _genericFormatterTypes = new();
     static readonly ConcurrentDictionary<Type, Type> _unmanagedGenericFormatterTypes = new();
-    static readonly ConcurrentBag<Type> _unmanagedGenericEnumerableTypes = new()
-    {
-        EnumerableType,
-        typeof(IReadOnlyList<>),
-        typeof(IReadOnlyCollection<>),
-        typeof(IReadOnlySet<>),
-        typeof(IList<>),
-        typeof(ICollection<>),
-        typeof(ISet<>),
-        typeof(List<>),
-        typeof(HashSet<>),
-        typeof(SortedSet<>),
-        typeof(Stack<>),
-    };
+    static readonly ConcurrentDictionary<Type, IEnumerableFactory> _unmanagedGenericEnumerableTypes = new();
 
     static IRedisValueFormatter _default = new RedisValueFormatterNotRegistered();
-    static IEnumerableFactory _enumerableFactory = new EnumerableFactory();
 
     public static IRedisValueFormatter Default => _default;
 
@@ -99,8 +86,20 @@ public static class RedisValueFormatterRegistry
         Register(ByteArrayFormatter.Default);
         Register(BitArrayFormatter.Default);
 
-        //RegisterUnmanagedEnumerable<Int32>();
-        //RegisterUnmanagedEnumerable<Guid>();
+        //RegisterEnumerableFactory(ArrayFactory.Default, typeof(IEnumerable<>));
+        RegisterEnumerableFactory(ListFactory.Default, typeof(IList<>));
+        RegisterEnumerableFactory(LinkedListFactory.Default, typeof(ICollection<>), typeof(IEnumerable<>));
+        RegisterEnumerableFactory(HashSetFactory.Default, typeof(ISet<>));
+        RegisterEnumerableFactory(SortedSetFactory.Default);
+        RegisterEnumerableFactory(StackFactory.Default);
+        RegisterEnumerableFactory(QueueFactory.Default);
+        RegisterEnumerableFactory(CollectionFactory.Default);
+        RegisterEnumerableFactory(ObservableCollectionFactory.Default);
+        RegisterEnumerableFactory(ReadOnlyObservableCollectionFactory.Default);
+
+        RegisterEnumerableFactory(ReadOnlyListFactory.Default, typeof(IReadOnlyList<>));
+        RegisterEnumerableFactory(ReadOnlyLinkedListFactory.Default, typeof(IReadOnlyCollection<>));
+        RegisterEnumerableFactory(ReadOnlyHashSetFactory.Default, typeof(IReadOnlySet<>));
     }
 
     public static void Register<T>(IRedisValueFormatter<T> formatter)
@@ -142,20 +141,51 @@ public static class RedisValueFormatterRegistry
         _unmanagedGenericFormatterTypes[genericType] = genericFormatterType;
     }
 
-    public static void RegisterUnmanagedEnumerableGenericType(Type genericType)
+    public static void RegisterEnumerableFactory(IEnumerableFactory factory, params Type[] genericTypes)
     {
-        if (!genericType.IsGenericType) throw new ArgumentException($"Registered type '{genericType.FullName}' is not generic type", nameof(genericType));
+        if (factory == null) throw new ArgumentNullException(nameof(factory));
 
-        _unmanagedGenericEnumerableTypes.Add(genericType);
+        var enumerable = factory.Empty<int>();
+
+        if (enumerable == null) throw new ArgumentException("Factory Error", nameof(factory));
+
+        var enumerableType = enumerable.GetType();
+
+        if (!enumerableType.IsGenericType) throw new ArgumentException($"Registered type '{enumerableType.FullName}' is not generic type", nameof(factory));
+
+        var genericType = enumerableType.GetGenericTypeDefinition();
+
+        _unmanagedGenericEnumerableTypes[genericType] = factory;
+
+        if (genericTypes != null && genericTypes.Length > 0)
+        {
+            for (int i = 0; i < genericTypes.Length; i++)
+            {
+                var genericTypeBase = genericTypes[i];
+
+                if (!genericTypeBase.IsGenericType) 
+                    throw new ArgumentException($"Registered type '{genericTypeBase.FullName}' is not generic type", nameof(genericTypes));
+
+                if (!genericTypeBase.MakeGenericType(typeof(int)).IsAssignableFrom(enumerableType))
+                    throw new ArgumentException($"Registered type '{genericTypeBase.FullName}' is not assignable from type '{genericType.FullName}'", nameof(genericTypes));
+
+                _unmanagedGenericEnumerableTypes[genericTypeBase] = factory;
+            }
+        }
     }
 
     private static object? GetFormatter(Type type, bool isUnmanagedType)
     {
-        if (isUnmanagedType) return Activator.CreateInstance(UnmanagedFormatterType.MakeGenericType(
-            type.IsGenericType && type.GetGenericTypeDefinition().Equals(NullableType)
-            ? type.GetGenericArguments()[0] : type));
+        if (isUnmanagedType) return Activator.CreateInstance(UnmanagedFormatterType.MakeGenericType(type.GetNullableUnderlyingType()));
 
-        if (type.IsArray && type.IsSZArray) return GetUnmanagedEnumerableFormatter(type, type.GetElementType());
+        if (type.IsArray && type.IsSZArray)
+        {
+            var elementType = type.GetElementType();
+            if (elementType != null && elementType.IsUnmanaged())
+            {
+                return Activator.CreateInstance(UnmanagedArrayFormatterType.MakeGenericType(elementType.GetNullableUnderlyingType()));
+            }
+        }
         else if (type.IsGenericType)
         {
             var genericType = type.GetGenericTypeDefinition();
@@ -166,8 +196,20 @@ public static class RedisValueFormatterRegistry
             //if (_genericFormatterTypes.TryGetValue(genericType, out genericFormatterType))
             //    return genericFormatterType.MakeGenericType(type.GetGenericArguments());
 
-            if (_unmanagedGenericEnumerableTypes.Contains(genericType))
-                return GetUnmanagedEnumerableFormatter(type, type.GetGenericArguments()[0]);
+            if (_unmanagedGenericEnumerableTypes.TryGetValue(genericType, out var factory))
+            {
+                var elementType = type.GetGenericArguments()[0];
+
+                if (elementType.IsUnmanaged())
+                {
+                    var formatterType = elementType.IsGenericType && elementType.GetGenericTypeDefinition().Equals(NullableType)
+                        ? UnmanagedEnumerableNullableFormatterType : UnmanagedEnumerableFormatterType;
+
+                    var genericFactory = Activator.CreateInstance(EnumerableFactoryProxyType.MakeGenericType(type, elementType), factory);
+
+                    return Activator.CreateInstance(formatterType.MakeGenericType(type, elementType.GetNullableUnderlyingType()), genericFactory);
+                }
+            }
         }
 
         return null;
@@ -189,16 +231,5 @@ public static class RedisValueFormatterRegistry
         //        }
         //    }
         //}
-    }
-
-    private static object? GetUnmanagedEnumerableFormatter(Type type, Type? elementType)
-    {
-        if (elementType == null || !elementType.IsUnmanaged()) return null;
-
-        var formatterType = elementType.IsGenericType && elementType.GetGenericTypeDefinition().Equals(NullableType)
-            ? UnmanagedEnumerableNullableFormatterType.MakeGenericType(type, elementType.GetGenericArguments()[0])
-            : UnmanagedEnumerableFormatterType.MakeGenericType(type, elementType);
-
-        return Activator.CreateInstance(formatterType, _enumerableFactory);
     }
 }

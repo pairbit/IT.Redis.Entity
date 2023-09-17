@@ -13,4 +13,6 @@ internal static class xType
         return type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
                    .All(x => IsUnmanaged(x.FieldType));
     }
+
+    public static Type GetNullableUnderlyingType(this Type type) => Nullable.GetUnderlyingType(type) ?? type;
 }
