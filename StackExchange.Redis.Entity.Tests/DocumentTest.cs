@@ -77,7 +77,9 @@ public class DocumentTest
             doc2.TagIds = new EquatableList<Guid?>() { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
             //doc2.Decimals = new ReadOnlyCollection<decimal?>(new decimal?[3]);
             //doc2.Decimals = new decimal?[4];
-            doc2.Decimals = new LinkedList<decimal?>();
+            //doc2.Decimals = new LinkedList<decimal?>();
+            doc2.Decimals = new Queue<decimal?>(new decimal?[] { 4534 });
+            //doc2.Decimals = new Stack<decimal?>(new decimal?[] { 4534 });
 
             _db.EntityLoad<IDocument>(doc2, Key);
 

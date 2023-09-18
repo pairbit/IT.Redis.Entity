@@ -57,6 +57,7 @@ public static class DocumentGenerator
             new DocumentVersionInfo(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow.AddDays(-random.Next(1, 365)), random.Next(1, 100)),
             new DocumentVersionInfo(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow.AddDays(-random.Next(1, 365)), random.Next(1, 100))
         };
-        doc.Decimals = new decimal?[] { 434534, null, 234234, 234234 };
+        //doc.Decimals = new Stack<decimal?>(new decimal?[] { 434534, null, 134234, 9344234 });
+        doc.Decimals = new decimal?[] { 434534, null, 134234, 9344234 };
     }
 }
