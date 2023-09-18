@@ -58,4 +58,31 @@ public class DocumentTest
             _db.KeyDelete(Key);
         }
     }
+
+    [Test]
+    public void ReadOnlyDocument_LoadTest()
+    {
+        var doc = DocumentGenerator.New<DocumentPOCO>();
+        try
+        {
+            _db.EntitySet<IReadOnlyDocument>(Key, new ReadOnlyDocument(doc));
+
+            var doc2 = new DocumentPOCO();
+            doc2.IntArray = new int[4];
+            doc2.IntArrayN = new int?[24];
+            doc2.Content = new byte[3];
+            doc2.VersionInfos = new DocumentVersionInfos(100) { new DocumentVersionInfo() };
+            doc2.TagIds = new EquatableList<Guid?>() { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
+
+            _db.EntityLoad<IDocument>(doc2, Key);
+
+            Assert.That(ReferenceEquals(doc, doc2), Is.False);
+            Assert.That(doc2!.TagIds!.Equals(doc!.TagIds), Is.True);
+            Assert.That(DocumentEqualityComparer.Default.Equals(doc, doc2), Is.True);
+        }
+        finally
+        {
+            _db.KeyDelete(Key);
+        }
+    }
 }

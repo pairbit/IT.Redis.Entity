@@ -141,8 +141,6 @@ internal static class UnmanagedEnumerableNullableFormatter
                         {
                             ilist[i] = (bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null;
 
-                            if (++i == ilist.Count) break;
-
                             b += size;
 
                             if (++iBits == 8)
@@ -150,10 +148,7 @@ internal static class UnmanagedEnumerableNullableFormatter
                                 bits = span[++iBytes];
                                 iBits = 0;
                             }
-                        } while (true);
-
-                        length -= count;
-                        i = 0;
+                        } while (++i < ilist.Count);
                     }
 
                     do
@@ -188,9 +183,9 @@ internal static class UnmanagedEnumerableNullableFormatter
                         }
                     } while (true);
 
-                    i = count - length - 1;
+                    i = count - 1;
 
-                    for (; i >= 0; i--) ilist.RemoveAt(i);
+                    for (; i >= length; i--) ilist.RemoveAt(i);
                 }
             }
             else

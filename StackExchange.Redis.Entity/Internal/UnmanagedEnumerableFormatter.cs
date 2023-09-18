@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace StackExchange.Redis.Entity.Internal;
@@ -100,10 +99,7 @@ internal static class UnmanagedEnumerableFormatter
                         ilist[i] = Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b));
                     }
 
-                    for (int i = count - length - 1; i >= 0; i--)
-                    {
-                        ilist.RemoveAt(i);
-                    }
+                    for (int i = count - 1; i >= length; i--) ilist.RemoveAt(i);
                 }
             }
             else
