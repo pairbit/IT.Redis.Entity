@@ -5,42 +5,87 @@ namespace StackExchange.Redis.Entity.Internal;
 
 internal static class UnmanagedEnumerableNullableFormatter
 {
-    internal static void Build<T>(IEnumerable<T?> buffer, in ReadOnlyMemory<byte> memory)
+    internal static void Build<T>(IEnumerable<T?> buffer, in ReadOnlyMemory<byte> memory) where T : unmanaged
     {
         var span = memory.Span;
-        var size = Unsafe.SizeOf<T?>();
-        var count = span.Length / size;
+        var size = Unsafe.SizeOf<T>();
+        var count = (int)(((long)span.Length << 3) / ((size << 3) + 1));
         ref byte spanRef = ref MemoryMarshal.GetReference(span);
+
+        var iBits = 0;
+        var iBytes = size * count;
+        var bits = span[iBytes];
+        int i = 0, b = 0;
 
         if (buffer is T?[] array)
         {
             //if (array.Length < count) throw new InvalidOperationException();
 
-            for (int i = 0, b = 0; i < array.Length; i++, b += size)
+            do
             {
-                array[i] = Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b));
-            }
+                if ((bits & (1 << iBits)) == 0) array[i] = Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b));
+
+                if (++i == array.Length) break;
+
+                b += size;
+
+                if (++iBits == 8)
+                {
+                    bits = span[++iBytes];
+                    iBits = 0;
+                }
+            } while (true);
         }
         else if (buffer is ICollection<T?> collection)
         {
-            for (int i = 0, b = 0; i < count; i++, b += size)
+            do
             {
-                collection.Add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
-            }
+                collection.Add((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
+
+                if (++i == count) break;
+
+                b += size;
+
+                if (++iBits == 8)
+                {
+                    bits = span[++iBytes];
+                    iBits = 0;
+                }
+            } while (true);
         }
         else if (buffer is Queue<T?> queue)
         {
-            for (int i = 0, b = 0; i < count; i++, b += size)
+            do
             {
-                queue.Enqueue(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
-            }
+                queue.Enqueue((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
+
+                if (++i == count) break;
+
+                b += size;
+
+                if (++iBits == 8)
+                {
+                    bits = span[++iBytes];
+                    iBits = 0;
+                }
+            } while (true);
         }
         else if (buffer is Stack<T?> stack)
         {
-            for (int i = 0, b = 0; i < count; i++, b += size)
+            do
             {
-                stack.Push(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
-            }
+                stack.Push((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
+
+                if (++i == count) break;
+
+                b += size;
+
+                if (++iBits == 8)
+                {
+                    bits = span[++iBytes];
+                    iBits = 0;
+                }
+            } while (true);
         }
         else
         {
@@ -48,7 +93,177 @@ internal static class UnmanagedEnumerableNullableFormatter
         }
     }
 
-    internal static RedisValue Serialize<T>(in IEnumerable<T?>? value)
+    internal static bool Deserialize<T>(ref IEnumerable<T?> value, in ReadOnlySpan<byte> span, int size, int length) where T : unmanaged
+    {
+        ref byte spanRef = ref MemoryMarshal.GetReference(span);
+
+        var iBits = 0;
+        var iBytes = size * length;
+        var bits = span[iBytes];
+        int i = 0, b = 0;
+
+        if (value is T?[] array)
+        {
+            if (array.Length != length)
+            {
+                array = new T?[length];
+                value = array;
+            }
+
+            do
+            {
+                array[i] = (bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null;
+
+                if (++i == array.Length) break;
+
+                b += size;
+
+                if (++iBits == 8)
+                {
+                    bits = span[++iBytes];
+                    iBits = 0;
+                }
+            } while (true);
+        }
+        else if (value is ICollection<T?> collection)
+        {
+            if (collection.IsReadOnly) return false;
+            else if (value is IList<T?> ilist)
+            {
+                var count = ilist.Count;
+                if (count < length)
+                {
+                    if (ilist is List<T?> list && list.Capacity < length) list.Capacity = length;
+
+                    if (count > 0)
+                    {
+                        do
+                        {
+                            ilist[i] = (bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null;
+
+                            if (++i == ilist.Count) break;
+
+                            b += size;
+
+                            if (++iBits == 8)
+                            {
+                                bits = span[++iBytes];
+                                iBits = 0;
+                            }
+                        } while (true);
+
+                        length -= count;
+                        i = 0;
+                    }
+
+                    do
+                    {
+                        ilist.Add((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
+
+                        if (++i == length) break;
+
+                        b += size;
+
+                        if (++iBits == 8)
+                        {
+                            bits = span[++iBytes];
+                            iBits = 0;
+                        }
+                    } while (true);
+                }
+                else
+                {
+                    do
+                    {
+                        ilist[i] = (bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null;
+
+                        if (++i == length) break;
+
+                        b += size;
+
+                        if (++iBits == 8)
+                        {
+                            bits = span[++iBytes];
+                            iBits = 0;
+                        }
+                    } while (true);
+
+                    i = count - length - 1;
+
+                    for (; i >= 0; i--) ilist.RemoveAt(i);
+                }
+            }
+            else
+            {
+                if (collection.Count > 0) collection.Clear();
+
+                do
+                {
+                    collection.Add((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
+
+                    if (++i == length) break;
+
+                    b += size;
+
+                    if (++iBits == 8)
+                    {
+                        bits = span[++iBytes];
+                        iBits = 0;
+                    }
+                } while (true);
+            }
+        }
+        else if (value is Queue<T?> queue)
+        {
+            if (queue.Count > 0) queue.Clear();
+
+            queue.EnsureCapacity(length);
+
+            do
+            {
+                queue.Enqueue((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
+
+                if (++i == length) break;
+
+                b += size;
+
+                if (++iBits == 8)
+                {
+                    bits = span[++iBytes];
+                    iBits = 0;
+                }
+            } while (true);
+        }
+        else if (value is Stack<T?> stack)
+        {
+            if (stack.Count > 0) stack.Clear();
+
+            stack.EnsureCapacity(length);
+
+            do
+            {
+                stack.Push((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
+
+                if (++i == length) break;
+
+                b += size;
+
+                if (++iBits == 8)
+                {
+                    bits = span[++iBytes];
+                    iBits = 0;
+                }
+            } while (true);
+        }
+        else
+        {
+            throw new NotImplementedException($"{value.GetType().FullName} not implemented add");
+        }
+
+        return true;
+    }
+
+    internal static RedisValue Serialize<T>(in IEnumerable<T?>? value) where T : unmanaged
     {
         if (value == null) return RedisValues.Zero;
         if (value is T?[] array) return SerializeArray(array);
@@ -60,94 +275,242 @@ internal static class UnmanagedEnumerableNullableFormatter
         {
             if (count == 0) return RedisValue.EmptyString;
 
-            var size = Unsafe.SizeOf<T?>();
-            var bytes = new byte[size * count];
-            var b = 0;
+            var size = Unsafe.SizeOf<T>();
+            var maxLength = (int)(Util.RedisValueMaxLengthInBits / ((size << 3) + 1));
+            if (count > maxLength) throw Ex.InvalidLengthCollection(typeof(T), count, maxLength);
+
+            var sizeValue = size * count;
+            var bytes = new byte[sizeValue + (count - 1) / 8 + 1];
+
+            byte bits = 0;
+            var iBits = 0;
+            var iBytes = sizeValue;
+            int b = 0;
+
             foreach (var item in value)
             {
-                Unsafe.WriteUnaligned(ref bytes[b], item);
+                if (item == null)
+                {
+                    bits = (byte)(bits | (1 << iBits));
+                }
+                else
+                {
+                    Unsafe.WriteUnaligned(ref bytes[b], item.Value);
+                }
+                if (++iBits == 8)
+                {
+                    bytes[iBytes++] = bits;
+                    iBits = 0;
+                    bits = 0;
+                }
                 b += size;
             }
+
+            if (iBits > 0) bytes[iBytes] = bits;
+
             return bytes;
         }
         return SerializeArray(value.ToArray());
     }
 
-    private static RedisValue SerializeArray<T>(in T?[] value)
+    internal static RedisValue SerializeArray<T>(in T?[] value) where T : unmanaged
     {
-        if (value.Length == 0) return RedisValue.EmptyString;
+        var length = value.Length;
+        if (length == 0) return RedisValue.EmptyString;
 
-        var size = Unsafe.SizeOf<T?>();
-        var bytes = new byte[size * value.Length];
+        var size = Unsafe.SizeOf<T>();
+        var maxLength = (int)(Util.RedisValueMaxLengthInBits / ((size << 3) + 1));
+        if (length > maxLength) throw Ex.InvalidLengthCollection(typeof(T), length, maxLength);
+
+        var sizeValue = size * length;
+        var bytes = new byte[sizeValue + (length - 1) / 8 + 1];
+
+        byte bits = 0;
+        var iBits = 0;
+        var iBytes = sizeValue;
 
         for (int i = 0, b = 0; i < value.Length; i++, b += size)
         {
-            Unsafe.WriteUnaligned(ref bytes[b], value[i]);
+            var item = value[i];
+            if (item == null)
+            {
+                bits = (byte)(bits | (1 << iBits));
+            }
+            else
+            {
+                Unsafe.WriteUnaligned(ref bytes[b], item.Value);
+            }
+            if (++iBits == 8)
+            {
+                bytes[iBytes++] = bits;
+                iBits = 0;
+                bits = 0;
+            }
         }
+
+        if (iBits > 0) bytes[iBytes] = bits;
 
         return bytes;
     }
 
-    private static RedisValue SerializeReadOnlyList<T>(in IReadOnlyList<T?> value)
+    private static RedisValue SerializeReadOnlyList<T>(in IReadOnlyList<T?> value) where T : unmanaged
     {
-        if (value.Count == 0) return RedisValue.EmptyString;
+        var count = value.Count;
+        if (count == 0) return RedisValue.EmptyString;
 
-        var size = Unsafe.SizeOf<T?>();
-        var bytes = new byte[size * value.Count];
+        var size = Unsafe.SizeOf<T>();
+        var maxLength = (int)(Util.RedisValueMaxLengthInBits / ((size << 3) + 1));
+        if (count > maxLength) throw Ex.InvalidLengthCollection(typeof(T), count, maxLength);
+
+        var sizeValue = size * count;
+        var bytes = new byte[sizeValue + (count - 1) / 8 + 1];
+
+        byte bits = 0;
+        var iBits = 0;
+        var iBytes = sizeValue;
 
         for (int i = 0, b = 0; i < value.Count; i++, b += size)
         {
-            Unsafe.WriteUnaligned(ref bytes[b], value[i]);
+            var item = value[i];
+            if (item == null)
+            {
+                bits = (byte)(bits | (1 << iBits));
+            }
+            else
+            {
+                Unsafe.WriteUnaligned(ref bytes[b], item.Value);
+            }
+            if (++iBits == 8)
+            {
+                bytes[iBytes++] = bits;
+                iBits = 0;
+                bits = 0;
+            }
         }
+
+        if (iBits > 0) bytes[iBytes] = bits;
 
         return bytes;
     }
 
-    private static RedisValue SerializeList<T>(in IList<T?> value)
+    private static RedisValue SerializeList<T>(in IList<T?> value) where T : unmanaged
     {
-        if (value.Count == 0) return RedisValue.EmptyString;
+        var count = value.Count;
+        if (count == 0) return RedisValue.EmptyString;
 
-        var size = Unsafe.SizeOf<T?>();
-        var bytes = new byte[size * value.Count];
+        var size = Unsafe.SizeOf<T>();
+        var maxLength = (int)(Util.RedisValueMaxLengthInBits / ((size << 3) + 1));
+        if (count > maxLength) throw Ex.InvalidLengthCollection(typeof(T), count, maxLength);
+
+        var sizeValue = size * count;
+        var bytes = new byte[sizeValue + (count - 1) / 8 + 1];
+
+        byte bits = 0;
+        var iBits = 0;
+        var iBytes = sizeValue;
 
         for (int i = 0, b = 0; i < value.Count; i++, b += size)
         {
-            Unsafe.WriteUnaligned(ref bytes[b], value[i]);
+            var item = value[i];
+            if (item == null)
+            {
+                bits = (byte)(bits | (1 << iBits));
+            }
+            else
+            {
+                Unsafe.WriteUnaligned(ref bytes[b], item.Value);
+            }
+            if (++iBits == 8)
+            {
+                bytes[iBytes++] = bits;
+                iBits = 0;
+                bits = 0;
+            }
         }
+
+        if (iBits > 0) bytes[iBytes] = bits;
 
         return bytes;
     }
 
-    private static RedisValue SerializeReadOnlyCollection<T>(in IReadOnlyCollection<T?> value)
+    private static RedisValue SerializeReadOnlyCollection<T>(in IReadOnlyCollection<T?> value) where T : unmanaged
     {
-        if (value.Count == 0) return RedisValue.EmptyString;
+        var count = value.Count;
+        if (count == 0) return RedisValue.EmptyString;
 
-        var size = Unsafe.SizeOf<T?>();
-        var bytes = new byte[size * value.Count];
+        var size = Unsafe.SizeOf<T>();
+        var maxLength = (int)(Util.RedisValueMaxLengthInBits / ((size << 3) + 1));
+        if (count > maxLength) throw Ex.InvalidLengthCollection(typeof(T), count, maxLength);
+
+        var sizeValue = size * count;
+        var bytes = new byte[sizeValue + (count - 1) / 8 + 1];
+
+        byte bits = 0;
+        var iBits = 0;
+        var iBytes = sizeValue;
         int b = 0;
 
         foreach (var item in value)
         {
-            Unsafe.WriteUnaligned(ref bytes[b], item);
+            if (item == null)
+            {
+                bits = (byte)(bits | (1 << iBits));
+            }
+            else
+            {
+                Unsafe.WriteUnaligned(ref bytes[b], item.Value);
+            }
+            if (++iBits == 8)
+            {
+                bytes[iBytes++] = bits;
+                iBits = 0;
+                bits = 0;
+            }
             b += size;
         }
+
+        if (iBits > 0) bytes[iBytes] = bits;
 
         return bytes;
     }
 
-    private static RedisValue SerializeCollection<T>(in ICollection<T?> value)
+    private static RedisValue SerializeCollection<T>(in ICollection<T?> value) where T : unmanaged
     {
-        if (value.Count == 0) return RedisValue.EmptyString;
+        var count = value.Count;
+        if (count == 0) return RedisValue.EmptyString;
 
-        var size = Unsafe.SizeOf<T?>();
-        var bytes = new byte[size * value.Count];
+        var size = Unsafe.SizeOf<T>();
+        var maxLength = (int)(Util.RedisValueMaxLengthInBits / ((size << 3) + 1));
+        if (count > maxLength) throw Ex.InvalidLengthCollection(typeof(T), count, maxLength);
+
+        var sizeValue = size * count;
+        var bytes = new byte[sizeValue + (count - 1) / 8 + 1];
+
+        byte bits = 0;
+        var iBits = 0;
+        var iBytes = sizeValue;
         int b = 0;
 
         foreach (var item in value)
         {
-            Unsafe.WriteUnaligned(ref bytes[b], item);
+            if (item == null)
+            {
+                bits = (byte)(bits | (1 << iBits));
+            }
+            else
+            {
+                Unsafe.WriteUnaligned(ref bytes[b], item.Value);
+            }
+            if (++iBits == 8)
+            {
+                bytes[iBytes++] = bits;
+                iBits = 0;
+                bits = 0;
+            }
             b += size;
         }
+
+        if (iBits > 0) bytes[iBytes] = bits;
 
         return bytes;
     }

@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace StackExchange.Redis.Entity.Internal;
@@ -48,6 +49,103 @@ internal static class UnmanagedEnumerableFormatter
         }
     }
 
+    internal static bool Deserialize<T>(ref IEnumerable<T> value, in ReadOnlySpan<byte> span, int size, int length) where T : unmanaged
+    {
+        ref byte spanRef = ref MemoryMarshal.GetReference(span);
+
+        if (value is T[] array)
+        {
+            if (array.Length != length)
+            {
+                array = new T[length];
+                value = array;
+            }
+
+            for (int i = 0, b = 0; i < array.Length; i++, b += size)
+            {
+                array[i] = Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b));
+            }
+        }
+        else if (value is ICollection<T> collection)
+        {
+            if (collection.IsReadOnly) return false;
+            else if (value is IList<T> ilist)
+            {
+                var count = ilist.Count;
+                if (count < length)
+                {
+                    if (ilist is List<T> list && list.Capacity < length) list.Capacity = length;
+
+                    var b = 0;
+
+                    if (count > 0)
+                    {
+                        for (int i = 0; i < ilist.Count; i++, b += size)
+                        {
+                            ilist[i] = Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b));
+                        }
+
+                        length -= count;
+                    }
+
+                    for (int i = 0; i < length; i++, b += size)
+                    {
+                        ilist.Add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
+                    }
+                }
+                else
+                {
+                    for (int i = 0, b = 0; i < length; i++, b += size)
+                    {
+                        ilist[i] = Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b));
+                    }
+
+                    for (int i = count - length - 1; i >= 0; i--)
+                    {
+                        ilist.RemoveAt(i);
+                    }
+                }
+            }
+            else
+            {
+                if (collection.Count > 0) collection.Clear();
+
+                for (int i = 0, b = 0; i < length; i++, b += size)
+                {
+                    collection.Add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
+                }
+            }
+        }
+        else if (value is Queue<T> queue)
+        {
+            if (queue.Count > 0) queue.Clear();
+
+            queue.EnsureCapacity(length);
+
+            for (int i = 0, b = 0; i < length; i++, b += size)
+            {
+                queue.Enqueue(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
+            }
+        }
+        else if (value is Stack<T> stack)
+        {
+            if (stack.Count > 0) stack.Clear();
+
+            stack.EnsureCapacity(length);
+
+            for (int i = 0, b = 0; i < length; i++, b += size)
+            {
+                stack.Push(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
+            }
+        }
+        else
+        {
+            throw new NotImplementedException($"{value.GetType().FullName} not implemented add");
+        }
+
+        return true;
+    }
+
     internal static RedisValue Serialize<T>(in IEnumerable<T>? value)
     {
         if (value == null) return RedisValues.Zero;
@@ -61,6 +159,9 @@ internal static class UnmanagedEnumerableFormatter
             if (count == 0) return RedisValue.EmptyString;
 
             var size = Unsafe.SizeOf<T>();
+            var maxLength = Util.RedisValueMaxLength / size;
+            if (count > maxLength) throw Ex.InvalidLengthCollection(typeof(T), count, maxLength);
+
             var bytes = new byte[size * count];
             var b = 0;
             foreach (var item in value)
@@ -73,12 +174,16 @@ internal static class UnmanagedEnumerableFormatter
         return SerializeArray(value.ToArray());
     }
 
-    private static RedisValue SerializeArray<T>(in T[] value)
+    internal static RedisValue SerializeArray<T>(in T[] value)
     {
-        if (value.Length == 0) return RedisValue.EmptyString;
+        var length = value.Length;
+        if (length == 0) return RedisValue.EmptyString;
 
         var size = Unsafe.SizeOf<T>();
-        var bytes = new byte[size * value.Length];
+        var maxLength = Util.RedisValueMaxLength / size;
+        if (length > maxLength) throw Ex.InvalidLengthCollection(typeof(T), length, maxLength);
+
+        var bytes = new byte[size * length];
 
         for (int i = 0, b = 0; i < value.Length; i++, b += size)
         {
@@ -90,10 +195,14 @@ internal static class UnmanagedEnumerableFormatter
 
     private static RedisValue SerializeReadOnlyList<T>(in IReadOnlyList<T> value)
     {
-        if (value.Count == 0) return RedisValue.EmptyString;
+        var count = value.Count;
+        if (count == 0) return RedisValue.EmptyString;
 
         var size = Unsafe.SizeOf<T>();
-        var bytes = new byte[size * value.Count];
+        var maxLength = Util.RedisValueMaxLength / size;
+        if (count > maxLength) throw Ex.InvalidLengthCollection(typeof(T), count, maxLength);
+
+        var bytes = new byte[size * count];
 
         for (int i = 0, b = 0; i < value.Count; i++, b += size)
         {
@@ -105,10 +214,14 @@ internal static class UnmanagedEnumerableFormatter
 
     private static RedisValue SerializeList<T>(in IList<T> value)
     {
-        if (value.Count == 0) return RedisValue.EmptyString;
+        var count = value.Count;
+        if (count == 0) return RedisValue.EmptyString;
 
         var size = Unsafe.SizeOf<T>();
-        var bytes = new byte[size * value.Count];
+        var maxLength = Util.RedisValueMaxLength / size;
+        if (count > maxLength) throw Ex.InvalidLengthCollection(typeof(T), count, maxLength);
+
+        var bytes = new byte[size * count];
 
         for (int i = 0, b = 0; i < value.Count; i++, b += size)
         {
@@ -120,10 +233,14 @@ internal static class UnmanagedEnumerableFormatter
 
     private static RedisValue SerializeReadOnlyCollection<T>(in IReadOnlyCollection<T> value)
     {
-        if (value.Count == 0) return RedisValue.EmptyString;
+        var count = value.Count;
+        if (count == 0) return RedisValue.EmptyString;
 
         var size = Unsafe.SizeOf<T>();
-        var bytes = new byte[size * value.Count];
+        var maxLength = Util.RedisValueMaxLength / size;
+        if (count > maxLength) throw Ex.InvalidLengthCollection(typeof(T), count, maxLength);
+
+        var bytes = new byte[size * count];
         int b = 0;
 
         foreach (var item in value)
@@ -137,10 +254,14 @@ internal static class UnmanagedEnumerableFormatter
 
     private static RedisValue SerializeCollection<T>(in ICollection<T> value)
     {
-        if (value.Count == 0) return RedisValue.EmptyString;
+        var count = value.Count;
+        if (count == 0) return RedisValue.EmptyString;
 
         var size = Unsafe.SizeOf<T>();
-        var bytes = new byte[size * value.Count];
+        var maxLength = Util.RedisValueMaxLength / size;
+        if (count > maxLength) throw Ex.InvalidLengthCollection(typeof(T), count, maxLength);
+
+        var bytes = new byte[size * count];
         int b = 0;
 
         foreach (var item in value)
