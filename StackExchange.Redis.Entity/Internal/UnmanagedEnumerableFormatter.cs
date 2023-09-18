@@ -129,9 +129,11 @@ internal static class UnmanagedEnumerableFormatter
 
             stack.EnsureCapacity(length);
 
-            for (int i = 0, b = 0; i < length; i++, b += size)
+            spanRef = ref Unsafe.Add(ref spanRef, span.Length);
+
+            for (int i = 0, b = size; i < length; i++, b += size)
             {
-                stack.Push(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
+                stack.Push(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)));
             }
         }
         else
