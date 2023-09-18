@@ -44,8 +44,11 @@ public static class RedisValueFormatterRegistry
     static readonly ConcurrentDictionary<Type, IEnumerableFactory> _unmanagedGenericEnumerableTypes = new();
 
     static IRedisValueFormatter _default = new RedisValueFormatterNotRegistered();
+    static CompressionOptions _compressionOptions = CompressionOptions.Default;
 
     public static IRedisValueFormatter Default => _default;
+
+    public static CompressionOptions CompressionOptions => _compressionOptions;
 
     static RedisValueFormatterRegistry()
     {
@@ -183,7 +186,7 @@ public static class RedisValueFormatterRegistry
             var elementType = type.GetElementType();
             if (elementType != null && elementType.IsUnmanaged())
             {
-                return Activator.CreateInstance(UnmanagedArrayFormatterType.MakeGenericType(elementType.GetNullableUnderlyingType()));
+                return Activator.CreateInstance(UnmanagedArrayFormatterType.MakeGenericType(elementType.GetNullableUnderlyingType()), _compressionOptions);
             }
         }
         else if (type.IsGenericType)

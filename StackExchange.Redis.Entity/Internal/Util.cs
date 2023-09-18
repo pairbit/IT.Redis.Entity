@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -6,6 +7,13 @@ namespace StackExchange.Redis.Entity.Internal;
 
 internal static class Util
 {
+    public readonly static int RedisValueMaxLength = 512 * 1024 * 1024;
+    public readonly static long RedisValueMaxLengthInBits = ((long)RedisValueMaxLength << 3);
+    public readonly static long ArrayMaxLengthInBits = ((long)Array.MaxLength << 3);
+
+    public static byte[] GZipHeaderBytes = { 0x1f, 0x8b, 8, 0, 0, 0, 0, 0, 4, 0 };
+    public static byte[] GZipLevel10HeaderBytes = { 0x1f, 0x8b, 8, 0, 0, 0, 0, 0, 2, 0 };
+
     internal static RedisValue SerializeSlow<T>(in T?[]? value) where T : unmanaged
     {
         if (value == null) return RedisValues.Zero;
@@ -15,7 +23,7 @@ internal static class Util
         var sizeValue = size * value.Length;
         var bytes = new byte[sizeValue + (value.Length - 1) / 8 + 1];
         var bits = new BitArray(value.Length);
-
+        
         for (int i = 0, b = 0; i < value.Length; i++, b += size)
         {
             var item = value[i];
@@ -75,5 +83,39 @@ internal static class Util
 
             return value;
         }
+    }
+
+    public static byte[] Compress(byte[] data, CompressionLevel level = CompressionLevel.Optimal)
+    {
+        using var output = new MemoryStream();
+        using (var dstream = new DeflateStream(output, level))
+        {
+            dstream.Write(data, 0, data.Length);
+        }
+        return output.ToArray();
+    }
+
+    public static bool IsCompressed(ReadOnlySpan<byte> bytes)
+    {
+        var yes = bytes.Length > 10;
+
+        if (!yes) return false;
+
+        var header = bytes.Slice(0, 10).ToArray();
+
+        var check = header.SequenceEqual(GZipHeaderBytes) || header.SequenceEqual(GZipLevel10HeaderBytes);
+
+        return true;
+    }
+
+    public static byte[] Decompress(byte[] data)
+    {
+        using var input = new MemoryStream(data);
+        using var output = new MemoryStream();
+        using (var dstream = new DeflateStream(input, CompressionMode.Decompress))
+        {
+            dstream.CopyTo(output);
+        }
+        return output.ToArray();
     }
 }

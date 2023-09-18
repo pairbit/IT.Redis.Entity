@@ -1,4 +1,6 @@
 ﻿using StackExchange.Redis.Entity.Internal;
+using System;
+using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -6,6 +8,13 @@ namespace StackExchange.Redis.Entity.Formatters;
 
 public class UnmanagedArrayFormatter<T> : IRedisValueFormatter<T[]>, IRedisValueFormatter<T?[]> where T : unmanaged
 {
+    private readonly CompressionOptions _compressionOptions;
+
+    public UnmanagedArrayFormatter(CompressionOptions? compressionOptions = null)
+    {
+        _compressionOptions = compressionOptions ?? CompressionOptions.Default;
+    }
+
     public void Deserialize(in RedisValue redisValue, ref T?[]? value)
     {
         if (redisValue == RedisValues.Zero)
@@ -19,6 +28,13 @@ public class UnmanagedArrayFormatter<T> : IRedisValueFormatter<T[]>, IRedisValue
         else
         {
             var span = ((ReadOnlyMemory<byte>)redisValue).Span;
+
+            //if (Util.IsCompressed(span))
+            //{
+            //    var decompressed = Util.Decompress((byte[])redisValue!);
+            //    span = decompressed;
+            //}
+
             var size = Unsafe.SizeOf<T>();
             //var len = int.MaxValue;
             var length = (int)(((long)span.Length << 3) / ((size << 3) + 1));//span.Length * 8 / ((size * 8) + 1)
@@ -46,9 +62,9 @@ public class UnmanagedArrayFormatter<T> : IRedisValueFormatter<T[]>, IRedisValue
                 }
             } while (true);
 
-            var value2 = Util.DeserializeSlow<T>(redisValue);
+            //var value2 = Util.DeserializeSlow<T>(redisValue);
 
-            if (!value.SequenceEqual(value2!)) throw new InvalidOperationException();
+            //if (!value.SequenceEqual(value2!)) throw new InvalidOperationException();
         }
     }
 
@@ -82,11 +98,16 @@ public class UnmanagedArrayFormatter<T> : IRedisValueFormatter<T[]>, IRedisValue
     public RedisValue Serialize(in T?[]? value)
     {
         if (value == null) return RedisValues.Zero;
-        if (value.Length == 0) return RedisValue.EmptyString;
-
+        
+        var length = value.Length;
+        if (length == 0) return RedisValue.EmptyString;
+        
         var size = Unsafe.SizeOf<T>();
-        var sizeValue = size * value.Length;
-        var bytes = new byte[sizeValue + (value.Length - 1) / 8 + 1];
+        var maxLength = (int)(Util.RedisValueMaxLengthInBits / ((size << 3) + 1));
+        if (length > maxLength) throw Ex.InvalidLengthCollection(typeof(T?), length, maxLength);
+
+        var sizeValue = size * length;
+        var bytes = new byte[sizeValue + (length - 1) / 8 + 1];
 
         byte bits = 0;
         var iBits = 0;
@@ -119,16 +140,31 @@ public class UnmanagedArrayFormatter<T> : IRedisValueFormatter<T[]>, IRedisValue
 
         if (bytesRedis != bytesRedis2) throw new InvalidOperationException();
 
+        //if (bytes.Length >= _compressionOptions.StartLength)
+        //{
+        //    var compressed = Util.Compress(bytes, _compressionOptions.Level);
+
+        //    var diff = bytes.Length - compressed.Length;
+
+        //    var check = Util.IsCompressed(compressed);
+
+        //    return compressed;
+        //}
         return bytes;
     }
 
     public RedisValue Serialize(in T[]? value)
     {
         if (value == null) return RedisValues.Zero;
-        if (value.Length == 0) return RedisValue.EmptyString;
+        
+        var length = value.Length;
+        if (length == 0) return RedisValue.EmptyString;
 
         var size = Unsafe.SizeOf<T>();
-        var bytes = new byte[size * value.Length];
+        var maxLength = Util.RedisValueMaxLength / size;
+        if (length > maxLength) throw Ex.InvalidLengthCollection(typeof(T?), length, maxLength);
+        
+        var bytes = new byte[size * length];
 
         for (int i = 0, b = 0; i < value.Length; i++, b += size)
         {
