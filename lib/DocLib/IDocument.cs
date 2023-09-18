@@ -48,4 +48,6 @@ public interface IDocument : IReadOnlyDocument
     public new DocumentVersionInfo? VersionInfo { get; set; }
 
     public new DocumentVersionInfos? VersionInfos { get; set; }
+
+    public new IEnumerable<decimal?>? Decimals { get; set; }
 }

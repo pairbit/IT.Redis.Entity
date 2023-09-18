@@ -52,5 +52,7 @@ public record DocumentPOCO : IDocument
     [IgnoreDataMember]
     public DocumentVersionInfos? VersionInfos { get; set; }
 
+    public IEnumerable<decimal?>? Decimals { get; set; }
+
     IReadOnlyList<Guid?>? IReadOnlyDocument.TagIds => TagIds?.AsReadOnly();
 }

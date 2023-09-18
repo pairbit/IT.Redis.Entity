@@ -55,4 +55,6 @@ public class ReadOnlyDocument : IReadOnlyDocument
     public DocumentVersionInfo? VersionInfo => _document.VersionInfo;
 
     public DocumentVersionInfos? VersionInfos => _document.VersionInfos;
+
+    public IEnumerable<decimal?>? Decimals => _document.Decimals;
 }

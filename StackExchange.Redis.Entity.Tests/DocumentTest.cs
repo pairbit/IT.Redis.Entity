@@ -1,6 +1,8 @@
 ﻿using DocLib;
 using DocLib.RedisEntity;
 using StackExchange.Redis.Entity.Formatters;
+using System.Collections;
+using System.Collections.ObjectModel;
 
 namespace StackExchange.Redis.Entity.Tests;
 
@@ -73,6 +75,9 @@ public class DocumentTest
             doc2.Content = new byte[3];
             doc2.VersionInfos = new DocumentVersionInfos(100) { new DocumentVersionInfo() };
             doc2.TagIds = new EquatableList<Guid?>() { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
+            //doc2.Decimals = new ReadOnlyCollection<decimal?>(new decimal?[3]);
+            //doc2.Decimals = new decimal?[4];
+            doc2.Decimals = new LinkedList<decimal?>();
 
             _db.EntityLoad<IDocument>(doc2, Key);
 

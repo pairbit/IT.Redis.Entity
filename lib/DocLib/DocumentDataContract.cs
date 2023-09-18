@@ -73,5 +73,8 @@ public class DocumentDataContract : IDocument
     [IgnoreDataMember]
     public DocumentVersionInfos? VersionInfos { get; set; }
 
+    [DataMember(Order = 20)]
+    public IEnumerable<decimal?>? Decimals { get; set; }
+
     IReadOnlyList<Guid?>? IReadOnlyDocument.TagIds => TagIds;
 }
