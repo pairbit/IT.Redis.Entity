@@ -9,8 +9,10 @@ public class RedisDocumentArrayExpression : IRedisEntityReaderWriter<Document>
     private static readonly IRedisEntityFields _fields = new RedisEntityFields(new Dictionary<string, RedisValue>
     {
         { nameof(Document.Name), 0 },
+#if NET6_0_OR_GREATER
         { nameof(Document.StartDate), 1 },
         { nameof(Document.EndDate), 2 },
+#endif
         { nameof(Document.Price), 3 },
         { nameof(Document.IsDeleted), 4 },
         { nameof(Document.Size), 5 },
@@ -28,13 +30,13 @@ public class RedisDocumentArrayExpression : IRedisEntityReaderWriter<Document>
     {
         _readers[0] = Compile(x => x.Name);
         _writers[0] = Compile(x => x.Name, v => (string?)v);
-
+#if NET6_0_OR_GREATER
         _readers[1] = Compile(x => x.StartDate.DayNumber);
         _writers[1] = Compile(x => x.StartDate, v => DateOnly.FromDayNumber((int)v));
 
         _readers[2] = Compile(x => x.EndDate == null ? RedisValue.EmptyString : x.EndDate.Value.DayNumber);
         _writers[2] = Compile(x => x.EndDate, v => v.IsNullOrEmpty ? null : DateOnly.FromDayNumber((int)v));
-
+#endif
         _readers[3] = Compile(x => x.Price);
         _writers[3] = Compile(x => x.Price, v => (long)v);
 
@@ -56,7 +58,7 @@ public class RedisDocumentArrayExpression : IRedisEntityReaderWriter<Document>
 
     private static Func<Document, RedisValue> Compile(Expression<Func<Document, RedisValue>> reader) => reader.Compile();
 
-    private static Guid RedisValueToGuid(in RedisValue value) => new(((ReadOnlyMemory<byte>)value).Span);
+    private static Guid RedisValueToGuid(in RedisValue value) => new(((byte[])value)!);
 
     private static Action<Document, RedisValue> Compile<T>(Expression<Func<Document, T>> setter, Expression<Func<RedisValue, T>> getValue)
     {

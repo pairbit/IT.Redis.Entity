@@ -13,9 +13,13 @@ public interface IDocument : IReadOnlyDocument
 
     public new char Character { get; set; }
 
+#if NET6_0_OR_GREATER
+
     public new DateOnly StartDate { get; set; }
 
     public new DateOnly? EndDate { get; set; }
+
+#endif
 
     public new long Price { get; set; }
 

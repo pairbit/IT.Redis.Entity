@@ -20,9 +20,13 @@ public class ReadOnlyDocument : IReadOnlyDocument
 
     public char Character => _document.Character;
 
+#if NET6_0_OR_GREATER
+
     public DateOnly StartDate => _document.StartDate;
 
     public DateOnly? EndDate => _document.EndDate;
+
+#endif
 
     public long Price => _document.Price;
 

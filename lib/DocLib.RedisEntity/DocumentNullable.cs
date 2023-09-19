@@ -10,7 +10,9 @@ public class DocumentNullable
 
     public char? Character { get; set; }
 
+#if NET6_0_OR_GREATER
     public DateOnly? Date { get; set; }
+#endif
 
     public long? Price { get; set; }
 

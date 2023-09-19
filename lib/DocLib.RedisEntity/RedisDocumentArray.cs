@@ -8,8 +8,10 @@ public class RedisDocumentArray : IRedisEntityReaderWriter<Document>
     private static readonly IRedisEntityFields _fields = new RedisEntityFields(new Dictionary<string, RedisValue>
     {
         { nameof(Document.Name), 0 },
+#if NET6_0_OR_GREATER
         { nameof(Document.StartDate), 1 },
         { nameof(Document.EndDate), 2 },
+#endif
         { nameof(Document.Price), 3 },
         { nameof(Document.IsDeleted), 4 },
         { nameof(Document.Size), 5 },
@@ -27,13 +29,13 @@ public class RedisDocumentArray : IRedisEntityReaderWriter<Document>
     {
         _readers[0] = x => x.Name;
         _writers[0] = (x, v) => x.Name = v;
-
+#if NET6_0_OR_GREATER
         _readers[1] = x => x.StartDate.DayNumber;
         _writers[1] = (x, v) => x.StartDate = DateOnly.FromDayNumber((int)v);
 
         _readers[2] = x => x.EndDate?.DayNumber ?? RedisValue.EmptyString;
         _writers[2] = (x, v) => x.EndDate = v.IsNullOrEmpty ? null : DateOnly.FromDayNumber((int)v);
-
+#endif
         _readers[3] = x => x.Price;
         _writers[3] = (x, v) => x.Price = (long)v;
 
@@ -50,7 +52,7 @@ public class RedisDocumentArray : IRedisEntityReaderWriter<Document>
         _writers[7] = (x, v) => x.Modified = v.IsNullOrEmpty ? null : new DateTime((long)v);
 
         _readers[8] = x => x.Id.ToByteArray();
-        _writers[8] = (x, v) => x.Id = new Guid(((ReadOnlyMemory<byte>)v).Span);
+        _writers[8] = (x, v) => x.Id = new Guid((byte[])v!);
     }
 
     public RedisValue Read(Document entity, in RedisValue field)

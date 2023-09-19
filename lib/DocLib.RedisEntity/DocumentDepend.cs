@@ -7,6 +7,13 @@ namespace DocLib.RedisEntity;
 
 public record DocumentDepend
 {
+    private static readonly Random _random
+#if NET6_0_OR_GREATER
+        = Random.Shared;
+#else
+        = new();
+#endif
+
     [GuidHexFormatter("D")]
     public Guid Id { get; set; }
 
@@ -17,9 +24,13 @@ public record DocumentDepend
 
     public char Character { get; set; }
 
+#if NET6_0_OR_GREATER
+
     public DateOnly StartDate { get; set; }
 
     public DateOnly? EndDate { get; set; }
+
+#endif
 
     public long Price { get; set; }
 
@@ -71,20 +82,22 @@ public record DocumentDepend
 
     public static void New(DocumentDepend doc, int i)
     {
-        var random = Random.Shared;
+        var random = _random;
 
         doc.Id = Guid.NewGuid();
         doc.ClientId = Guid.NewGuid();
         doc.Url = new Uri("https://www.youtube.com/");
         doc.Version = new Version(1, 2);
         doc.Name = null;// $"Самый важный документ для сдачи проекта №{i}";
+#if NET6_0_OR_GREATER
         doc.StartDate = new DateOnly(random.Next(2000, 2024), random.Next(1, 13), random.Next(1, 29));
-        doc.Price = random.NextInt64(1_000_000, 1_000_000_000);
+        doc.EndDate = null;
+#endif
+        doc.Price = random.Next(1_000_000, 1_000_000_000);
         doc.Size = (DocumentSize)random.Next(0, 3);
         //doc.SizeEnum = doc.Size;
         doc.Created = DateTime.UtcNow;
         doc.Modified = null;
-        doc.EndDate = null;
         doc.IsDeleted = false;
         doc.Character = char.MaxValue;
 
@@ -98,10 +111,10 @@ public record DocumentDepend
         doc.RedisValNull = RedisValue.Null;
         doc.RedisValNullable = null;
         doc.RedisValEmpty = RedisValue.EmptyString;
-        doc.RedisValNum = random.NextInt64();
+        doc.RedisValNum = random.Next();
 
-        doc.IntPtrValue = (IntPtr)random.NextInt64();
-        doc.UIntPtrValue = (UIntPtr)random.NextInt64();
+        doc.IntPtrValue = (IntPtr)random.Next();
+        doc.UIntPtrValue = (UIntPtr)random.Next();
 
         var bytes = new byte[32];
         random.NextBytes(bytes);

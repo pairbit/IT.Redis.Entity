@@ -19,11 +19,15 @@ public class DocumentDataContract : IDocument
     [DataMember(Order = 3)]
     public char Character { get; set; }
 
+#if NET6_0_OR_GREATER
+
     [DataMember(Order = 4)]
     public DateOnly StartDate { get; set; }
 
     [DataMember(Order = 5)]
     public DateOnly? EndDate { get; set; }
+
+#endif
 
     [DataMember(Order = 6)]
     public long Price { get; set; }
