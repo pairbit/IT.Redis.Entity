@@ -1,4 +1,6 @@
-﻿using StackExchange.Redis.Entity.Internal.Collections;
+﻿#if NET6_0_OR_GREATER
+
+using StackExchange.Redis.Entity.Internal.Collections;
 
 namespace StackExchange.Redis.Entity.Factories;
 
@@ -19,3 +21,5 @@ public class ReadOnlyHashSetFactory : IEnumerableFactory
         return new ReadOnlySet<T>(hashSet);
     }
 }
+
+#endif

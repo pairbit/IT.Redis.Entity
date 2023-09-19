@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿#if NET6_0_OR_GREATER
+
+using System.Collections;
 
 namespace StackExchange.Redis.Entity.Internal.Collections;
 
@@ -32,3 +34,5 @@ internal class ReadOnlySet<T> : IReadOnlySet<T>
 
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_set).GetEnumerator();
 }
+
+#endif

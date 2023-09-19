@@ -9,7 +9,7 @@ internal static class Util
 {
     public readonly static int RedisValueMaxLength = 512 * 1024 * 1024;
     public readonly static long RedisValueMaxLengthInBits = ((long)RedisValueMaxLength << 3);
-    public readonly static long ArrayMaxLengthInBits = ((long)Array.MaxLength << 3);
+    //public readonly static long ArrayMaxLengthInBits = ((long)Array.MaxLength << 3);
 
     public static byte[] GZipHeaderBytes = { 0x1f, 0x8b, 8, 0, 0, 0, 0, 0, 4, 0 };
     public static byte[] GZipLevel10HeaderBytes = { 0x1f, 0x8b, 8, 0, 0, 0, 0, 0, 2, 0 };

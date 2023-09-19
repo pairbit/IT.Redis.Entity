@@ -21,7 +21,13 @@ public static class RedisValueFormatterRegistry
         {
             if (Check<T>._registered) return;
 
-            var formatter = GetFormatter(typeof(T), !RuntimeHelpers.IsReferenceOrContainsReferences<T>()) as IRedisValueFormatter<T>;
+            var type = typeof(T);
+#if NETSTANDARD2_0
+            var isUnmanagedType = type.IsUnmanaged();
+#else
+            var isUnmanagedType = !RuntimeHelpers.IsReferenceOrContainsReferences<T>();
+#endif
+            var formatter = GetFormatter(type, isUnmanagedType) as IRedisValueFormatter<T>;
 
             if (formatter != null)
             {
@@ -78,9 +84,10 @@ public static class RedisValueFormatterRegistry
         Register(GuidFormatter.Default);
 
         Register(ReadOnlyMemoryByteFormatter.Default);
+#if NET6_0_OR_GREATER
         Register(DateOnlyFormatter.Default);
         Register(TimeOnlyFormatter.Default);
-
+#endif
         Register(VersionFormatter.Default);
         Register(EnumFormatter.Default);
         Register(UriFormatter.Default);
@@ -102,7 +109,9 @@ public static class RedisValueFormatterRegistry
 
         RegisterEnumerableFactory(ReadOnlyListFactory.Default, typeof(IReadOnlyList<>));
         RegisterEnumerableFactory(ReadOnlyLinkedListFactory.Default, typeof(IReadOnlyCollection<>));
+#if NET6_0_OR_GREATER
         RegisterEnumerableFactory(ReadOnlyHashSetFactory.Default, typeof(IReadOnlySet<>));
+#endif
     }
 
     public static void Register<T>(IRedisValueFormatter<T> formatter)
@@ -181,7 +190,11 @@ public static class RedisValueFormatterRegistry
     {
         if (isUnmanagedType) return Activator.CreateInstance(UnmanagedFormatterType.MakeGenericType(type.GetNullableUnderlyingType()));
 
+#if NETSTANDARD2_0
+        if (type.IsArray)
+#else
         if (type.IsArray && type.IsSZArray)
+#endif
         {
             var elementType = type.GetElementType();
             if (elementType != null && elementType.IsUnmanaged())

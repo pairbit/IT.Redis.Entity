@@ -1,4 +1,6 @@
-﻿namespace StackExchange.Redis.Entity.Formatters;
+﻿#if NET6_0_OR_GREATER
+
+namespace StackExchange.Redis.Entity.Formatters;
 
 public class DateOnlyFormatter : NullableFormatter<DateOnly>
 {
@@ -9,3 +11,5 @@ public class DateOnlyFormatter : NullableFormatter<DateOnly>
 
     public override RedisValue Serialize(in DateOnly value) => value.DayNumber;
 }
+
+#endif

@@ -116,8 +116,9 @@ internal static class UnmanagedEnumerableFormatter
         {
             if (queue.Count > 0) queue.Clear();
 
+#if NET6_0_OR_GREATER
             queue.EnsureCapacity(length);
-
+#endif
             for (int i = 0, b = 0; i < length; i++, b += size)
             {
                 queue.Enqueue(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
@@ -127,8 +128,9 @@ internal static class UnmanagedEnumerableFormatter
         {
             if (stack.Count > 0) stack.Clear();
 
+#if NET6_0_OR_GREATER
             stack.EnsureCapacity(length);
-
+#endif
             spanRef = ref Unsafe.Add(ref spanRef, span.Length);
 
             for (int i = 0, b = size; i < length; i++, b += size)
@@ -152,8 +154,14 @@ internal static class UnmanagedEnumerableFormatter
         if (value is IList<T> list) return SerializeList(list);
         if (value is IReadOnlyCollection<T> readOnlyCollection) return SerializeReadOnlyCollection(readOnlyCollection);
         if (value is ICollection<T> collection) return SerializeCollection(collection);
+#if NET6_0_OR_GREATER
         if (value.TryGetNonEnumeratedCount(out var count))
         {
+#else
+        if (value is System.Collections.ICollection collectionNonGeneric)
+        {
+            var count = collectionNonGeneric.Count;
+#endif
             if (count == 0) return RedisValue.EmptyString;
 
             var size = Unsafe.SizeOf<T>();
