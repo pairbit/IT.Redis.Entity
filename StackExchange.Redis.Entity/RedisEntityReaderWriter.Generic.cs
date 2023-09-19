@@ -35,7 +35,7 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
         var writerFields = new Dictionary<string, RedisValue>(properties.Length);
         var readerInfos = new Dictionary<RedisValue, ReaderInfo>(properties.Length);
         var writerInfos = new Dictionary<RedisValue, WriterInfo>(properties.Length);
-#if NETSTANDARD2_0
+#if NETSTANDARD2_0 || NET461
         var set = new HashSet<RedisValue>();
 #else
         var set = new HashSet<RedisValue>(properties.Length);

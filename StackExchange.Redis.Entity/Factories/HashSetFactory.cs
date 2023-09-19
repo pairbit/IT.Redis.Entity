@@ -6,9 +6,11 @@ public class HashSetFactory : EnumerableFactory
 
     public override IEnumerable<T> Empty<T>() => new HashSet<T>((IEqualityComparer<T>?)null);
 
-#if NETSTANDARD2_0
-    protected override IEnumerable<T> New<T>(int capacity) => new HashSet<T>();
+
+    protected override IEnumerable<T> New<T>(int capacity)
+#if NETSTANDARD2_0 || NET461
+        => new HashSet<T>();
 #else
-    protected override IEnumerable<T> New<T>(int capacity) => new HashSet<T>(capacity, null);
+        => new HashSet<T>(capacity, null);
 #endif
 }

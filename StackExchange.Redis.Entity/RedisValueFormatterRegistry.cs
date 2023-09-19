@@ -22,10 +22,10 @@ public static class RedisValueFormatterRegistry
             if (Check<T>._registered) return;
 
             var type = typeof(T);
-#if NETSTANDARD2_0
-            var isUnmanagedType = type.IsUnmanaged();
-#else
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
             var isUnmanagedType = !RuntimeHelpers.IsReferenceOrContainsReferences<T>();
+#else
+            var isUnmanagedType = type.IsUnmanaged();
 #endif
             var formatter = GetFormatter(type, isUnmanagedType) as IRedisValueFormatter<T>;
 
@@ -190,10 +190,10 @@ public static class RedisValueFormatterRegistry
     {
         if (isUnmanagedType) return Activator.CreateInstance(UnmanagedFormatterType.MakeGenericType(type.GetNullableUnderlyingType()));
 
-#if NETSTANDARD2_0
-        if (type.IsArray)
-#else
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
         if (type.IsArray && type.IsSZArray)
+#else
+        if (type.IsArray)
 #endif
         {
             var elementType = type.GetElementType();

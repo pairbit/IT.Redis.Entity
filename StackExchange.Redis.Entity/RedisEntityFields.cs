@@ -25,11 +25,12 @@ public class RedisEntityFields : IRedisEntityFields
 
     public bool ContainsKey(string key) => _dictionary.ContainsKey(key);
 
-#if NETSTANDARD2_0
-    public bool TryGetValue(string key, out RedisValue value) => _dictionary.TryGetValue(key, out value);
-#else
-    public bool TryGetValue(string key, [MaybeNullWhen(false)] out RedisValue value) => _dictionary.TryGetValue(key, out value);
+    public bool TryGetValue(
+        string key,
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+        [MaybeNullWhen(false)]
 #endif
+        out RedisValue value) => _dictionary.TryGetValue(key, out value);
 
     public IEnumerator<KeyValuePair<string, RedisValue>> GetEnumerator() => _dictionary.GetEnumerator();
 
