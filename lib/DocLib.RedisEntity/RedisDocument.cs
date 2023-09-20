@@ -1,5 +1,6 @@
 ﻿using StackExchange.Redis;
 using StackExchange.Redis.Entity;
+using StackExchange.Redis.Entity.Formatters;
 
 namespace DocLib.RedisEntity;
 
@@ -21,6 +22,10 @@ public class RedisDocument : IRedisEntityReaderWriter<Document>
     });
 
     public IRedisEntityFields Fields => _fields;
+
+    public IRedisValueDeserializer<TField> GetDeserializer<TField>(in RedisValue field) => (IRedisValueDeserializer<TField>)GetFormatter((int)field);
+
+    public IRedisValueSerializer<TField> GetSerializer<TField>(in RedisValue field) => (IRedisValueSerializer<TField>)GetFormatter((int)field);
 
     public RedisValue Read(Document entity, in RedisValue field)
     {
@@ -60,5 +65,22 @@ public class RedisDocument : IRedisEntityReaderWriter<Document>
         else throw new InvalidOperationException();
 
         return true;
+    }
+
+    internal static object GetFormatter(int no)
+    {
+        if (no == 0) return StringFormatter.Default;
+#if NET6_0_OR_GREATER
+        if (no == 1) return DateOnlyFormatter.Default;
+        if (no == 2) return DateOnlyFormatter.Default;
+#endif
+        if (no == 3) return Int64Formatter.Default;
+        if (no == 4) return BooleanFormatter.Default;
+        //if (no == 5) return (int)entity.Size;
+        if (no == 6) return DateTimeFormatter.Default;
+        if (no == 7) return DateTimeFormatter.Default;
+        if (no == 8) return GuidFormatter.Default;
+
+        throw new InvalidOperationException();
     }
 }

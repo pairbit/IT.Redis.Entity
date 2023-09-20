@@ -233,4 +233,24 @@ public abstract class RedisEntityTest
             _db.KeyDelete(Key);
         }
     }
+
+    [Test]
+    public void EntitySetGet_SingleField()
+    {
+        var reader = _reader;
+        var writer = _writer;
+
+        var fieldPrice = reader.Fields[nameof(Document.Price)];
+        var price = 999;
+
+        Assert.That(_db.EntitySetField<Document, long>(in Key, in fieldPrice, price, reader), Is.True);
+
+        long price2 = default;
+
+        _db.EntityLoadField(ref price2, in Key, in fieldPrice, writer);
+
+        Assert.That(price2, Is.EqualTo(price));
+
+        Assert.That(_db.EntityGetField<Document, long>(in Key, in fieldPrice, writer), Is.EqualTo(price));
+    }
 }

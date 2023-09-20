@@ -111,4 +111,10 @@ public class RedisDocumentArrayExpression : IRedisEntityReaderWriter<Document>
 
         return true;
     }
+
+    public IRedisValueDeserializer<TField> GetDeserializer<TField>(in RedisValue field)
+        => (IRedisValueDeserializer<TField>)RedisDocument.GetFormatter((int)field);
+
+    public IRedisValueSerializer<TField> GetSerializer<TField>(in RedisValue field)
+        => (IRedisValueSerializer<TField>)RedisDocument.GetFormatter((int)field);
 }

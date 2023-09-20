@@ -13,6 +13,9 @@ public static class xIDatabase
     public static bool EntitySet<T>(this IDatabase db, RedisKey key, T entity, RedisValue field, IRedisEntityReader<T>? reader = null, When when = When.Always, CommandFlags flags = CommandFlags.None)
         => db.HashSet(key, field, (reader ?? RedisEntity<T>.Reader).Read(entity, in field), when, flags);
 
+    public static bool EntitySetField<TEntity, TField>(this IDatabase db, in RedisKey key, in RedisValue field, in TField value, IRedisEntityReader<TEntity>? reader = null, When when = When.Always, CommandFlags flags = CommandFlags.None)
+        => db.HashSet(key, field, (reader ?? RedisEntity<TEntity>.Reader).GetSerializer<TField>(in field).Serialize(in value), when, flags);
+
     public static bool EntityLoadAll<T>(this IDatabase db, T entity, RedisKey key, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None)
         => (writer ?? RedisEntity<T>.Writer).Write(entity, db.HashGetAll(key, flags));
 
@@ -27,6 +30,17 @@ public static class xIDatabase
         writer ??= RedisEntity<T>.Writer;
         var fields = writer.Fields.All;
         return writer.Write(entity, fields, db.HashGet(key, fields, flags));
+    }
+
+    public static bool EntityLoadField<TEntity, TField>(this IDatabase db, ref TField? value, in RedisKey key, in RedisValue field, IRedisEntityWriter<TEntity>? writer = null, CommandFlags flags = CommandFlags.None)
+    {
+        var redisValue = db.HashGet(key, field, flags);
+
+        if (redisValue.IsNull) return false;
+
+        (writer ?? RedisEntity<TEntity>.Writer).GetDeserializer<TField>(in field).Deserialize(redisValue, ref value);
+
+        return true;
     }
 
     public static TEntity? EntityGetAll<TEntity, IEntity>(this IDatabase db, RedisKey key, IRedisEntityWriter<IEntity>? writer = null, CommandFlags flags = CommandFlags.None) where TEntity : IEntity, new()
@@ -59,5 +73,16 @@ public static class xIDatabase
         writer ??= RedisEntity<T>.Writer;
         var fields = writer.Fields.All;
         return writer.GetEntity<T, T>(fields, db.HashGet(key, fields, flags));
+    }
+
+    public static TField? EntityGetField<TEntity, TField>(this IDatabase db, in RedisKey key, in RedisValue field, IRedisEntityWriter<TEntity>? writer = null, CommandFlags flags = CommandFlags.None)
+    {
+        TField? value = default;
+
+        var redisValue = db.HashGet(key, field, flags);
+
+        if (!redisValue.IsNull) (writer ?? RedisEntity<TEntity>.Writer).GetDeserializer<TField>(in field).Deserialize(redisValue, ref value);
+
+        return value;
     }
 }

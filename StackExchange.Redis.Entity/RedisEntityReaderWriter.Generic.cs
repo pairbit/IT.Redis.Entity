@@ -9,6 +9,8 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
         public RedisValueWriter<T> Writer { get; set; } = null!;
 
         public RedisValueDeserializerProxy Deserializer { get; set; } = null!;
+
+        public object DeserializerGeneric { get; set; } = null!;
     }
 
     class ReaderInfo
@@ -16,6 +18,8 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
         public RedisValueReader<T> Reader { get; set; } = null!;
 
         public IRedisValueSerializer Serializer { get; set; } = null!;
+
+        public object SerializerGeneric { get; set; } = null!;
     }
 
     private readonly Dictionary<RedisValue, ReaderInfo> _readerInfos;
@@ -30,6 +34,7 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
     public RedisEntityReaderWriter(IRedisEntityConfiguration configuration)
     {
         if (configuration == null) throw new ArgumentNullException(nameof(configuration));
+
         var properties = RedisEntity<T>.Properties;
         var readerFields = new Dictionary<string, RedisValue>(properties.Length);
         var writerFields = new Dictionary<string, RedisValue>(properties.Length);
@@ -51,13 +56,15 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
                 if (!set.Add(field)) throw new InvalidOperationException($"Propery '{name}' has duplicate '{field}'");
 
                 var formatter = configuration.GetFormatter(property);
-                
+                var propertyType = property.PropertyType;
+
                 if (property.SetMethod != null)
                 {
                     writerInfos.Add(field, new WriterInfo
                     {
                         Writer = Compiler.GetWriter<T>(property),
-                        Deserializer = new RedisValueDeserializerProxy(formatter)
+                        Deserializer = new RedisValueDeserializerProxy(formatter),
+                        DeserializerGeneric = Activator.CreateInstance(typeof(RedisValueDeserializerProxy<>).MakeGenericType(propertyType), formatter)
                     });
                     writerFields.Add(name, field);
                 }
@@ -67,7 +74,8 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
                     readerInfos.Add(field, new ReaderInfo
                     {
                         Reader = Compiler.GetReader<T>(property),
-                        Serializer = formatter
+                        Serializer = formatter,
+                        SerializerGeneric = Activator.CreateInstance(typeof(RedisValueSerializerProxy<>).MakeGenericType(propertyType), formatter)
                     });
                     readerFields.Add(name, field);
                 }
@@ -98,5 +106,21 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
         writerInfo.Writer(entity, value, writerInfo.Deserializer);
 
         return true;
+    }
+
+    public IRedisValueSerializer<TField> GetSerializer<TField>(in RedisValue field)
+    {
+        if (!_readerInfos.TryGetValue(field, out var readerInfo))
+            throw new ArgumentOutOfRangeException(nameof(field));
+
+        return (IRedisValueSerializer<TField>)readerInfo.SerializerGeneric;
+    }
+
+    public IRedisValueDeserializer<TField> GetDeserializer<TField>(in RedisValue field)
+    {
+        if (!_writerInfos.TryGetValue(field, out var writerInfo))
+            throw new ArgumentOutOfRangeException(nameof(field));
+
+        return (IRedisValueDeserializer<TField>)writerInfo.DeserializerGeneric;
     }
 }
