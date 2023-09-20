@@ -17,7 +17,7 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
 
     static class Cache<T>
     {
-        public static IRedisValueFormatter<T> _formatter;
+        public static IRedisValueFormatter<T> _formatter = null!;
 
         static Cache()
         {
@@ -31,7 +31,11 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
 #endif
             var formatter = GetFormatter(type, isUnmanagedType) as IRedisValueFormatter<T>;
 
-            if (formatter != null)
+            if (formatter == null)
+            {
+                Cache<T>._formatter = (IRedisValueFormatter<T>)Activator.CreateInstance(RedisValueFormatterDefaultType.MakeGenericType(type))!;
+            }
+            else
             {
                 Cache<T>._formatter = formatter;
                 Check<T>._registered = true;
@@ -246,6 +250,6 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
             }
         }
 
-        return Activator.CreateInstance(RedisValueFormatterDefaultType.MakeGenericType(type));
+        return null;
     }
 }
