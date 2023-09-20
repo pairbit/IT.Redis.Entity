@@ -47,7 +47,7 @@ public class StringArrayFormatter : IRedisValueFormatter<string?[]>
 
             var offset = Size;
 
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < value.Length; i++)
             {
                 var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, offset));
 
@@ -64,7 +64,6 @@ public class StringArrayFormatter : IRedisValueFormatter<string?[]>
                 else
                 {
                     value[i] = _encoding.GetString(span.Slice(offset + Size, strlen));
-
                     offset += Size + strlen;
                 }
             }

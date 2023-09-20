@@ -48,6 +48,7 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
     static readonly Type EnumFormatterType = typeof(EnumFormatter<,>);
     static readonly Type UnmanagedFormatterType = typeof(UnmanagedFormatter<>);
 
+    static readonly Type StringEnumerableFormatterType = typeof(StringEnumerableFormatter<>);
     static readonly Type UnmanagedArrayFormatterType = typeof(UnmanagedArrayFormatter<>);
     static readonly Type UnmanagedEnumerableFormatterType = typeof(UnmanagedEnumerableFormatter<,>);
     static readonly Type UnmanagedEnumerableNullableFormatterType = typeof(UnmanagedEnumerableNullableFormatter<,>);
@@ -248,6 +249,13 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
                     var genericFactory = Activator.CreateInstance(EnumerableFactoryProxyType.MakeGenericType(type, elementType), factory);
 
                     return Activator.CreateInstance(formatterType.MakeGenericType(type, elementType.GetNullableUnderlyingType()), genericFactory);
+                }
+
+                if (elementType == typeof(string))
+                {
+                    var genericFactory = Activator.CreateInstance(EnumerableFactoryProxyType.MakeGenericType(type, elementType), factory);
+
+                    return Activator.CreateInstance(StringEnumerableFormatterType.MakeGenericType(type), genericFactory);
                 }
             }
         }

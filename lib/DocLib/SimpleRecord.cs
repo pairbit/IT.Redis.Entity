@@ -11,4 +11,6 @@ public record SimpleRecord
     public DocumentSizeLong SizeLong { get; set; }
 
     public string?[]? Strings { get; set; }
+
+    public IList<string?>? StringList { get; set; }
 }
