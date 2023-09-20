@@ -7,6 +7,8 @@ namespace StackExchange.Redis.Entity.Formatters;
 
 public class StringArrayFormatter : IRedisValueFormatter<string?[]>
 {
+    private const int Size = 4;
+    private const int MinLength = Size * 2;
     public static readonly StringArrayFormatter Default = new();
 
     private readonly Encoding _encoding;
@@ -34,16 +36,16 @@ public class StringArrayFormatter : IRedisValueFormatter<string?[]>
         else
         {
             var span = ((ReadOnlyMemory<byte>)redisValue).Span;
-            if (span.Length < 5) throw Ex.InvalidMinLength(typeof(string?[]), span.Length, 5);
+            if (span.Length < MinLength) throw Ex.InvalidMinLength(typeof(string?[]), span.Length, MinLength);
 
             ref byte spanRef = ref MemoryMarshal.GetReference(span);
 
-            //[4] array.length
+            //[Size] array.length
             var length = Unsafe.ReadUnaligned<int>(ref spanRef);
 
             if (value == null || value.Length != length) value = new string?[length];
 
-            var offset = 4;
+            var offset = Size;
 
             for (int i = 0; i < length; i++)
             {
@@ -52,18 +54,18 @@ public class StringArrayFormatter : IRedisValueFormatter<string?[]>
                 if (strlen == int.MaxValue)
                 {
                     value[i] = null;
-                    offset += 4;
+                    offset += Size;
                 }
                 else if (strlen == 0)
                 {
                     value[i] = string.Empty;
-                    offset += 4;
+                    offset += Size;
                 }
                 else
                 {
-                    value[i] = _encoding.GetString(span.Slice(offset + 4, strlen));
+                    value[i] = _encoding.GetString(span.Slice(offset + Size, strlen));
 
-                    offset += 4 + strlen;
+                    offset += Size + strlen;
                 }
             }
         }
@@ -74,21 +76,21 @@ public class StringArrayFormatter : IRedisValueFormatter<string?[]>
         if (value == null) return RedisValues.Zero;
         if (value.Length == 0) return RedisValue.EmptyString;
 
-        var length = 4;
+        var length = Size;
         for (int i = 0; i < value.Length; i++)
         {
             var str = value[i];
-            length += 4 + (str == null || str.Length == 0 ? 0 : _encoding.GetByteCount(str.AsSpan()));
+            length += Size + (str == null || str.Length == 0 ? 0 : _encoding.GetByteCount(str.AsSpan()));
         }
 
         if (length > Util.RedisValueMaxLength) throw Ex.InvalidLengthCollection(typeof(string?[]), length, Util.RedisValueMaxLength);
 
         var bytes = new byte[length];
 
-        //[4] array.length
+        //[Size] array.length
         Unsafe.WriteUnaligned(ref bytes[0], value.Length);
 
-        var offset = 4;
+        var offset = Size;
         var span = bytes.AsSpan();
 
         for (int i = 0; i < value.Length; i++)
@@ -97,26 +99,26 @@ public class StringArrayFormatter : IRedisValueFormatter<string?[]>
 
             if (str == null)
             {
-                //[4] string.length
+                //[Size] string.length
                 Unsafe.WriteUnaligned(ref bytes[offset], int.MaxValue);
 
-                offset += 4;
+                offset += Size;
             }
             else if (str.Length == 0)
             {
                 Unsafe.WriteUnaligned(ref bytes[offset], 0);
 
-                offset += 4;
+                offset += Size;
             }
             else
             {
                 //[string.length] string
-                var written = _encoding.GetBytes(str, span.Slice(offset + 4));
+                var written = _encoding.GetBytes(str, span.Slice(offset + Size));
 
-                //[4] string.length
+                //[Size] string.length
                 Unsafe.WriteUnaligned(ref bytes[offset], written);
 
-                offset += 4 + written;
+                offset += Size + written;
             }
         }
 
