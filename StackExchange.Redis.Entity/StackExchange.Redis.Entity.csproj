@@ -7,6 +7,10 @@
 	<NoWarn>$(NoWarn);IDE1006;IDE0049</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$(TargetFramework) == 'net461' or $(TargetFramework) == 'net472' or $(TargetFramework) == 'netstandard2.0'">
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="StackExchange.Redis" Version="2.6.122" />
   </ItemGroup>

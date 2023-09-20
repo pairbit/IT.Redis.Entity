@@ -99,13 +99,18 @@ public class DocumentTest
             Decimal = 345345345,
             DateTimeKind = DateTimeKind.Local,
             Size = DocumentSize.Medium,
-            SizeLong = DocumentSizeLong.Medium
+            SizeLong = DocumentSizeLong.Medium,
+            Strings = new string?[] { null, "", "test", "mystr", " ", "ascii" }
         };
         try
         {
             _db.EntitySet(Key, entity);
 
             var entity2 = _db.EntityGet<SimpleRecord>(Key);
+
+            Assert.That(entity.Strings.SequenceEqual(entity2.Strings), Is.True);
+
+            entity2.Strings = entity.Strings = null;
 
             Assert.That(entity, Is.EqualTo(entity2));
         }

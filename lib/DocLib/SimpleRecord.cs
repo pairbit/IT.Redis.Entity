@@ -9,4 +9,6 @@ public record SimpleRecord
     public DocumentSize Size { get; set; }
 
     public DocumentSizeLong SizeLong { get; set; }
+
+    public string?[]? Strings { get; set; }
 }
