@@ -89,7 +89,6 @@ public static class RedisValueFormatterRegistry
         Register(TimeOnlyFormatter.Default);
 #endif
         Register(VersionFormatter.Default);
-        Register(EnumFormatter.Default);
         Register(UriFormatter.Default);
 
         Register(StringFormatter.Default);

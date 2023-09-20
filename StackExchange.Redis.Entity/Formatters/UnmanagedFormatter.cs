@@ -12,9 +12,7 @@ public class UnmanagedFormatter<T> : NullableFormatter<T> where T : unmanaged
 
         if (span.Length != Unsafe.SizeOf<T>()) throw Ex.InvalidLength(typeof(T), Unsafe.SizeOf<T>());
 
-        ref byte spanRef = ref MemoryMarshal.GetReference(span);
-
-        value = Unsafe.ReadUnaligned<T>(ref spanRef);
+        value = Unsafe.ReadUnaligned<T>(ref MemoryMarshal.GetReference(span));
     }
 
     public override RedisValue Serialize(in T value)

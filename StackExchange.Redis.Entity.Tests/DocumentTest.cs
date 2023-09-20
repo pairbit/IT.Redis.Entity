@@ -92,4 +92,22 @@ public class DocumentTest
             _db.KeyDelete(Key);
         }
     }
+
+    [Test]
+    public void SimpleTest()
+    {
+        var entity = new SimpleRecord() { Decimal = 345345345 };
+        try
+        {
+            _db.EntitySet(Key, entity);
+
+            var entity2 = _db.EntityGet<SimpleRecord>(Key);
+
+            Assert.That(entity, Is.EqualTo(entity2));
+        }
+        finally
+        {
+            _db.KeyDelete(Key);
+        }
+    }
 }
