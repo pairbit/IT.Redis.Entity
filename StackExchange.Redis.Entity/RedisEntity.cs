@@ -1,10 +1,8 @@
-﻿using StackExchange.Redis.Entity.Internal;
-
-namespace StackExchange.Redis.Entity;
+﻿namespace StackExchange.Redis.Entity;
 
 public static class RedisEntity
 {
-    private static IRedisEntityFactory _factory = new RedisEntityFactory(new RedisEntityConfiguration(new RedisValueFormatterCached()));
+    private static IRedisEntityFactory _factory = new RedisEntityFactory(new RedisEntityConfiguration(RedisValueFormatterRegistry.Default));
 
     public static IRedisEntityFactory Factory
     {

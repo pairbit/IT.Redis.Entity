@@ -1,8 +1,6 @@
 ﻿using DocLib;
 using DocLib.RedisEntity;
 using StackExchange.Redis.Entity.Formatters;
-using System.Collections;
-using System.Collections.ObjectModel;
 
 namespace StackExchange.Redis.Entity.Tests;
 
@@ -96,7 +94,13 @@ public class DocumentTest
     [Test]
     public void SimpleTest()
     {
-        var entity = new SimpleRecord() { Decimal = 345345345 };
+        var entity = new SimpleRecord()
+        {
+            Decimal = 345345345,
+            DateTimeKind = DateTimeKind.Local,
+            Size = DocumentSize.Medium,
+            SizeLong = DocumentSizeLong.Medium
+        };
         try
         {
             _db.EntitySet(Key, entity);

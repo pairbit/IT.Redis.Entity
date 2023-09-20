@@ -5,8 +5,6 @@ namespace StackExchange.Redis.Entity.Internal;
 
 internal static class Compiler
 {
-    private static readonly Type RedisValueType = typeof(RedisValue);
-    private static readonly Type NullableType = typeof(Nullable<>);
     private static readonly MethodInfo MethodDeserialize = typeof(RedisValueDeserializerProxy).GetMethod(nameof(RedisValueDeserializerProxy.Deserialize))!;
     private static readonly MethodInfo MethodSerialize = typeof(IRedisValueSerializer).GetMethod(nameof(IRedisValueSerializer.Serialize))!;
 
@@ -22,26 +20,9 @@ internal static class Compiler
     {
         var pEntity = Expression.Parameter(typeof(T), "entity");
 
-        Expression eProperty = Expression.Property(pEntity, property);
+        var eProperty = Expression.Property(pEntity, property);
 
-        var propertyType = property.PropertyType;
-
-        if (propertyType.IsEnum)
-        {
-            propertyType = propertyType.GetEnumUnderlyingType();
-            eProperty = Expression.ConvertChecked(eProperty, propertyType);
-        } 
-        else if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition().Equals(NullableType))
-        {
-            var genericArgument = propertyType.GetGenericArguments()[0];
-            if (genericArgument.IsEnum)
-            {
-                propertyType = NullableType.MakeGenericType(genericArgument.GetEnumUnderlyingType());
-                eProperty = Expression.ConvertChecked(eProperty, propertyType);
-            }
-        }
-
-        var eCall = Expression.Call(ParameterSerializer, MethodSerialize.MakeGenericMethod(propertyType), eProperty);
+        var eCall = Expression.Call(ParameterSerializer, MethodSerialize.MakeGenericMethod(property.PropertyType), eProperty);
 
         var lambda = Expression.Lambda<RedisValueReader<T>>(eCall, pEntity, ParameterSerializer);
 
@@ -59,44 +40,9 @@ internal static class Compiler
 
         var eProperty = Expression.Property(pEntity, property);
 
-        var propertyType = property.PropertyType;
+        var eCall = Expression.Call(ParameterDeserializer, MethodDeserialize.MakeGenericMethod(property.PropertyType), ParameterRedisValue, eProperty);
 
-        Expression eRight;
-
-        if (propertyType.IsEnum)
-        {
-            var enumType = propertyType.GetEnumUnderlyingType();
-
-            var eConvert = Expression.ConvertChecked(eProperty, enumType);
-
-            var call = Expression.Call(ParameterDeserializer, MethodDeserialize.MakeGenericMethod(enumType), ParameterRedisValue, eConvert);
-
-            eRight = Expression.ConvertChecked(call, propertyType);
-        } 
-        else if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition().Equals(NullableType))
-        {
-            var genericArgument = propertyType.GetGenericArguments()[0];
-            if (genericArgument.IsEnum)
-            {
-                var enumType = NullableType.MakeGenericType(genericArgument.GetEnumUnderlyingType());
-
-                var eConvert = Expression.ConvertChecked(eProperty, enumType);
-
-                var call = Expression.Call(ParameterDeserializer, MethodDeserialize.MakeGenericMethod(enumType), ParameterRedisValue, eConvert);
-
-                eRight = Expression.ConvertChecked(call, propertyType);
-            }
-            else
-            {
-                eRight = Expression.Call(ParameterDeserializer, MethodDeserialize.MakeGenericMethod(propertyType), ParameterRedisValue, eProperty);
-            }
-        }
-        else
-        {
-            eRight = Expression.Call(ParameterDeserializer, MethodDeserialize.MakeGenericMethod(propertyType), ParameterRedisValue, eProperty);
-        }
-
-        var eAssign = Expression.Assign(eProperty, eRight);
+        var eAssign = Expression.Assign(eProperty, eCall);
 
         var lambda = Expression.Lambda<RedisValueWriter<T>>(eAssign, pEntity, ParameterRedisValue, ParameterDeserializer);
 

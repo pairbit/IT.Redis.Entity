@@ -6,6 +6,8 @@ namespace DocLib.RedisEntity;
 
 public class RedisDocument : IRedisEntityReaderWriter<Document>
 {
+    private static readonly IRedisValueFormatter<DocumentSize> DocumentSizeFormatter = new EnumFormatter<DocumentSize, sbyte>();
+
     private static readonly IRedisEntityFields _fields = new RedisEntityFields(new Dictionary<string, RedisValue>
     {
         { nameof(Document.Name), 0 },
@@ -76,7 +78,7 @@ public class RedisDocument : IRedisEntityReaderWriter<Document>
 #endif
         if (no == 3) return Int64Formatter.Default;
         if (no == 4) return BooleanFormatter.Default;
-        //if (no == 5) return (int)entity.Size;
+        if (no == 5) return DocumentSizeFormatter;
         if (no == 6) return DateTimeFormatter.Default;
         if (no == 7) return DateTimeFormatter.Default;
         if (no == 8) return GuidFormatter.Default;

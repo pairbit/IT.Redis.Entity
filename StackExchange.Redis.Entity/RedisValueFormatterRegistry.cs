@@ -6,8 +6,10 @@ using System.Runtime.CompilerServices;
 
 namespace StackExchange.Redis.Entity;
 
-public static class RedisValueFormatterRegistry
+public class RedisValueFormatterRegistry : IRedisValueFormatter
 {
+    public static readonly RedisValueFormatterRegistry Default = new();
+
     static class Check<T>
     {
         public static bool _registered;
@@ -15,7 +17,7 @@ public static class RedisValueFormatterRegistry
 
     static class Cache<T>
     {
-        public static IRedisValueFormatter<T>? _formatter;
+        public static IRedisValueFormatter<T> _formatter;
 
         static Cache()
         {
@@ -37,7 +39,9 @@ public static class RedisValueFormatterRegistry
         }
     }
 
+    static readonly Type RedisValueFormatterDefaultType = typeof(RedisValueFormatterDefault<>);
     static readonly Type NullableType = typeof(Nullable<>);
+    static readonly Type EnumFormatterType = typeof(EnumFormatter<,>);
     static readonly Type UnmanagedFormatterType = typeof(UnmanagedFormatter<>);
 
     static readonly Type UnmanagedArrayFormatterType = typeof(UnmanagedArrayFormatter<>);
@@ -49,10 +53,10 @@ public static class RedisValueFormatterRegistry
     static readonly ConcurrentDictionary<Type, Type> _unmanagedGenericFormatterTypes = new();
     static readonly ConcurrentDictionary<Type, IEnumerableFactory> _unmanagedGenericEnumerableTypes = new();
 
-    static IRedisValueFormatter _default = new RedisValueFormatterNotRegistered();
+    static IRedisValueFormatter _defaultFormatter = new RedisValueFormatterNotRegistered();
     static CompressionOptions _compressionOptions = CompressionOptions.Default;
 
-    public static IRedisValueFormatter Default => _default;
+    internal static IRedisValueFormatter DefaultFormatter => _defaultFormatter;
 
     public static CompressionOptions CompressionOptions => _compressionOptions;
 
@@ -113,6 +117,12 @@ public static class RedisValueFormatterRegistry
 #endif
     }
 
+    private RedisValueFormatterRegistry() { }
+
+    public void Deserialize<T>(in RedisValue redisValue, ref T? value) => GetFormatter<T>().Deserialize(in redisValue, ref value);
+
+    public RedisValue Serialize<T>(in T? value) => GetFormatter<T>().Serialize(in value);
+
     public static void Register<T>(IRedisValueFormatter<T> formatter)
     {
         if (formatter == null) throw new ArgumentNullException(nameof(formatter));
@@ -127,12 +137,12 @@ public static class RedisValueFormatterRegistry
         Register((IRedisValueFormatter<T?>)formatter);
     }
 
-    public static void Register(IRedisValueFormatter formatter)
+    public static void RegisterDefault(IRedisValueFormatter formatter)
     {
-        _default = formatter ?? throw new ArgumentNullException(nameof(formatter));
+        _defaultFormatter = formatter ?? throw new ArgumentNullException(nameof(formatter));
     }
 
-    public static IRedisValueFormatter<T>? GetFormatter<T>() => Cache<T>._formatter;
+    public static IRedisValueFormatter<T> GetFormatter<T>() => Cache<T>._formatter;
 
     public static bool IsRegistered<T>() => Check<T>._registered;
 
@@ -174,7 +184,7 @@ public static class RedisValueFormatterRegistry
             {
                 var genericTypeBase = genericTypes[i];
 
-                if (!genericTypeBase.IsGenericType) 
+                if (!genericTypeBase.IsGenericType)
                     throw new ArgumentException($"Registered type '{genericTypeBase.FullName}' is not generic type", nameof(genericTypes));
 
                 if (!genericTypeBase.MakeGenericType(typeof(int)).IsAssignableFrom(enumerableType))
@@ -187,12 +197,21 @@ public static class RedisValueFormatterRegistry
 
     private static object? GetFormatter(Type type, bool isUnmanagedType)
     {
-        if (isUnmanagedType) return Activator.CreateInstance(UnmanagedFormatterType.MakeGenericType(type.GetNullableUnderlyingType()));
+        if (isUnmanagedType)
+        {
+            type = type.GetNullableUnderlyingType();
+
+            var formatterType = type.IsEnum
+                ? EnumFormatterType.MakeGenericType(type, type.GetEnumUnderlyingType())
+                : UnmanagedFormatterType.MakeGenericType(type);
+
+            return Activator.CreateInstance(formatterType);
+        }
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
         if (type.IsArray && type.IsSZArray)
 #else
-        if (type.IsArray)
+        if (type.IsArray && type.GetArrayRank() == 1)
 #endif
         {
             var elementType = type.GetElementType();
@@ -227,24 +246,6 @@ public static class RedisValueFormatterRegistry
             }
         }
 
-        return null;
-
-        //else
-        //{
-        //    var iTypes = type.GetInterfaces();
-        //    for (int i = 0; i < iTypes.Length; i++)
-        //    {
-        //        var iType = iTypes[i];
-        //        if (iType.IsGenericType && iType.GetGenericTypeDefinition().Equals(IEnumerableType))
-        //        {
-        //            var genericArgument = iType.GetGenericArguments()[0];
-        //            if (genericArgument.IsUnmanaged())
-        //            {
-        //                formatterType = UnmanagedIEnumerableFormatterType.MakeGenericType(type, genericArgument);
-        //                break;
-        //            }
-        //        }
-        //    }
-        //}
+        return Activator.CreateInstance(RedisValueFormatterDefaultType.MakeGenericType(type));
     }
 }
