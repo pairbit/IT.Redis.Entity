@@ -18,7 +18,7 @@ public class DocumentTest
         _db = connection.GetDatabase()!;
         
         //RedisValueFormatterRegistry.RegisterEnumerableFactory(LinkedListFactory.Default, typeof(IReadOnlyCollection<>));
-        RedisValueFormatterRegistry.RegisterEnumerableFactory(StackFactory.Default, typeof(IEnumerable<>));
+        RedisValueFormatterRegistry.RegisterEnumerableFactory(StackFactory.Default, typeof(IEnumerable<>), typeof(IReadOnlyCollection<>));
         RedisValueFormatterRegistry.RegisterEnumerableFactory(EquatableListFactory.Default, typeof(List<>));
         RedisValueFormatterRegistry.Register(new UnmanagedEnumerableFormatter<DocumentVersionInfos, DocumentVersionInfo>(x => new DocumentVersionInfos(x)));
     }
@@ -112,7 +112,7 @@ public class DocumentTest
             _db.EntitySet(Key, entity);
 
             var entity2 = new SimpleRecord();
-            entity2.StringCollection = new List<string?>();
+            entity2.StringCollection = new Stack<string?>();
 
             _db.EntityLoad(entity2, Key);
             

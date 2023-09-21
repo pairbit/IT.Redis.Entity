@@ -28,12 +28,13 @@ internal class StringEnumerableFormatter
         var length = state.Length;
         var encoding = state.Encoding;
         var span = state.Memory.Span;
-        ref byte spanRef = ref MemoryMarshal.GetReference(span);
-        span = span.Slice(Size * length + Size);
 
         if (buffer is string?[] array)
         {
             //if (array.Length < count) throw new InvalidOperationException();
+
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
+            span = span.Slice(Size * length + Size);
 
             for (int i = 0, b = Size; i < array.Length; i++, b += Size)
             {
@@ -49,6 +50,9 @@ internal class StringEnumerableFormatter
         }
         else if (buffer is ICollection<string?> collection)
         {
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
+            span = span.Slice(Size * length + Size);
+
             for (int i = 0, b = Size; i < length; i++, b += Size)
             {
                 var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
@@ -64,6 +68,9 @@ internal class StringEnumerableFormatter
         }
         else if (buffer is Queue<string?> queue)
         {
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
+            span = span.Slice(Size * length + Size);
+
             for (int i = 0, b = Size; i < length; i++, b += Size)
             {
                 var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
@@ -79,7 +86,20 @@ internal class StringEnumerableFormatter
         }
         else if (buffer is Stack<string?> stack)
         {
-            throw new NotImplementedException();
+            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), Size * length + Size);
+
+            for (int i = 0, b = Size; i < length; i++, b += Size)
+            {
+                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, -b));
+
+                if (strlen == int.MaxValue) stack.Push(null);
+                else if (strlen == 0) stack.Push(string.Empty);
+                else
+                {
+                    stack.Push(encoding.GetString(span.Slice(span.Length - strlen)));
+                    span = span.Slice(0, span.Length - strlen);
+                }
+            }
         }
         else
         {
@@ -92,11 +112,12 @@ internal class StringEnumerableFormatter
         var length = state.Length;
         var encoding = state.Encoding;
         var span = state.Memory.Span;
-        ref byte spanRef = ref MemoryMarshal.GetReference(span);
-        span = span.Slice(Size * length + Size);
 
         if (value is string?[] array)
         {
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
+            span = span.Slice(Size * length + Size);
+
             if (array.Length != length)
             {
                 array = new string?[length];
@@ -119,7 +140,11 @@ internal class StringEnumerableFormatter
         else if (value is ICollection<string?> collection)
         {
             if (collection.IsReadOnly) return false;
-            else if (value is IList<string?> ilist)
+
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
+            span = span.Slice(Size * length + Size);
+
+            if (value is IList<string?> ilist)
             {
                 var count = ilist.Count;
                 if (count < length)
@@ -197,6 +222,9 @@ internal class StringEnumerableFormatter
         }
         else if (value is Queue<string?> queue)
         {
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
+            span = span.Slice(Size * length + Size);
+
             if (queue.Count > 0) queue.Clear();
 
 #if NET6_0_OR_GREATER
@@ -222,7 +250,20 @@ internal class StringEnumerableFormatter
 #if NET6_0_OR_GREATER
             stack.EnsureCapacity(length);
 #endif
-            throw new NotImplementedException();
+            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), Size * length + Size);
+
+            for (int i = 0, b = Size; i < length; i++, b += Size)
+            {
+                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, -b));
+
+                if (strlen == int.MaxValue) stack.Push(null);
+                else if (strlen == 0) stack.Push(string.Empty);
+                else
+                {
+                    stack.Push(encoding.GetString(span.Slice(span.Length - strlen)));
+                    span = span.Slice(0, span.Length - strlen);
+                }
+            }
         }
         else
         {
