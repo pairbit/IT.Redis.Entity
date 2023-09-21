@@ -22,6 +22,8 @@ public record SimpleRecord
 
     public DocumentVersionInfoDictionary Versions { get; set; }
 
+    public SortedDictionary<int, int> SortedDictionary { get; set; }
+
     //public IDictionary<string, string> StringDictionary { get; set; }
 
 #if NETCOREAPP3_1_OR_GREATER

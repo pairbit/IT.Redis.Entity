@@ -137,6 +137,7 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
 #endif
         RegisterDictionaryFactory(DictionaryFactory.Default, typeof(IDictionary<,>));
         RegisterDictionaryFactory(ReadOnlyDictionaryFactory.Default, typeof(IReadOnlyDictionary<,>));
+        RegisterDictionaryFactory(SortedDictionaryFactory.Default);
     }
 
     private RedisValueFormatterRegistry() { }

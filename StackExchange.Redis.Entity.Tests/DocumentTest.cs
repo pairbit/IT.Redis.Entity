@@ -2,6 +2,7 @@
 using DocLib.RedisEntity;
 using StackExchange.Redis.Entity.Factories;
 using StackExchange.Redis.Entity.Formatters;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 
@@ -112,6 +113,7 @@ public class DocumentTest
             KeyValuePairs = new Dictionary<int, int?>() { { 0, 1 }, { 1, null } },
             Dictionary = new Dictionary<int, int>() { { 0, 1 }, { 1, 2 } },
             ReadOnlyDictionary = new ReadOnlyDictionary<int, int?>(new Dictionary<int, int?>() { { 0, null }, { 1, 2 } }),
+            SortedDictionary = new SortedDictionary<int, int>() { { 4, 1 }, { 1, 2 } },
             StringCollection = new string?[] { null, "", "test", "mystr", " ", "ascii" },
             Versions = new DocumentVersionInfoDictionary(3) { { Guid.NewGuid(), new DocumentVersionInfo(Guid.NewGuid(), Guid.NewGuid(), DateTime.Now, 34) } },
 #if NETCOREAPP3_1_OR_GREATER
@@ -133,6 +135,7 @@ public class DocumentTest
             Assert.That(entity.KeyValuePairs.SequenceEqual(entity2.KeyValuePairs), Is.True);
             Assert.That(entity.Dictionary.SequenceEqual(entity2.Dictionary), Is.True);
             Assert.That(entity.ReadOnlyDictionary.SequenceEqual(entity2.ReadOnlyDictionary), Is.True);
+            Assert.That(entity.SortedDictionary.SequenceEqual(entity2.SortedDictionary), Is.True);
             Assert.That(entity.StringCollection.SequenceEqual(entity2.StringCollection), Is.True);
             Assert.That(entity.Strings.SequenceEqual(entity2.Strings), Is.True);
             Assert.That(entity.Versions.SequenceEqual(entity2.Versions), Is.True);
