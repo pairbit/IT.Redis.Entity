@@ -72,19 +72,26 @@ internal static class UnmanagedEnumerableNullableFormatter
         }
         else if (buffer is Stack<T?> stack)
         {
+            spanRef = ref Unsafe.Add(ref spanRef, iBytes - size);
+            iBits = (count % 8) - 1;
+            if (iBits == -1) iBits = 7;
+            iBytes = span.Length - 1;
+            bits = span[iBytes];
+            i = count;
+
             do
             {
-                stack.Push((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
+                stack.Push((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)) : null);
 
-                if (++i == count) break;
+                if (--i == 0) break;
+
+                if (--iBits == -1)
+                {
+                    bits = span[--iBytes];
+                    iBits = 7;
+                }
 
                 b += size;
-
-                if (++iBits == 8)
-                {
-                    bits = span[++iBytes];
-                    iBits = 0;
-                }
             } while (true);
         }
         else

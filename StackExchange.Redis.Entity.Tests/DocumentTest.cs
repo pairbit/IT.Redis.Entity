@@ -1,5 +1,6 @@
 ﻿using DocLib;
 using DocLib.RedisEntity;
+using StackExchange.Redis.Entity.Factories;
 using StackExchange.Redis.Entity.Formatters;
 
 namespace StackExchange.Redis.Entity.Tests;
@@ -16,6 +17,7 @@ public class DocumentTest
         var connection = ConnectionMultiplexer.Connect("localhost:6381,defaultDatabase=0,syncTimeout=5000,allowAdmin=False,connectTimeout=5000,ssl=False,abortConnect=False");
         _db = connection.GetDatabase()!;
 
+        RedisValueFormatterRegistry.RegisterEnumerableFactory(StackFactory.Default, typeof(IEnumerable<>));
         RedisValueFormatterRegistry.RegisterEnumerableFactory(EquatableListFactory.Default, typeof(List<>));
         RedisValueFormatterRegistry.Register(new UnmanagedEnumerableFormatter<DocumentVersionInfos, DocumentVersionInfo>(x => new DocumentVersionInfos(x)));
     }
@@ -77,7 +79,7 @@ public class DocumentTest
             //doc2.Decimals = new decimal?[4];
             //doc2.Decimals = new LinkedList<decimal?>();
             //doc2.Decimals = new Queue<decimal?>(new decimal?[] { 4534 });
-            doc2.Decimals = new Stack<decimal?>(new decimal?[] { 4534 });
+            //doc2.Decimals = new Stack<decimal?>(new decimal?[] { 4534 });
 
             _db.EntityLoad<IDocument>(doc2, Key);
 
