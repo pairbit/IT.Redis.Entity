@@ -179,11 +179,20 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
 
         var enumerableType = enumerable.GetType();
 
-        if (!enumerableType.IsGenericType) throw new ArgumentException($"Registered type '{enumerableType.FullName}' is not generic type", nameof(factory));
+        Type baseType;
 
-        var genericType = enumerableType.GetGenericTypeDefinition();
+        if (enumerableType.IsArray)
+        {
+            baseType = typeof(Array);
+        }
+        else
+        {
+            if (!enumerableType.IsGenericType) throw new ArgumentException($"Registered type '{enumerableType.FullName}' is not generic type", nameof(factory));
 
-        _unmanagedGenericEnumerableTypes[genericType] = factory;
+            baseType = enumerableType.GetGenericTypeDefinition();
+
+            _unmanagedGenericEnumerableTypes[baseType] = factory;
+        }
 
         if (genericTypes != null && genericTypes.Length > 0)
         {
@@ -195,7 +204,7 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
                     throw new ArgumentException($"Registered type '{genericTypeBase.FullName}' is not generic type", nameof(genericTypes));
 
                 if (!genericTypeBase.MakeGenericType(typeof(int)).IsAssignableFrom(enumerableType))
-                    throw new ArgumentException($"Registered type '{genericTypeBase.FullName}' is not assignable from type '{genericType.FullName}'", nameof(genericTypes));
+                    throw new ArgumentException($"Registered type '{genericTypeBase.FullName}' is not assignable from type '{baseType.FullName}'", nameof(genericTypes));
 
                 _unmanagedGenericEnumerableTypes[genericTypeBase] = factory;
             }

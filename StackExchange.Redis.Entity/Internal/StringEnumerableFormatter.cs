@@ -39,9 +39,8 @@ internal class StringEnumerableFormatter
             {
                 var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
 
-                if (strlen == int.MaxValue) array[i] = null;
-                else if (strlen == 0) array[i] = string.Empty;
-                else
+                if (strlen == 0) array[i] = string.Empty;
+                else if (strlen != int.MaxValue)
                 {
                     array[i] = encoding.GetString(span.Slice(0, strlen));
                     span = span.Slice(strlen);

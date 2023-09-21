@@ -12,5 +12,5 @@ public record SimpleRecord
 
     public string?[]? Strings { get; set; }
 
-    public IList<string?>? StringList { get; set; }
+    public IReadOnlyCollection<string?>? StringCollection { get; set; }
 }

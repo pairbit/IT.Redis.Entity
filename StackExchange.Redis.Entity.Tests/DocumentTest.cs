@@ -16,7 +16,8 @@ public class DocumentTest
     {
         var connection = ConnectionMultiplexer.Connect("localhost:6381,defaultDatabase=0,syncTimeout=5000,allowAdmin=False,connectTimeout=5000,ssl=False,abortConnect=False");
         _db = connection.GetDatabase()!;
-
+        
+        //RedisValueFormatterRegistry.RegisterEnumerableFactory(LinkedListFactory.Default, typeof(IReadOnlyCollection<>));
         RedisValueFormatterRegistry.RegisterEnumerableFactory(StackFactory.Default, typeof(IEnumerable<>));
         RedisValueFormatterRegistry.RegisterEnumerableFactory(EquatableListFactory.Default, typeof(List<>));
         RedisValueFormatterRegistry.Register(new UnmanagedEnumerableFormatter<DocumentVersionInfos, DocumentVersionInfo>(x => new DocumentVersionInfos(x)));
@@ -104,18 +105,21 @@ public class DocumentTest
             SizeLong = DocumentSizeLong.Medium,
             //Strings = new string?[] { "" },
             Strings = new string?[] { null, "", "test", "mystr", " ", "ascii" },
-            StringList = new string?[] { null, "", "test", "mystr", " ", "ascii" },
+            StringCollection = new string?[] { null, "", "test", "mystr", " ", "ascii" },
         };
         try
         {
             _db.EntitySet(Key, entity);
 
-            var entity2 = _db.EntityGet<SimpleRecord>(Key);
-          
-            Assert.That(entity.StringList.SequenceEqual(entity2.StringList), Is.True);
+            var entity2 = new SimpleRecord();
+            entity2.StringCollection = new List<string?>();
+
+            _db.EntityLoad(entity2, Key);
+            
+            Assert.That(entity.StringCollection.SequenceEqual(entity2.StringCollection), Is.True);
             Assert.That(entity.Strings.SequenceEqual(entity2.Strings), Is.True);
 
-            entity2.StringList = entity.StringList = null;
+            entity2.StringCollection = entity.StringCollection = null;
             entity2.Strings = entity.Strings = null;
 
             Assert.That(entity, Is.EqualTo(entity2));
