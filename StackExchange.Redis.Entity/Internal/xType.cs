@@ -4,6 +4,10 @@ namespace StackExchange.Redis.Entity.Internal;
 
 internal static class xType
 {
+    static readonly Type NullableType = typeof(Nullable<>);
+
+    public static bool IsNullable(this Type type) => type.IsGenericType && !type.IsGenericTypeDefinition && type.GetGenericTypeDefinition() == NullableType;
+
     public static bool IsUnmanaged(this Type type)
     {
         if (type.IsPrimitive || type.IsPointer || type.IsEnum) return true;

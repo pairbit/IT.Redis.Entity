@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace DocLib;
+﻿namespace DocLib;
 
 public record SimpleRecord
 {
@@ -16,9 +14,11 @@ public record SimpleRecord
 
     public IReadOnlyCollection<string?>? StringCollection { get; set; }
 
-    public ICollection<KeyValuePair<int,int>> KeyValuePairs { get; set; }
+    public ICollection<KeyValuePair<int,int?>> KeyValuePairs { get; set; }
 
     public IDictionary<int, int> Dictionary { get; set; }
+
+    public IReadOnlyDictionary<int, int?> ReadOnlyDictionary { get; set; }
 
     public DocumentVersionInfoDictionary Versions { get; set; }
 

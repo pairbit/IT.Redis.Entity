@@ -51,6 +51,7 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
     static readonly Type StringEnumerableFormatterType = typeof(StringEnumerableFormatter<>);
     static readonly Type UnmanagedArrayFormatterType = typeof(UnmanagedArrayFormatter<>);
     static readonly Type UnmanagedDictionaryFormatterType = typeof(UnmanagedDictionaryFormatter<,,>);
+    static readonly Type UnmanagedDictionaryNullableFormatterType = typeof(UnmanagedDictionaryNullableFormatter<,,>);
     static readonly Type UnmanagedEnumerableFormatterType = typeof(UnmanagedEnumerableFormatter<,>);
     static readonly Type UnmanagedEnumerableNullableFormatterType = typeof(UnmanagedEnumerableNullableFormatter<,>);
     static readonly Type EnumerableFactoryProxyType = typeof(EnumerableFactoryProxy<,>);
@@ -300,12 +301,13 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
 
                 if (elementType.IsUnmanaged())
                 {
-                    var formatterType = elementType.IsGenericType && elementType.GetGenericTypeDefinition().Equals(NullableType)
-                        ? UnmanagedEnumerableNullableFormatterType : UnmanagedEnumerableFormatterType;
+                    var formatterType = elementType.IsNullable()
+                        ? UnmanagedEnumerableNullableFormatterType.MakeGenericType(type, elementType.GetGenericArguments()[0])
+                        : UnmanagedEnumerableFormatterType.MakeGenericType(type, elementType);
 
                     var genericFactory = Activator.CreateInstance(EnumerableFactoryProxyType.MakeGenericType(type, elementType), factory);
 
-                    return Activator.CreateInstance(formatterType.MakeGenericType(type, elementType.GetNullableUnderlyingType()), genericFactory);
+                    return Activator.CreateInstance(formatterType, genericFactory);
                 }
 
                 if (elementType == typeof(string))
@@ -325,11 +327,15 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
                 var keyType = args[0];
                 var valueType = args[1];
 
-                if (keyType.IsUnmanaged() && valueType.IsUnmanaged())
+                if (keyType.IsUnmanaged() && !keyType.IsNullable() && valueType.IsUnmanaged())
                 {
+                    var formatterType = valueType.IsNullable()
+                        ? UnmanagedDictionaryNullableFormatterType.MakeGenericType(type, keyType, valueType.GetGenericArguments()[0])
+                        : UnmanagedDictionaryFormatterType.MakeGenericType(type, keyType, valueType);
+
                     var genericFactory = Activator.CreateInstance(DictionaryFactoryProxyType.MakeGenericType(type, keyType, valueType), dictionaryFactory);
 
-                    return Activator.CreateInstance(UnmanagedDictionaryFormatterType.MakeGenericType(type, keyType, valueType), genericFactory);
+                    return Activator.CreateInstance(formatterType, genericFactory);
                 }
             }
         }

@@ -3,6 +3,7 @@ using DocLib.RedisEntity;
 using StackExchange.Redis.Entity.Factories;
 using StackExchange.Redis.Entity.Formatters;
 using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 
 namespace StackExchange.Redis.Entity.Tests;
 
@@ -17,7 +18,7 @@ public class DocumentTest
     {
         var connection = ConnectionMultiplexer.Connect("localhost:6381,defaultDatabase=0,syncTimeout=5000,allowAdmin=False,connectTimeout=5000,ssl=False,abortConnect=False");
         _db = connection.GetDatabase()!;
-        
+
         //RedisValueFormatterRegistry.RegisterEnumerableFactory(LinkedListFactory.Default, typeof(IReadOnlyCollection<>));
         RedisValueFormatterRegistry.RegisterEnumerableFactory(StackFactory.Default, typeof(IEnumerable<>), typeof(IReadOnlyCollection<>));
         RedisValueFormatterRegistry.RegisterEnumerableFactory(EquatableListFactory.Default, typeof(List<>));
@@ -108,8 +109,9 @@ public class DocumentTest
             SizeLong = DocumentSizeLong.Medium,
             //Strings = new string?[] { "" },
             Strings = new string?[] { null, "", "test", "mystr", " ", "ascii" },
-            KeyValuePairs = new Dictionary<int, int>() { { 0, 1 }, { 1, 2 } },
+            KeyValuePairs = new Dictionary<int, int?>() { { 0, 1 }, { 1, null } },
             Dictionary = new Dictionary<int, int>() { { 0, 1 }, { 1, 2 } },
+            ReadOnlyDictionary = new ReadOnlyDictionary<int, int?>(new Dictionary<int, int?>() { { 0, null }, { 1, 2 } }),
             StringCollection = new string?[] { null, "", "test", "mystr", " ", "ascii" },
             Versions = new DocumentVersionInfoDictionary(3) { { Guid.NewGuid(), new DocumentVersionInfo(Guid.NewGuid(), Guid.NewGuid(), DateTime.Now, 34) } },
 #if NETCOREAPP3_1_OR_GREATER
@@ -127,21 +129,18 @@ public class DocumentTest
 
 #if NETCOREAPP3_1_OR_GREATER
             Assert.That(entity.ImmutableList.Cast<int?>().SequenceEqual(entity2.ImmutableList), Is.True);
-            entity2.ImmutableList = entity.ImmutableList = default;
 #endif
             Assert.That(entity.KeyValuePairs.SequenceEqual(entity2.KeyValuePairs), Is.True);
             Assert.That(entity.Dictionary.SequenceEqual(entity2.Dictionary), Is.True);
+            Assert.That(entity.ReadOnlyDictionary.SequenceEqual(entity2.ReadOnlyDictionary), Is.True);
             Assert.That(entity.StringCollection.SequenceEqual(entity2.StringCollection), Is.True);
             Assert.That(entity.Strings.SequenceEqual(entity2.Strings), Is.True);
             Assert.That(entity.Versions.SequenceEqual(entity2.Versions), Is.True);
 
-            entity2.Versions = entity.Versions = null;
-            entity2.Dictionary = entity.Dictionary = null;
-            entity2.KeyValuePairs = entity.KeyValuePairs = null;
-            entity2.StringCollection = entity.StringCollection = null;
-            entity2.Strings = entity.Strings = null;
-
-            Assert.That(entity, Is.EqualTo(entity2));
+            Assert.That(entity.Decimal, Is.EqualTo(entity2.Decimal));
+            Assert.That(entity.DateTimeKind, Is.EqualTo(entity2.DateTimeKind));
+            Assert.That(entity.Size, Is.EqualTo(entity2.Size));
+            Assert.That(entity.SizeLong, Is.EqualTo(entity2.SizeLong));
         }
         finally
         {
