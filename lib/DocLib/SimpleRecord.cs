@@ -26,6 +26,18 @@ public record SimpleRecord
 
     public SortedList<int, int?> SortedList { get; set; }
 
+    //public ConcurrentDictionary<int,int> ConcurrentDictionary { get; set; }
+
+    //public IProducerConsumerCollection<int> ProducerConsumerCollection { get; set; }
+
+    //public ConcurrentQueue<int> ConcurrentQueue { get; set; }
+
+    //public ConcurrentStack<int> ConcurrentStack { get; set; }
+
+    //public ConcurrentBag<int> ConcurrentBag { get; set; }
+
+    //public BlockingCollection<int> BlockingCollection { get; set; }
+
     //public IDictionary<string, string> StringDictionary { get; set; }
 
 #if NETCOREAPP3_1_OR_GREATER

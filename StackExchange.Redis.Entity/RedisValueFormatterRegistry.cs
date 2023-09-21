@@ -134,6 +134,7 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
         RegisterEnumerableFactory(ImmutableStackFactory.Default, typeof(System.Collections.Immutable.IImmutableStack<>));
         RegisterEnumerableFactory(ImmutableQueueFactory.Default, typeof(System.Collections.Immutable.IImmutableQueue<>));
         RegisterDictionaryFactory(ImmutableDictionaryFactory.Default, typeof(System.Collections.Immutable.IImmutableDictionary<,>));
+        RegisterDictionaryFactory(ImmutableSortedDictionaryFactory.Default);
 #endif
         RegisterDictionaryFactory(DictionaryFactory.Default, typeof(IDictionary<,>));
         RegisterDictionaryFactory(ReadOnlyDictionaryFactory.Default, typeof(IReadOnlyDictionary<,>));
