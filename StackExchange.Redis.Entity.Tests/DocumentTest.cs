@@ -110,7 +110,7 @@ public class DocumentTest
             Strings = new string?[] { null, "", "test", "mystr", " ", "ascii" },
             StringCollection = new string?[] { null, "", "test", "mystr", " ", "ascii" },
 #if NETCOREAPP3_1_OR_GREATER
-            ImmutableList = new int?[] { 0, null }.ToImmutableArray()
+            ImmutableList = ImmutableStack.Create(new int?[] { 0, null })
 #endif
         };
         try

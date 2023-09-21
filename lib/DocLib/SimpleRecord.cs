@@ -16,7 +16,7 @@ public record SimpleRecord
 
 #if NETCOREAPP3_1_OR_GREATER
 
-    public System.Collections.Immutable.ImmutableArray<int?> ImmutableList { get; set; }
+    public System.Collections.Immutable.IImmutableStack<int?> ImmutableList { get; set; }
 
 #endif
 }

@@ -18,7 +18,11 @@ public class ImmutableStackFactory : IEnumerableFactory
 
         builder(array, in state);
 
-        return ImmutableStack.Create(array);
+        var stack = ImmutableStack<T>.Empty;
+
+        for (int i = array.Length - 1; i >= 0; i--) stack = stack.Push(array[i]);
+
+        return stack;
     }
 }
 
