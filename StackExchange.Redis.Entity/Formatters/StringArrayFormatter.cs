@@ -45,26 +45,18 @@ public class StringArrayFormatter : IRedisValueFormatter<string?[]>
 
             if (value == null || value.Length != length) value = new string?[length];
 
-            var offset = Size;
+            span = span.Slice(Size * value.Length + Size);
 
-            for (int i = 0; i < value.Length; i++)
+            for (int i = 0, b = Size; i < value.Length; i++, b += Size)
             {
-                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, offset));
+                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
 
-                if (strlen == int.MaxValue)
-                {
-                    value[i] = null;
-                    offset += Size;
-                }
-                else if (strlen == 0)
-                {
-                    value[i] = string.Empty;
-                    offset += Size;
-                }
+                if (strlen == int.MaxValue) value[i] = null;
+                else if (strlen == 0) value[i] = string.Empty;
                 else
                 {
-                    value[i] = _encoding.GetString(span.Slice(offset + Size, strlen));
-                    offset += Size + strlen;
+                    value[i] = _encoding.GetString(span.Slice(0, strlen));
+                    span = span.Slice(strlen);
                 }
             }
         }
@@ -84,40 +76,25 @@ public class StringArrayFormatter : IRedisValueFormatter<string?[]>
 
         if (length > Util.RedisValueMaxLength) throw Ex.InvalidLengthCollection(typeof(string?[]), length, Util.RedisValueMaxLength);
 
+        //[Size] array.length
+        //[Size * array.length] lengths
+        //Data
         var bytes = new byte[length];
 
-        //[Size] array.length
         Unsafe.WriteUnaligned(ref bytes[0], value.Length);
 
-        var offset = Size;
-        var span = bytes.AsSpan();
+        var span = bytes.AsSpan(Size * value.Length + Size);
 
-        for (int i = 0; i < value.Length; i++)
+        for (int i = 0, b = Size; i < value.Length; i++, b += Size)
         {
             var str = value[i];
-
-            if (str == null)
-            {
-                //[Size] string.length
-                Unsafe.WriteUnaligned(ref bytes[offset], int.MaxValue);
-
-                offset += Size;
-            }
-            else if (str.Length == 0)
-            {
-                Unsafe.WriteUnaligned(ref bytes[offset], 0);
-
-                offset += Size;
-            }
+            if (str == null) Unsafe.WriteUnaligned(ref bytes[b], int.MaxValue);
+            else if (str.Length == 0) Unsafe.WriteUnaligned(ref bytes[b], 0);
             else
             {
-                //[string.length] string
-                var written = _encoding.GetBytes(str, span.Slice(offset + Size));
-
-                //[Size] string.length
-                Unsafe.WriteUnaligned(ref bytes[offset], written);
-
-                offset += Size + written;
+                var written = _encoding.GetBytes(str, span);
+                Unsafe.WriteUnaligned(ref bytes[b], written);
+                span = span.Slice(written);
             }
         }
 
