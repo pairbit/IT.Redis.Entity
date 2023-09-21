@@ -24,6 +24,8 @@ public record SimpleRecord
 
     public SortedDictionary<int, int> SortedDictionary { get; set; }
 
+    public SortedList<int, int?> SortedList { get; set; }
+
     //public IDictionary<string, string> StringDictionary { get; set; }
 
 #if NETCOREAPP3_1_OR_GREATER
