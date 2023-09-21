@@ -2,6 +2,9 @@
 using DocLib.RedisEntity;
 using StackExchange.Redis.Entity.Factories;
 using StackExchange.Redis.Entity.Formatters;
+using System.Collections.Immutable;
+using System.Collections.Specialized;
+using System.Linq;
 
 namespace StackExchange.Redis.Entity.Tests;
 
@@ -106,6 +109,9 @@ public class DocumentTest
             //Strings = new string?[] { "" },
             Strings = new string?[] { null, "", "test", "mystr", " ", "ascii" },
             StringCollection = new string?[] { null, "", "test", "mystr", " ", "ascii" },
+#if NETCOREAPP3_1_OR_GREATER
+            ImmutableList = new int?[] { 0, null }.ToImmutableArray()
+#endif
         };
         try
         {
@@ -115,7 +121,11 @@ public class DocumentTest
             entity2.StringCollection = new Stack<string?>();
 
             _db.EntityLoad(entity2, Key);
-            
+
+#if NETCOREAPP3_1_OR_GREATER
+            Assert.That(entity.ImmutableList.Cast<int?>().SequenceEqual(entity2.ImmutableList), Is.True);
+            entity2.ImmutableList = entity.ImmutableList = default;
+#endif
             Assert.That(entity.StringCollection.SequenceEqual(entity2.StringCollection), Is.True);
             Assert.That(entity.Strings.SequenceEqual(entity2.Strings), Is.True);
 

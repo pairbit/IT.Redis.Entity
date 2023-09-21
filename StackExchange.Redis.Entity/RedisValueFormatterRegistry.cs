@@ -122,6 +122,14 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
 #if NET6_0_OR_GREATER
         RegisterEnumerableFactory(ReadOnlyHashSetFactory.Default, typeof(IReadOnlySet<>));
 #endif
+#if NETCOREAPP3_1_OR_GREATER
+        RegisterEnumerableFactory(ImmutableArrayFactory.Default);
+        RegisterEnumerableFactory(ImmutableListFactory.Default, typeof(System.Collections.Immutable.IImmutableList<>));
+        RegisterEnumerableFactory(ImmutableHashSetFactory.Default, typeof(System.Collections.Immutable.IImmutableSet<>));
+        RegisterEnumerableFactory(ImmutableStackFactory.Default, typeof(System.Collections.Immutable.IImmutableStack<>));
+        RegisterEnumerableFactory(ImmutableQueueFactory.Default, typeof(System.Collections.Immutable.IImmutableQueue<>));
+        //RegisterEnumerableFactory(ImmutableQueueFactory.Default, typeof(System.Collections.Immutable.IImmutableDictionary<,>));
+#endif
     }
 
     private RedisValueFormatterRegistry() { }

@@ -13,4 +13,10 @@ public record SimpleRecord
     public string?[]? Strings { get; set; }
 
     public IReadOnlyCollection<string?>? StringCollection { get; set; }
+
+#if NETCOREAPP3_1_OR_GREATER
+
+    public System.Collections.Immutable.ImmutableArray<int?> ImmutableList { get; set; }
+
+#endif
 }
