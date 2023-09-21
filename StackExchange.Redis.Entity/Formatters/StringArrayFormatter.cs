@@ -62,42 +62,5 @@ public class StringArrayFormatter : IRedisValueFormatter<string?[]>
         }
     }
 
-    public RedisValue Serialize(in string?[]? value)
-    {
-        if (value == null) return RedisValues.Zero;
-        if (value.Length == 0) return RedisValue.EmptyString;
-
-        var length = Size;
-        for (int i = 0; i < value.Length; i++)
-        {
-            var str = value[i];
-            length += Size + (str == null || str.Length == 0 ? 0 : _encoding.GetByteCount(str.AsSpan()));
-        }
-
-        if (length > Util.RedisValueMaxLength) throw Ex.InvalidLengthCollection(typeof(string?[]), length, Util.RedisValueMaxLength);
-
-        //[Size] array.length
-        //[Size * array.length] lengths
-        //Data
-        var bytes = new byte[length];
-
-        Unsafe.WriteUnaligned(ref bytes[0], value.Length);
-
-        var span = bytes.AsSpan(Size * value.Length + Size);
-
-        for (int i = 0, b = Size; i < value.Length; i++, b += Size)
-        {
-            var str = value[i];
-            if (str == null) Unsafe.WriteUnaligned(ref bytes[b], int.MaxValue);
-            else if (str.Length == 0) Unsafe.WriteUnaligned(ref bytes[b], 0);
-            else
-            {
-                var written = _encoding.GetBytes(str, span);
-                Unsafe.WriteUnaligned(ref bytes[b], written);
-                span = span.Slice(written);
-            }
-        }
-
-        return bytes;
-    }
+    public RedisValue Serialize(in string?[]? value) => value == null ? RedisValues.Zero : StringEnumerableFormatter.Serialize(_encoding, value);
 }
