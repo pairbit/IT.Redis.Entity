@@ -37,9 +37,11 @@ internal static class UnmanagedEnumerableFormatter
         }
         else if (buffer is Stack<T> stack)
         {
-            for (int i = 0, b = 0; i < count; i++, b += size)
+            spanRef = ref Unsafe.Add(ref spanRef, span.Length);
+
+            for (int i = 0, b = size; i < count; i++, b += size)
             {
-                stack.Push(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
+                stack.Push(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)));
             }
         }
         else

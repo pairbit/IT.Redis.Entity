@@ -79,6 +79,9 @@ public class DocumentDataContract : IDocument
 
     [DataMember(Order = 20)]
     public IEnumerable<decimal?>? Decimals { get; set; }
+    
+    [DataMember(Order = 21)]
+    public IEnumerable<char>? Chars { get; set; }
 
     IReadOnlyList<Guid?>? IReadOnlyDocument.TagIds => TagIds;
 }

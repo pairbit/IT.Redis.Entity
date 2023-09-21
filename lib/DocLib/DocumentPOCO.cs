@@ -58,5 +58,7 @@ public record DocumentPOCO : IDocument
 
     public IEnumerable<decimal?>? Decimals { get; set; }
 
+    public IEnumerable<char>? Chars { get; set; }
+
     IReadOnlyList<Guid?>? IReadOnlyDocument.TagIds => TagIds?.AsReadOnly();
 }

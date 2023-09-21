@@ -79,8 +79,8 @@ public class DocumentTest
             //doc2.Decimals = new decimal?[4];
             //doc2.Decimals = new LinkedList<decimal?>();
             //doc2.Decimals = new Queue<decimal?>(new decimal?[] { 4534 });
-            //doc2.Decimals = new Stack<decimal?>(new decimal?[] { 4534 });
-
+            doc2.Decimals = new Stack<decimal?>(new decimal?[] { 4534 });
+            doc2.Chars = new Stack<char>(new char[] { '0' });
             _db.EntityLoad<IDocument>(doc2, Key);
 
             Assert.That(ReferenceEquals(doc, doc2), Is.False);

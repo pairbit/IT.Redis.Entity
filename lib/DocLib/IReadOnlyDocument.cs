@@ -5,53 +5,55 @@ namespace DocLib;
 
 public interface IReadOnlyDocument
 {
-    public Guid Id { get; }
+    Guid Id { get; }
 
-    public Guid ExternalId { get; }
+    Guid ExternalId { get; }
 
-    public string? Name { get; }
+    string? Name { get; }
 
-    public char Character { get; }
+    char Character { get; }
 
 #if NET6_0_OR_GREATER
 
-    public DateOnly StartDate { get; }
+    DateOnly StartDate { get; }
 
-    public DateOnly? EndDate { get; }
+    DateOnly? EndDate { get; }
 
 #endif
 
-    public long Price { get; }
+    long Price { get; }
 
-    public bool IsDeleted { get; }
+    bool IsDeleted { get; }
 
-    public DocumentSize Size { get; }
+    DocumentSize Size { get; }
 
-    public DateTime Created { get; }
+    DateTime Created { get; }
 
-    public DateTime? Modified { get; }
+    DateTime? Modified { get; }
 
-    public byte[]? Content { get; }
+    byte[]? Content { get; }
 
-    public ReadOnlyMemory<byte>? MemoryBytes { get; }
+    ReadOnlyMemory<byte>? MemoryBytes { get; }
 
-    public BigInteger BigInteger { get; }
+    BigInteger BigInteger { get; }
 
-    public BitArray? Bits { get; }
+    BitArray? Bits { get; }
 
-    public Version? Version { get; }
+    Version? Version { get; }
 
-    public Uri? Url { get; }
+    Uri? Url { get; }
 
-    public int[]? IntArray { get; }
+    int[]? IntArray { get; }
 
-    public int?[]? IntArrayN { get; }
+    int?[]? IntArrayN { get; }
 
-    public IReadOnlyList<Guid?>? TagIds { get; }
+    IReadOnlyList<Guid?>? TagIds { get; }
 
-    public DocumentVersionInfo? VersionInfo { get; }
+    DocumentVersionInfo? VersionInfo { get; }
 
-    public DocumentVersionInfos? VersionInfos { get; }
+    DocumentVersionInfos? VersionInfos { get; }
 
-    public IEnumerable<decimal?>? Decimals { get; }
+    IEnumerable<decimal?>? Decimals { get; }
+
+    IEnumerable<char>? Chars { get; }
 }

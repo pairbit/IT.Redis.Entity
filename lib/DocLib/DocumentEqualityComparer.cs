@@ -34,7 +34,8 @@ public class DocumentEqualityComparer : IEqualityComparer<IReadOnlyDocument>
         Seq(x.IntArrayN, y.IntArrayN) &&
         Seq(x.TagIds, y.TagIds) &&
         Seq(x.VersionInfos, y.VersionInfos) &&
-        Seq(x.Decimals, y.Decimals)
+        Seq(x.Decimals, y.Decimals) &&
+        Seq(x.Chars, y.Chars)
         );
 
     public int GetHashCode(IReadOnlyDocument obj)

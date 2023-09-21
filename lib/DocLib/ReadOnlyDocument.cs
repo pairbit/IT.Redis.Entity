@@ -61,4 +61,6 @@ public class ReadOnlyDocument : IReadOnlyDocument
     public DocumentVersionInfos? VersionInfos => _document.VersionInfos;
 
     public IEnumerable<decimal?>? Decimals => _document.Decimals;
+
+    public IEnumerable<char>? Chars => _document.Chars;
 }
