@@ -8,3 +8,10 @@ public interface IEnumerableFactory
 
     IEnumerable<T> New<T, TState>(int capacity, in TState state, EnumerableBuilder<T, TState> builder);
 }
+
+public interface IDictionaryFactory
+{
+    IDictionary<TKey, TValue> Empty<TKey, TValue>();
+
+    IDictionary<TKey, TValue> New<TKey, TValue, TState>(int capacity, in TState state, EnumerableBuilder<KeyValuePair<TKey, TValue>, TState> builder);
+}

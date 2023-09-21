@@ -1,4 +1,6 @@
-﻿namespace DocLib;
+﻿using System.Collections.Generic;
+
+namespace DocLib;
 
 public record SimpleRecord
 {
@@ -13,6 +15,14 @@ public record SimpleRecord
     public string?[]? Strings { get; set; }
 
     public IReadOnlyCollection<string?>? StringCollection { get; set; }
+
+    public ICollection<KeyValuePair<int,int>> KeyValuePairs { get; set; }
+
+    public IDictionary<int, int> Dictionary { get; set; }
+
+    public DocumentVersionInfoDictionary Versions { get; set; }
+
+    //public IDictionary<string, string> StringDictionary { get; set; }
 
 #if NETCOREAPP3_1_OR_GREATER
 

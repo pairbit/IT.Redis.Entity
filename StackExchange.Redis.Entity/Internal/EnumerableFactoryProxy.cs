@@ -14,3 +14,19 @@ internal class EnumerableFactoryProxy<TEnumerable, T> : IEnumerableFactory<TEnum
     public TEnumerable New<TState>(int capacity, in TState state, EnumerableBuilder<T, TState> builder)
         => (TEnumerable)_factory.New(capacity, in state, builder);
 }
+
+internal class DictionaryFactoryProxy<TDictionary, TKey, TValue> : IDictionaryFactory<TDictionary, TKey, TValue>
+    where TDictionary : IEnumerable<KeyValuePair<TKey, TValue>>
+{
+    private readonly IDictionaryFactory _factory;
+
+    public DictionaryFactoryProxy(IDictionaryFactory factory)
+    {
+        _factory = factory ?? throw new ArgumentNullException(nameof(factory));
+    }
+
+    public TDictionary Empty() => (TDictionary)_factory.Empty<TKey, TValue>();
+
+    public TDictionary New<TState>(int capacity, in TState state, EnumerableBuilder<KeyValuePair<TKey, TValue>, TState> builder)
+        => (TDictionary)_factory.New(capacity, in state, builder);
+}

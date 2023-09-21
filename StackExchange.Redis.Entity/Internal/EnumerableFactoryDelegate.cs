@@ -22,3 +22,27 @@ internal class EnumerableFactoryDelegate<TEnumerable, T> : IEnumerableFactory<TE
         return enumerable;
     }
 }
+
+internal class DictionaryFactoryDelegate<TDictionary, TKey, TValue> : IDictionaryFactory<TDictionary, TKey, TValue>
+    where TDictionary : IEnumerable<KeyValuePair<TKey, TValue>>
+{
+    private readonly DictionaryFactory<TDictionary, TKey, TValue> _factory;
+
+    public DictionaryFactoryDelegate(DictionaryFactory<TDictionary, TKey, TValue> factory)
+    {
+        _factory = factory ?? throw new ArgumentNullException(nameof(factory));
+    }
+
+    public TDictionary Empty() => _factory(0);
+
+    public TDictionary New<TState>(int capacity, in TState state, EnumerableBuilder<KeyValuePair<TKey, TValue>, TState> builder)
+    {
+        if (capacity == 0) return _factory(0);
+
+        var dictionary = _factory(capacity);
+
+        builder(dictionary, in state);
+
+        return dictionary;
+    }
+}
