@@ -124,7 +124,9 @@ public class DocumentTest
             ConcurrentStack = new ConcurrentStack<int>(new int[] { 4, 5, 6 }),
             BlockingCollection = new BlockingCollection<int>(new ConcurrentQueue<int>(new int[] { 7, 8, 9 })),
 #if NETCOREAPP3_1_OR_GREATER
-            ImmutableList = ImmutableStack.Create(new int?[] { 0, null })
+            ImmutableList = ImmutableStack.Create(new int?[] { 0, null }),
+            Tuple =new Tuple<int, int> (0, -1),
+            NullableTuple = (null, -1),
 #endif
         };
         try
@@ -138,6 +140,8 @@ public class DocumentTest
 
 #if NETCOREAPP3_1_OR_GREATER
             Assert.That(entity.ImmutableList.Cast<int?>().SequenceEqual(entity2.ImmutableList), Is.True);
+            Assert.That(entity.Tuple, Is.EqualTo(entity2.Tuple));
+            Assert.That(entity.NullableTuple, Is.EqualTo(entity2.NullableTuple));
 #endif
             Assert.That(entity.KeyValuePairs.SequenceEqual(entity2.KeyValuePairs), Is.True);
             Assert.That(entity.Dictionary.SequenceEqual(entity2.Dictionary), Is.True);

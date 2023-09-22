@@ -46,5 +46,9 @@ public record SimpleRecord
 
     public System.Collections.Immutable.IImmutableStack<int?> ImmutableList { get; set; }
 
+    public (int, int) Tuple { get; set; }
+
+    public (int?, int?) NullableTuple { get; set; }
+
 #endif
 }
