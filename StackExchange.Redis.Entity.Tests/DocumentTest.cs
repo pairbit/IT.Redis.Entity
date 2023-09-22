@@ -118,10 +118,10 @@ public class DocumentTest
             StringCollection = new string?[] { null, "", "test", "mystr", " ", "ascii" },
             Versions = new DocumentVersionInfoDictionary(3) { { Guid.NewGuid(), new DocumentVersionInfo(Guid.NewGuid(), Guid.NewGuid(), DateTime.Now, 34) } },
             ConcurrentDictionary = new ConcurrentDictionary<int, int>(new Dictionary<int, int>() { { 0, 1 }, { 1, 2 } }),
-            ProducerConsumerCollection = new ConcurrentBag<int>() { 6, 9, 1 },
-            ConcurrentBag = new ConcurrentBag<int>() { 5, 7, 2 },
-            ConcurrentQueue = new ConcurrentQueue<int>(new int[] { 1, 2, 3 }),
-            ConcurrentStack = new ConcurrentStack<int>(new int[] { 4, 5, 6 }),
+            ProducerConsumerCollection = new ConcurrentBag<int?>() { 6, null, 1 },
+            ConcurrentBag = new ConcurrentBag<int?>() { 5, null, 2 },
+            ConcurrentQueue = new ConcurrentQueue<int?>(new int?[] { 1, null, 3 }),
+            ConcurrentStack = new ConcurrentStack<int?>(new int?[] { 4, null, 6 }),
             BlockingCollection = new BlockingCollection<int>(new ConcurrentQueue<int>(new int[] { 7, 8, 9 })),
 #if NETCOREAPP3_1_OR_GREATER
             ImmutableList = ImmutableStack.Create(new int?[] { 0, null }),
@@ -155,9 +155,9 @@ public class DocumentTest
             Assert.That(entity.ConcurrentQueue.SequenceEqual(entity2.ConcurrentQueue), Is.True);
             Assert.That(entity.BlockingCollection.SequenceEqual(entity2.BlockingCollection), Is.True);
 
-            Assert.That(entity.ProducerConsumerCollection.OrderBy(x => x).SequenceEqual(entity2.ProducerConsumerCollection.OrderBy(x => x)), Is.True);
-            Assert.That(entity.ConcurrentBag.OrderBy(x => x).SequenceEqual(entity2.ConcurrentBag.OrderBy(x => x)), Is.True);
-            Assert.That(entity.ConcurrentStack.OrderBy(x => x).SequenceEqual(entity2.ConcurrentStack.OrderBy(x => x)), Is.True);
+            Assert.That(entity.ProducerConsumerCollection.SequenceEqual(entity2.ProducerConsumerCollection), Is.True);
+            Assert.That(entity.ConcurrentBag.SequenceEqual(entity2.ConcurrentBag), Is.True);
+            Assert.That(entity.ConcurrentStack.SequenceEqual(entity2.ConcurrentStack), Is.True);
 
             Assert.That(entity.Decimal, Is.EqualTo(entity2.Decimal));
             Assert.That(entity.DateTimeKind, Is.EqualTo(entity2.DateTimeKind));

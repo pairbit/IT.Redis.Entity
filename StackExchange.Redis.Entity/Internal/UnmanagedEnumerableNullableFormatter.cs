@@ -54,23 +54,6 @@ internal static class UnmanagedEnumerableNullableFormatter
                 }
             } while (true);
         }
-        else if (buffer is IProducerConsumerCollection<T?> pcCollection)
-        {
-            do
-            {
-                pcCollection.AddOrThrow((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
-
-                if (++i == count) break;
-
-                b += size;
-
-                if (++iBits == 8)
-                {
-                    bits = span[++iBytes];
-                    iBits = 0;
-                }
-            } while (true);
-        }
         else if (buffer is Queue<T?> queue)
         {
             do
@@ -110,6 +93,71 @@ internal static class UnmanagedEnumerableNullableFormatter
                 }
 
                 b += size;
+            } while (true);
+        }
+        else if (buffer is ConcurrentStack<T?> cStack)
+        {
+            spanRef = ref Unsafe.Add(ref spanRef, iBytes - size);
+            iBits = (count % 8) - 1;
+            if (iBits == -1) iBits = 7;
+            iBytes = span.Length - 1;
+            bits = span[iBytes];
+            i = count;
+
+            do
+            {
+                cStack.Push((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)) : null);
+
+                if (--i == 0) break;
+
+                if (--iBits == -1)
+                {
+                    bits = span[--iBytes];
+                    iBits = 7;
+                }
+
+                b += size;
+            } while (true);
+        }
+        else if (buffer is ConcurrentBag<T?> bag)
+        {
+            spanRef = ref Unsafe.Add(ref spanRef, iBytes - size);
+            iBits = (count % 8) - 1;
+            if (iBits == -1) iBits = 7;
+            iBytes = span.Length - 1;
+            bits = span[iBytes];
+            i = count;
+
+            do
+            {
+                bag.Add((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)) : null);
+
+                if (--i == 0) break;
+
+                if (--iBits == -1)
+                {
+                    bits = span[--iBytes];
+                    iBits = 7;
+                }
+
+                b += size;
+            } while (true);
+        }
+        else if (buffer is IProducerConsumerCollection<T?> pcCollection)
+        {
+            do
+            {
+                pcCollection.AddOrThrow((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
+
+                if (++i == count) break;
+
+                b += size;
+
+                if (++iBits == 8)
+                {
+                    bits = span[++iBytes];
+                    iBits = 0;
+                }
             } while (true);
         }
         else
@@ -233,25 +281,6 @@ internal static class UnmanagedEnumerableNullableFormatter
                 } while (true);
             }
         }
-        else if (value is IProducerConsumerCollection<T?> pcCollection)
-        {
-            pcCollection.ClearOrThrow();
-
-            do
-            {
-                pcCollection.AddOrThrow((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
-
-                if (++i == length) break;
-
-                b += size;
-
-                if (++iBits == 8)
-                {
-                    bits = span[++iBytes];
-                    iBits = 0;
-                }
-            } while (true);
-        }
         else if (value is Queue<T?> queue)
         {
             if (queue.Count > 0) queue.Clear();
@@ -301,6 +330,89 @@ internal static class UnmanagedEnumerableNullableFormatter
                 }
 
                 b += size;
+            } while (true);
+        }
+        else if (value is ConcurrentStack<T?> cStack)
+        {
+            cStack.Clear();
+
+            spanRef = ref Unsafe.Add(ref spanRef, iBytes - size);
+            iBits = (length % 8) - 1;
+            if (iBits == -1) iBits = 7;
+            iBytes = span.Length - 1;
+            bits = span[iBytes];
+            i = length;
+
+            do
+            {
+                cStack.Push((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)) : null);
+
+                if (--i == 0) break;
+
+                if (--iBits == -1)
+                {
+                    bits = span[--iBytes];
+                    iBits = 7;
+                }
+
+                b += size;
+            } while (true);
+        }
+        else if (value is ConcurrentBag<T?> bag)
+        {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+            bag.Clear();
+#else
+            if (!bag.IsEmpty) throw Ex.ClearNotSupported(bag.GetType());
+#endif
+            spanRef = ref Unsafe.Add(ref spanRef, iBytes - size);
+            iBits = (length % 8) - 1;
+            if (iBits == -1) iBits = 7;
+            iBytes = span.Length - 1;
+            bits = span[iBytes];
+            i = length;
+
+            do
+            {
+                bag.Add((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)) : null);
+
+                if (--i == 0) break;
+
+                if (--iBits == -1)
+                {
+                    bits = span[--iBytes];
+                    iBits = 7;
+                }
+
+                b += size;
+            } while (true);
+        }
+        else if (value is IProducerConsumerCollection<T?> pcCollection)
+        {
+            if (pcCollection is ConcurrentQueue<T?> cQueue)
+            {
+                if (!cQueue.IsEmpty)
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+                    cQueue.Clear();
+#else
+                    throw Ex.ClearNotSupported(pcCollection.GetType());
+#endif
+            }
+            else if (pcCollection.Count > 0) throw Ex.ClearNotSupported(pcCollection.GetType());
+
+            do
+            {
+                pcCollection.TryAdd((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
+
+                if (++i == length) break;
+
+                b += size;
+
+                if (++iBits == 8)
+                {
+                    bits = span[++iBytes];
+                    iBits = 0;
+                }
             } while (true);
         }
         else

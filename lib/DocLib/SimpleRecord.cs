@@ -30,13 +30,13 @@ public record SimpleRecord
 
     public ConcurrentDictionary<int, int> ConcurrentDictionary { get; set; }
 
-    public IProducerConsumerCollection<int> ProducerConsumerCollection { get; set; }
+    public IProducerConsumerCollection<int?> ProducerConsumerCollection { get; set; }
 
-    public ConcurrentBag<int> ConcurrentBag { get; set; }
+    public ConcurrentBag<int?> ConcurrentBag { get; set; }
 
-    public ConcurrentQueue<int> ConcurrentQueue { get; set; }
+    public ConcurrentQueue<int?> ConcurrentQueue { get; set; }
 
-    public ConcurrentStack<int> ConcurrentStack { get; set; }
+    public ConcurrentStack<int?> ConcurrentStack { get; set; }
 
     public BlockingCollection<int> BlockingCollection { get; set; }
 

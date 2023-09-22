@@ -29,13 +29,6 @@ internal static class UnmanagedEnumerableFormatter
                 collection.Add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
             }
         }
-        else if (buffer is IProducerConsumerCollection<T> pcCollection)
-        {
-            for (int i = 0, b = 0; i < count; i++, b += size)
-            {
-                pcCollection.AddOrThrow(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
-            }
-        }
         else if (buffer is Queue<T> queue)
         {
             for (int i = 0, b = 0; i < count; i++, b += size)
@@ -50,6 +43,31 @@ internal static class UnmanagedEnumerableFormatter
             for (int i = 0, b = size; i < count; i++, b += size)
             {
                 stack.Push(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)));
+            }
+        }
+        else if (buffer is ConcurrentStack<T> cStack)
+        {
+            spanRef = ref Unsafe.Add(ref spanRef, span.Length);
+
+            for (int i = 0, b = size; i < count; i++, b += size)
+            {
+                cStack.Push(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)));
+            }
+        }
+        else if (buffer is ConcurrentBag<T> bag)
+        {
+            spanRef = ref Unsafe.Add(ref spanRef, span.Length);
+
+            for (int i = 0, b = size; i < count; i++, b += size)
+            {
+                bag.Add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)));
+            }
+        }
+        else if (buffer is IProducerConsumerCollection<T> pcCollection)
+        {
+            for (int i = 0, b = 0; i < count; i++, b += size)
+            {
+                pcCollection.AddOrThrow(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
             }
         }
         else
@@ -122,15 +140,6 @@ internal static class UnmanagedEnumerableFormatter
                 }
             }
         }
-        else if (value is IProducerConsumerCollection<T> pcCollection)
-        {
-            pcCollection.ClearOrThrow();
-
-            for (int i = 0, b = 0; i < length; i++, b += size)
-            {
-                pcCollection.AddOrThrow(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
-            }
-        }
         else if (value is Queue<T> queue)
         {
             if (queue.Count > 0) queue.Clear();
@@ -155,6 +164,49 @@ internal static class UnmanagedEnumerableFormatter
             for (int i = 0, b = size; i < length; i++, b += size)
             {
                 stack.Push(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)));
+            }
+        }
+        else if (value is ConcurrentStack<T> cStack)
+        {
+            cStack.Clear();
+
+            spanRef = ref Unsafe.Add(ref spanRef, span.Length);
+
+            for (int i = 0, b = size; i < length; i++, b += size)
+            {
+                cStack.Push(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)));
+            }
+        }
+        else if (value is ConcurrentBag<T> bag)
+        {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+            bag.Clear();
+#else
+            if (!bag.IsEmpty) throw Ex.ClearNotSupported(bag.GetType());
+#endif
+            spanRef = ref Unsafe.Add(ref spanRef, span.Length);
+
+            for (int i = 0, b = size; i < length; i++, b += size)
+            {
+                bag.Add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)));
+            }
+        }
+        else if (value is IProducerConsumerCollection<T> pcCollection)
+        {
+            if (pcCollection is ConcurrentQueue<T> cQueue)
+            {
+                if (!cQueue.IsEmpty)
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+                    cQueue.Clear();
+#else
+                    throw Ex.ClearNotSupported(pcCollection.GetType());
+#endif
+            }
+            else if (pcCollection.Count > 0) throw Ex.ClearNotSupported(pcCollection.GetType());
+
+            for (int i = 0, b = 0; i < length; i++, b += size)
+            {
+                pcCollection.AddOrThrow(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
             }
         }
         else
