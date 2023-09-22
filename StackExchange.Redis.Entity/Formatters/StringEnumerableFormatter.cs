@@ -39,7 +39,7 @@ public class StringEnumerableFormatter<TEnumerable> : IRedisValueFormatter<TEnum
 
             var length = Unsafe.ReadUnaligned<int>(ref MemoryMarshal.GetReference(span));
 
-            var state = new StringEnumerableFormatter.State(memory, _encoding, length);
+            var state = new BuildState(memory, _encoding, length);
 
             if (value != null)
             {

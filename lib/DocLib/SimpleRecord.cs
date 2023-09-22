@@ -40,7 +40,7 @@ public record SimpleRecord
 
     public BlockingCollection<string?> BlockingCollection { get; set; }
 
-    //public IEnumerable<KeyValuePair<string, string>> StringPairs { get; set; }
+    public IEnumerable<KeyValuePair<string, string>> StringPairs { get; set; }
 
     //public IDictionary<string, string> StringDictionary { get; set; }
 

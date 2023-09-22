@@ -123,7 +123,7 @@ public class DocumentTest
             ConcurrentQueue = new ConcurrentQueue<string?>(new string[] { "4", "5" }),
             ConcurrentStack = new ConcurrentStack<string?>(new string[] { "6", "7" }),
             BlockingCollection = new BlockingCollection<string?>(new ConcurrentQueue<string?>(new string?[] { "8", "9" })),
-            //StringPairs = new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>("a", "b"), new KeyValuePair<string, string>("c", "d") },
+            StringPairs = new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>("a1", "b"), new KeyValuePair<string, string>("c2", "d") },
             //StringDictionary = new Dictionary<string, string>() { { "g", "h" }, { "j", "k" } },
 #if NETCOREAPP3_1_OR_GREATER
             ImmutableList = ImmutableStack.Create(new int?[] { 0, null }),
@@ -165,7 +165,7 @@ public class DocumentTest
             Assert.That(entity.ConcurrentBag.SequenceEqual(entity2.ConcurrentBag), Is.True);
             Assert.That(entity.ConcurrentStack.SequenceEqual(entity2.ConcurrentStack), Is.True);
 
-            //Assert.That(entity.StringPairs.SequenceEqual(entity2.StringPairs), Is.True);
+            Assert.That(entity.StringPairs.SequenceEqual(entity2.StringPairs), Is.True);
             //Assert.That(entity.StringDictionary.SequenceEqual(entity2.StringDictionary), Is.True);
 
             Assert.That(entity.Decimal, Is.EqualTo(entity2.Decimal));

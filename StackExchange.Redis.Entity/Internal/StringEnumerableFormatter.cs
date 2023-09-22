@@ -10,21 +10,7 @@ internal class StringEnumerableFormatter
     private const int Size = 4;
     internal const int MinLength = Size * 2;
 
-    public readonly struct State
-    {
-        public readonly ReadOnlyMemory<byte> Memory;
-        public readonly Encoding Encoding;
-        public readonly int Length;
-
-        public State(ReadOnlyMemory<byte> memory, Encoding encoding, int length)
-        {
-            Memory = memory;
-            Encoding = encoding;
-            Length = length;
-        }
-    }
-
-    internal static void Build(IEnumerable<string?> buffer, in State state)
+    internal static void Build(IEnumerable<string?> buffer, in BuildState state)
     {
         var length = state.Length;
         var encoding = state.Encoding;
@@ -163,7 +149,7 @@ internal class StringEnumerableFormatter
         }
     }
 
-    internal static bool Deserialize(ref IEnumerable<string?> value, in State state)
+    internal static bool Deserialize(ref IEnumerable<string?> value, in BuildState state)
     {
         var length = state.Length;
         var encoding = state.Encoding;
