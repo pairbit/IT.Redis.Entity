@@ -144,6 +144,7 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
         RegisterEnumerableFactory(ConcurrentBagFactory.Default, typeof(IProducerConsumerCollection<>));
         RegisterEnumerableFactory(ConcurrentQueueFactory.Default);
         RegisterEnumerableFactory(ConcurrentStackFactory.Default);
+        RegisterEnumerableFactory(BlockingCollectionFactory.Default);
     }
 
     private RedisValueFormatterRegistry() { }

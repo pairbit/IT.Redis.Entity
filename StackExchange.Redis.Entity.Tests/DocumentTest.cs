@@ -122,6 +122,7 @@ public class DocumentTest
             ConcurrentBag = new ConcurrentBag<int>() { 5, 7, 2 },
             ConcurrentQueue = new ConcurrentQueue<int>(new int[] { 1, 2, 3 }),
             ConcurrentStack = new ConcurrentStack<int>(new int[] { 4, 5, 6 }),
+            BlockingCollection = new BlockingCollection<int>(new ConcurrentQueue<int>(new int[] { 7, 8, 9 })),
 #if NETCOREAPP3_1_OR_GREATER
             ImmutableList = ImmutableStack.Create(new int?[] { 0, null })
 #endif
@@ -148,7 +149,8 @@ public class DocumentTest
             Assert.That(entity.Versions.SequenceEqual(entity2.Versions), Is.True);
             Assert.That(entity.ConcurrentDictionary.SequenceEqual(entity2.ConcurrentDictionary), Is.True);
             Assert.That(entity.ConcurrentQueue.SequenceEqual(entity2.ConcurrentQueue), Is.True);
-            
+            Assert.That(entity.BlockingCollection.SequenceEqual(entity2.BlockingCollection), Is.True);
+
             Assert.That(entity.ProducerConsumerCollection.OrderBy(x => x).SequenceEqual(entity2.ProducerConsumerCollection.OrderBy(x => x)), Is.True);
             Assert.That(entity.ConcurrentBag.OrderBy(x => x).SequenceEqual(entity2.ConcurrentBag.OrderBy(x => x)), Is.True);
             Assert.That(entity.ConcurrentStack.OrderBy(x => x).SequenceEqual(entity2.ConcurrentStack.OrderBy(x => x)), Is.True);
