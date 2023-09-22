@@ -38,7 +38,7 @@ public record SimpleRecord
 
     public ConcurrentStack<int?> ConcurrentStack { get; set; }
 
-    public BlockingCollection<int> BlockingCollection { get; set; }
+    public BlockingCollection<int?> BlockingCollection { get; set; }
 
     //public IDictionary<string, string> StringDictionary { get; set; }
 

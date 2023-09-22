@@ -209,6 +209,15 @@ internal static class UnmanagedEnumerableFormatter
                 pcCollection.AddOrThrow(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
             }
         }
+        else if (value is BlockingCollection<T> bCollection)
+        {
+            if (bCollection.Count > 0) throw Ex.ClearNotSupported(bCollection.GetType());
+
+            for (int i = 0, b = 0; i < length; i++, b += size)
+            {
+                bCollection.Add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
+            }
+        }
         else
         {
             throw new NotImplementedException($"{value.GetType().FullName} not implemented add");

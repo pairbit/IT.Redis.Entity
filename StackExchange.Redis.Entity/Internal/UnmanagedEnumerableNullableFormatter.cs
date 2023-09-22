@@ -415,6 +415,25 @@ internal static class UnmanagedEnumerableNullableFormatter
                 }
             } while (true);
         }
+        else if (value is BlockingCollection<T?> bCollection)
+        {
+            if (bCollection.Count > 0) throw Ex.ClearNotSupported(bCollection.GetType());
+
+            do
+            {
+                bCollection.Add((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
+
+                if (++i == length) break;
+
+                b += size;
+
+                if (++iBits == 8)
+                {
+                    bits = span[++iBytes];
+                    iBits = 0;
+                }
+            } while (true);
+        }
         else
         {
             throw new NotImplementedException($"{value.GetType().FullName} not implemented add");
