@@ -97,8 +97,9 @@ internal class StringEnumerableFormatter
                 else if (strlen == 0) stack.Push(string.Empty);
                 else
                 {
-                    stack.Push(encoding.GetString(span.Slice(span.Length - strlen)));
-                    span = span.Slice(0, span.Length - strlen);
+                    strlen = span.Length - strlen;
+                    stack.Push(encoding.GetString(span.Slice(strlen)));
+                    span = span.Slice(0, strlen);
                 }
             }
         }
@@ -114,8 +115,9 @@ internal class StringEnumerableFormatter
                 else if (strlen == 0) cStack.Push(string.Empty);
                 else
                 {
-                    cStack.Push(encoding.GetString(span.Slice(span.Length - strlen)));
-                    span = span.Slice(0, span.Length - strlen);
+                    strlen = span.Length - strlen;
+                    cStack.Push(encoding.GetString(span.Slice(strlen)));
+                    span = span.Slice(0, strlen);
                 }
             }
         }
@@ -131,8 +133,9 @@ internal class StringEnumerableFormatter
                 else if (strlen == 0) bag.Add(string.Empty);
                 else
                 {
-                    bag.Add(encoding.GetString(span.Slice(span.Length - strlen)));
-                    span = span.Slice(0, span.Length - strlen);
+                    strlen = span.Length - strlen;
+                    bag.Add(encoding.GetString(span.Slice(strlen)));
+                    span = span.Slice(0, strlen);
                 }
             }
         }
@@ -313,8 +316,9 @@ internal class StringEnumerableFormatter
                 else if (strlen == 0) stack.Push(string.Empty);
                 else
                 {
-                    stack.Push(encoding.GetString(span.Slice(span.Length - strlen)));
-                    span = span.Slice(0, span.Length - strlen);
+                    strlen = span.Length - strlen;
+                    stack.Push(encoding.GetString(span.Slice(strlen)));
+                    span = span.Slice(0, strlen);
                 }
             }
         }
@@ -332,8 +336,9 @@ internal class StringEnumerableFormatter
                 else if (strlen == 0) cStack.Push(string.Empty);
                 else
                 {
-                    cStack.Push(encoding.GetString(span.Slice(span.Length - strlen)));
-                    span = span.Slice(0, span.Length - strlen);
+                    strlen = span.Length - strlen;
+                    cStack.Push(encoding.GetString(span.Slice(strlen)));
+                    span = span.Slice(0, strlen);
                 }
             }
         }
@@ -354,8 +359,9 @@ internal class StringEnumerableFormatter
                 else if (strlen == 0) bag.Add(string.Empty);
                 else
                 {
-                    bag.Add(encoding.GetString(span.Slice(span.Length - strlen)));
-                    span = span.Slice(0, span.Length - strlen);
+                    strlen = span.Length - strlen;
+                    bag.Add(encoding.GetString(span.Slice(strlen)));
+                    span = span.Slice(0, strlen);
                 }
             }
         }
