@@ -118,11 +118,13 @@ public class DocumentTest
             StringCollection = new string?[] { null, "", "test", "mystr", " ", "ascii" },
             Versions = new DocumentVersionInfoDictionary(3) { { Guid.NewGuid(), new DocumentVersionInfo(Guid.NewGuid(), Guid.NewGuid(), DateTime.Now, 34) } },
             ConcurrentDictionary = new ConcurrentDictionary<int, int>(new Dictionary<int, int>() { { 0, 1 }, { 1, 2 } }),
-            ProducerConsumerCollection = new ConcurrentBag<int>() { 6, 8, 1 },
-            ConcurrentBag = new ConcurrentBag<int>() { 5, 6, 2 },
-            ConcurrentQueue = new ConcurrentQueue<int>(new int[] { 1, 5, 3 }),
-            ConcurrentStack = new ConcurrentStack<int>(new int[] { 4, 2, 6 }),
-            BlockingCollection = new BlockingCollection<int>(new ConcurrentQueue<int>(new int[] { 7, 8, 9 })),
+            ProducerConsumerCollection = new ConcurrentBag<string?>() { "0", "1" },
+            ConcurrentBag = new ConcurrentBag<string?>() { "2", "3" },
+            ConcurrentQueue = new ConcurrentQueue<string?>(new string[] { "4", "5" }),
+            ConcurrentStack = new ConcurrentStack<string?>(new string[] { "6", "7" }),
+            BlockingCollection = new BlockingCollection<string?>(new ConcurrentQueue<string?>(new string?[] { "8", "9" })),
+            //StringPairs = new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>("a", "b"), new KeyValuePair<string, string>("c", "d") },
+            //StringDictionary = new Dictionary<string, string>() { { "g", "h" }, { "j", "k" } },
 #if NETCOREAPP3_1_OR_GREATER
             ImmutableList = ImmutableStack.Create(new int?[] { 0, null }),
             Tuple = (0, -1),
@@ -135,11 +137,11 @@ public class DocumentTest
 
             var entity2 = new SimpleRecord();
             entity2.StringCollection = new Stack<string?>();
-            entity2.ProducerConsumerCollection = new ConcurrentBag<int>();
-            entity2.ConcurrentBag = new ConcurrentBag<int>();
-            entity2.ConcurrentQueue = new ConcurrentQueue<int>();
-            entity2.ConcurrentStack = new ConcurrentStack<int>(new int[] { 1 });
-            entity2.BlockingCollection = new BlockingCollection<int>();
+            entity2.ProducerConsumerCollection = new ConcurrentBag<string?>();
+            entity2.ConcurrentBag = new ConcurrentBag<string?>();
+            entity2.ConcurrentQueue = new ConcurrentQueue<string?>();
+            entity2.ConcurrentStack = new ConcurrentStack<string?>(new string?[] { "3" });
+            entity2.BlockingCollection = new BlockingCollection<string?>();
             _db.EntityLoad(entity2, Key);
 
 #if NETCOREAPP3_1_OR_GREATER
@@ -162,6 +164,9 @@ public class DocumentTest
             Assert.That(entity.ProducerConsumerCollection.SequenceEqual(entity2.ProducerConsumerCollection), Is.True);
             Assert.That(entity.ConcurrentBag.SequenceEqual(entity2.ConcurrentBag), Is.True);
             Assert.That(entity.ConcurrentStack.SequenceEqual(entity2.ConcurrentStack), Is.True);
+
+            //Assert.That(entity.StringPairs.SequenceEqual(entity2.StringPairs), Is.True);
+            //Assert.That(entity.StringDictionary.SequenceEqual(entity2.StringDictionary), Is.True);
 
             Assert.That(entity.Decimal, Is.EqualTo(entity2.Decimal));
             Assert.That(entity.DateTimeKind, Is.EqualTo(entity2.DateTimeKind));

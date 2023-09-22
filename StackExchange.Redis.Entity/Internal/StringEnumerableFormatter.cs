@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -98,6 +99,58 @@ internal class StringEnumerableFormatter
                 {
                     stack.Push(encoding.GetString(span.Slice(span.Length - strlen)));
                     span = span.Slice(0, span.Length - strlen);
+                }
+            }
+        }
+        else if (buffer is ConcurrentStack<string?> cStack)
+        {
+            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), Size * length + Size);
+
+            for (int i = 0, b = Size; i < length; i++, b += Size)
+            {
+                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, -b));
+
+                if (strlen == int.MaxValue) cStack.Push(null);
+                else if (strlen == 0) cStack.Push(string.Empty);
+                else
+                {
+                    cStack.Push(encoding.GetString(span.Slice(span.Length - strlen)));
+                    span = span.Slice(0, span.Length - strlen);
+                }
+            }
+        }
+        else if (buffer is ConcurrentBag<string?> bag)
+        {
+            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), Size * length + Size);
+
+            for (int i = 0, b = Size; i < length; i++, b += Size)
+            {
+                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, -b));
+
+                if (strlen == int.MaxValue) bag.Add(null);
+                else if (strlen == 0) bag.Add(string.Empty);
+                else
+                {
+                    bag.Add(encoding.GetString(span.Slice(span.Length - strlen)));
+                    span = span.Slice(0, span.Length - strlen);
+                }
+            }
+        }
+        else if (buffer is IProducerConsumerCollection<string?> pcCollection)
+        {
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
+            span = span.Slice(Size * length + Size);
+
+            for (int i = 0, b = Size; i < length; i++, b += Size)
+            {
+                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
+
+                if (strlen == int.MaxValue) pcCollection.AddOrThrow(null);
+                else if (strlen == 0) pcCollection.AddOrThrow(string.Empty);
+                else
+                {
+                    pcCollection.AddOrThrow(encoding.GetString(span.Slice(0, strlen)));
+                    span = span.Slice(strlen);
                 }
             }
         }
@@ -222,14 +275,14 @@ internal class StringEnumerableFormatter
         }
         else if (value is Queue<string?> queue)
         {
-            ref byte spanRef = ref MemoryMarshal.GetReference(span);
-            span = span.Slice(Size * length + Size);
-
             if (queue.Count > 0) queue.Clear();
 
 #if NET6_0_OR_GREATER
             queue.EnsureCapacity(length);
 #endif
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
+            span = span.Slice(Size * length + Size);
+
             for (int i = 0, b = Size; i < length; i++, b += Size)
             {
                 var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
@@ -262,6 +315,96 @@ internal class StringEnumerableFormatter
                 {
                     stack.Push(encoding.GetString(span.Slice(span.Length - strlen)));
                     span = span.Slice(0, span.Length - strlen);
+                }
+            }
+        }
+        else if (value is ConcurrentStack<string?> cStack)
+        {
+            cStack.Clear();
+
+            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), Size * length + Size);
+
+            for (int i = 0, b = Size; i < length; i++, b += Size)
+            {
+                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, -b));
+
+                if (strlen == int.MaxValue) cStack.Push(null);
+                else if (strlen == 0) cStack.Push(string.Empty);
+                else
+                {
+                    cStack.Push(encoding.GetString(span.Slice(span.Length - strlen)));
+                    span = span.Slice(0, span.Length - strlen);
+                }
+            }
+        }
+        else if (value is ConcurrentBag<string?> bag)
+        {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+            bag.Clear();
+#else
+            if (!bag.IsEmpty) throw Ex.ClearNotSupported(bag.GetType());
+#endif
+            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), Size * length + Size);
+
+            for (int i = 0, b = Size; i < length; i++, b += Size)
+            {
+                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, -b));
+
+                if (strlen == int.MaxValue) bag.Add(null);
+                else if (strlen == 0) bag.Add(string.Empty);
+                else
+                {
+                    bag.Add(encoding.GetString(span.Slice(span.Length - strlen)));
+                    span = span.Slice(0, span.Length - strlen);
+                }
+            }
+        }
+        else if (value is IProducerConsumerCollection<string?> pcCollection)
+        {
+            if (pcCollection is ConcurrentQueue<string?> cQueue)
+            {
+                if (!cQueue.IsEmpty)
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+                    cQueue.Clear();
+#else
+                    throw Ex.ClearNotSupported(pcCollection.GetType());
+#endif
+            }
+            else if (pcCollection.Count > 0) throw Ex.ClearNotSupported(pcCollection.GetType());
+
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
+            span = span.Slice(Size * length + Size);
+
+            for (int i = 0, b = Size; i < length; i++, b += Size)
+            {
+                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
+
+                if (strlen == int.MaxValue) pcCollection.AddOrThrow(null);
+                else if (strlen == 0) pcCollection.AddOrThrow(string.Empty);
+                else
+                {
+                    pcCollection.AddOrThrow(encoding.GetString(span.Slice(0, strlen)));
+                    span = span.Slice(strlen);
+                }
+            }
+        }
+        else if (value is BlockingCollection<string?> bCollection)
+        {
+            if (bCollection.Count > 0) throw Ex.ClearNotSupported(bCollection.GetType());
+
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
+            span = span.Slice(Size * length + Size);
+
+            for (int i = 0, b = Size; i < length; i++, b += Size)
+            {
+                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
+
+                if (strlen == int.MaxValue) bCollection.Add(null);
+                else if (strlen == 0) bCollection.Add(string.Empty);
+                else
+                {
+                    bCollection.Add(encoding.GetString(span.Slice(0, strlen)));
+                    span = span.Slice(strlen);
                 }
             }
         }
