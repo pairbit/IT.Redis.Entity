@@ -16,7 +16,7 @@ public record SimpleRecord
 
     public IReadOnlyCollection<string?>? StringCollection { get; set; }
 
-    public ICollection<KeyValuePair<int,int?>> KeyValuePairs { get; set; }
+    public ICollection<KeyValuePair<int, int?>> KeyValuePairs { get; set; }
 
     public IDictionary<int, int> Dictionary { get; set; }
 
@@ -28,7 +28,7 @@ public record SimpleRecord
 
     public SortedList<int, int?> SortedList { get; set; }
 
-    public ConcurrentDictionary<int,int> ConcurrentDictionary { get; set; }
+    public ConcurrentDictionary<int, int> ConcurrentDictionary { get; set; }
 
     public IProducerConsumerCollection<int> ProducerConsumerCollection { get; set; }
 

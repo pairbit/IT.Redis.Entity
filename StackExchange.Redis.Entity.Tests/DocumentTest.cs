@@ -125,14 +125,14 @@ public class DocumentTest
             BlockingCollection = new BlockingCollection<int>(new ConcurrentQueue<int>(new int[] { 7, 8, 9 })),
 #if NETCOREAPP3_1_OR_GREATER
             ImmutableList = ImmutableStack.Create(new int?[] { 0, null }),
-            Tuple =new Tuple<int, int> (0, -1),
+            Tuple = (0, -1),
             NullableTuple = (null, -1),
 #endif
         };
         try
         {
             _db.EntitySet(Key, entity);
-            
+
             var entity2 = new SimpleRecord();
             entity2.StringCollection = new Stack<string?>();
 
