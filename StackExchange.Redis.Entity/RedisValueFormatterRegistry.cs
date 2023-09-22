@@ -44,7 +44,6 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
     }
 
     static readonly Type RedisValueFormatterDefaultType = typeof(RedisValueFormatterDefault<>);
-    static readonly Type NullableType = typeof(Nullable<>);
     static readonly Type EnumFormatterType = typeof(EnumFormatter<,>);
     static readonly Type UnmanagedFormatterType = typeof(UnmanagedFormatter<>);
 
@@ -140,6 +139,11 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
         RegisterDictionaryFactory(ReadOnlyDictionaryFactory.Default, typeof(IReadOnlyDictionary<,>));
         RegisterDictionaryFactory(SortedDictionaryFactory.Default);
         RegisterDictionaryFactory(SortedListFactory.Default);
+
+        RegisterDictionaryFactory(ConcurrentDictionaryFactory.Default);
+        RegisterEnumerableFactory(ConcurrentBagFactory.Default, typeof(IProducerConsumerCollection<>));
+        RegisterEnumerableFactory(ConcurrentQueueFactory.Default);
+        RegisterEnumerableFactory(ConcurrentStackFactory.Default);
     }
 
     private RedisValueFormatterRegistry() { }

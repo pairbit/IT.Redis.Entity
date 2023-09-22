@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace StackExchange.Redis.Entity.Internal;
@@ -26,6 +27,13 @@ internal static class UnmanagedEnumerableFormatter
             for (int i = 0, b = 0; i < count; i++, b += size)
             {
                 collection.Add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
+            }
+        }
+        else if (buffer is IProducerConsumerCollection<T> pcCollection)
+        {
+            for (int i = 0, b = 0; i < count; i++, b += size)
+            {
+                pcCollection.AddOrThrow(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
             }
         }
         else if (buffer is Queue<T> queue)
@@ -70,7 +78,7 @@ internal static class UnmanagedEnumerableFormatter
         else if (value is ICollection<T> collection)
         {
             if (collection.IsReadOnly) return false;
-            else if (value is IList<T> ilist)
+            if (value is IList<T> ilist)
             {
                 var count = ilist.Count;
                 if (count < length)
@@ -112,6 +120,15 @@ internal static class UnmanagedEnumerableFormatter
                 {
                     collection.Add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
                 }
+            }
+        }
+        else if (value is IProducerConsumerCollection<T> pcCollection)
+        {
+            pcCollection.ClearOrThrow();
+
+            for (int i = 0, b = 0; i < length; i++, b += size)
+            {
+                pcCollection.AddOrThrow(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
             }
         }
         else if (value is Queue<T> queue)

@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace StackExchange.Redis.Entity.Internal;
@@ -41,6 +42,23 @@ internal static class UnmanagedEnumerableNullableFormatter
             do
             {
                 collection.Add((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
+
+                if (++i == count) break;
+
+                b += size;
+
+                if (++iBits == 8)
+                {
+                    bits = span[++iBytes];
+                    iBits = 0;
+                }
+            } while (true);
+        }
+        else if (buffer is IProducerConsumerCollection<T?> pcCollection)
+        {
+            do
+            {
+                pcCollection.AddOrThrow((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
 
                 if (++i == count) break;
 
@@ -135,7 +153,7 @@ internal static class UnmanagedEnumerableNullableFormatter
         else if (value is ICollection<T?> collection)
         {
             if (collection.IsReadOnly) return false;
-            else if (value is IList<T?> ilist)
+            if (value is IList<T?> ilist)
             {
                 var count = ilist.Count;
                 if (count < length)
@@ -215,6 +233,25 @@ internal static class UnmanagedEnumerableNullableFormatter
                 } while (true);
             }
         }
+        else if (value is IProducerConsumerCollection<T?> pcCollection)
+        {
+            pcCollection.ClearOrThrow();
+
+            do
+            {
+                pcCollection.AddOrThrow((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
+
+                if (++i == length) break;
+
+                b += size;
+
+                if (++iBits == 8)
+                {
+                    bits = span[++iBytes];
+                    iBits = 0;
+                }
+            } while (true);
+        }
         else if (value is Queue<T?> queue)
         {
             if (queue.Count > 0) queue.Clear();
@@ -250,7 +287,7 @@ internal static class UnmanagedEnumerableNullableFormatter
             iBytes = span.Length - 1;
             bits = span[iBytes];
             i = length;
-            
+
             do
             {
                 stack.Push((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)) : null);
