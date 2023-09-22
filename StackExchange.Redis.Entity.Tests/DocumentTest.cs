@@ -118,11 +118,11 @@ public class DocumentTest
             StringCollection = new string?[] { null, "", "test", "mystr", " ", "ascii" },
             Versions = new DocumentVersionInfoDictionary(3) { { Guid.NewGuid(), new DocumentVersionInfo(Guid.NewGuid(), Guid.NewGuid(), DateTime.Now, 34) } },
             ConcurrentDictionary = new ConcurrentDictionary<int, int>(new Dictionary<int, int>() { { 0, 1 }, { 1, 2 } }),
-            ProducerConsumerCollection = new ConcurrentBag<int?>() { 6, null, 1 },
-            ConcurrentBag = new ConcurrentBag<int?>() { 5, null, 2 },
-            ConcurrentQueue = new ConcurrentQueue<int?>(new int?[] { 1, null, 3 }),
-            ConcurrentStack = new ConcurrentStack<int?>(new int?[] { 4, null, 6 }),
-            BlockingCollection = new BlockingCollection<int?>(new ConcurrentQueue<int?>(new int?[] { 7, 8, 9 })),
+            ProducerConsumerCollection = new ConcurrentBag<int>() { 6, 8, 1 },
+            ConcurrentBag = new ConcurrentBag<int>() { 5, 6, 2 },
+            ConcurrentQueue = new ConcurrentQueue<int>(new int[] { 1, 5, 3 }),
+            ConcurrentStack = new ConcurrentStack<int>(new int[] { 4, 2, 6 }),
+            BlockingCollection = new BlockingCollection<int>(new ConcurrentQueue<int>(new int[] { 7, 8, 9 })),
 #if NETCOREAPP3_1_OR_GREATER
             ImmutableList = ImmutableStack.Create(new int?[] { 0, null }),
             Tuple = (0, -1),
@@ -135,11 +135,11 @@ public class DocumentTest
 
             var entity2 = new SimpleRecord();
             entity2.StringCollection = new Stack<string?>();
-            entity2.ProducerConsumerCollection = new ConcurrentBag<int?>();
-            entity2.ConcurrentBag = new ConcurrentBag<int?>();
-            entity2.ConcurrentQueue = new ConcurrentQueue<int?>();
-            entity2.ConcurrentStack = new ConcurrentStack<int?>();
-            entity2.BlockingCollection = new BlockingCollection<int?>();
+            entity2.ProducerConsumerCollection = new ConcurrentBag<int>();
+            entity2.ConcurrentBag = new ConcurrentBag<int>();
+            entity2.ConcurrentQueue = new ConcurrentQueue<int>();
+            entity2.ConcurrentStack = new ConcurrentStack<int>(new int[] { 1 });
+            entity2.BlockingCollection = new BlockingCollection<int>();
             _db.EntityLoad(entity2, Key);
 
 #if NETCOREAPP3_1_OR_GREATER
