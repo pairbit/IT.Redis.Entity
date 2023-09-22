@@ -19,69 +19,69 @@ public static class StringDictionaryFormatter
 
         if (buffer is KeyValuePair<string?, string?>[] array)
         {
-            ref byte refLen = ref MemoryMarshal.GetReference(span);
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
             span = span.Slice(DoubleSize * length + Size);
 
             for (int i = 0, b = Size; i < array.Length; i++, b += DoubleSize)
             {
-                array[i] = UnsafeReader.ReadPairString(ref Unsafe.Add(ref refLen, b), ref span, encoding);
+                array[i] = UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding);
             }
         }
         else if (buffer is ICollection<KeyValuePair<string?, string?>> collection)
         {
-            ref byte refLen = ref MemoryMarshal.GetReference(span);
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
             span = span.Slice(DoubleSize * length + Size);
 
             for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
             {
-                collection.Add(UnsafeReader.ReadPairString(ref Unsafe.Add(ref refLen, b), ref span, encoding));
+                collection.Add(UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
             }
         }
         else if (buffer is Queue<KeyValuePair<string?, string?>> queue)
         {
-            ref byte refLen = ref MemoryMarshal.GetReference(span);
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
             span = span.Slice(DoubleSize * length + Size);
 
             for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
             {
-                queue.Enqueue(UnsafeReader.ReadPairString(ref Unsafe.Add(ref refLen, b), ref span, encoding));
+                queue.Enqueue(UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
             }
         }
         else if (buffer is Stack<KeyValuePair<string?, string?>> stack)
         {
-            ref byte refLen = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), DoubleSize * length + Size);
+            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), DoubleSize * length + Size);
 
             for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
             {
-                stack.Push(UnsafeReader.ReadPairStringFromEnd(ref Unsafe.Add(ref refLen, -b), ref span, encoding));
+                stack.Push(UnsafeReader.ReadPairStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
             }
         }
         else if (buffer is ConcurrentStack<KeyValuePair<string?, string?>> cStack)
         {
-            ref byte refLen = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), DoubleSize * length + Size);
+            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), DoubleSize * length + Size);
 
             for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
             {
-                cStack.Push(UnsafeReader.ReadPairStringFromEnd(ref Unsafe.Add(ref refLen, -b), ref span, encoding));
+                cStack.Push(UnsafeReader.ReadPairStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
             }
         }
         else if (buffer is ConcurrentBag<KeyValuePair<string?, string?>> bag)
         {
-            ref byte refLen = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), DoubleSize * length + Size);
+            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), DoubleSize * length + Size);
 
             for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
             {
-                bag.Add(UnsafeReader.ReadPairStringFromEnd(ref Unsafe.Add(ref refLen, -b), ref span, encoding));
+                bag.Add(UnsafeReader.ReadPairStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
             }
         }
         else if (buffer is IProducerConsumerCollection<KeyValuePair<string?, string?>> pcCollection)
         {
-            ref byte refLen = ref MemoryMarshal.GetReference(span);
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
             span = span.Slice(DoubleSize * length + Size);
 
             for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
             {
-                pcCollection.AddOrThrow(UnsafeReader.ReadPairString(ref Unsafe.Add(ref refLen, b), ref span, encoding));
+                pcCollection.AddOrThrow(UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
             }
         }
         else
@@ -99,7 +99,7 @@ public static class StringDictionaryFormatter
         if (value is KeyValuePair<string?, string?>[] array)
         {
             ref byte spanRef = ref MemoryMarshal.GetReference(span);
-            span = span.Slice(Size * length + Size);
+            span = span.Slice(DoubleSize * length + Size);
 
             if (array.Length != length)
             {
@@ -107,25 +107,17 @@ public static class StringDictionaryFormatter
                 value = array;
             }
 
-            //for (int i = 0, b = Size; i < array.Length; i++, b += Size)
-            //{
-            //    var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
-
-            //    if (strlen == int.MaxValue) array[i] = null;
-            //    else if (strlen == 0) array[i] = string.Empty;
-            //    else
-            //    {
-            //        array[i] = encoding.GetString(span.Slice(0, strlen));
-            //        span = span.Slice(strlen);
-            //    }
-            //}
+            for (int i = 0, b = Size; i < array.Length; i++, b += DoubleSize)
+            {
+                array[i] = UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding);
+            }
         }
         else if (value is ICollection<KeyValuePair<string?, string?>> collection)
         {
             if (collection.IsReadOnly) return false;
 
             ref byte spanRef = ref MemoryMarshal.GetReference(span);
-            span = span.Slice(Size * length + Size);
+            span = span.Slice(DoubleSize * length + Size);
 
             if (value is IList<KeyValuePair<string?, string?>> ilist)
             {
@@ -138,24 +130,24 @@ public static class StringDictionaryFormatter
 
                     if (count > 0)
                     {
-                        for (int i = 0; i < ilist.Count; i++, b += Size)
+                        for (int i = 0; i < ilist.Count; i++, b += DoubleSize)
                         {
-                            throw new NotImplementedException();
+                            ilist[i] = UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding);
                         }
 
                         length -= count;
                     }
 
-                    for (int i = 0; i < length; i++, b += Size)
+                    for (int i = 0; i < length; i++, b += DoubleSize)
                     {
-                        throw new NotImplementedException();
+                        ilist.Add(UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
                     }
                 }
                 else
                 {
-                    for (int i = 0, b = Size; i < length; i++, b += Size)
+                    for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
                     {
-                        throw new NotImplementedException();
+                        ilist[i] = UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding);
                     }
 
                     for (int i = count - 1; i >= length; i--) ilist.RemoveAt(i);
@@ -165,9 +157,9 @@ public static class StringDictionaryFormatter
             {
                 if (collection.Count > 0) collection.Clear();
 
-                for (int i = 0, b = Size; i < length; i++, b += Size)
+                for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
                 {
-                    throw new NotImplementedException();
+                    collection.Add(UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
                 }
             }
         }
@@ -178,7 +170,13 @@ public static class StringDictionaryFormatter
 #if NET6_0_OR_GREATER
             queue.EnsureCapacity(length);
 #endif
-            throw new NotImplementedException();
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
+            span = span.Slice(DoubleSize * length + Size);
+
+            for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
+            {
+                queue.Enqueue(UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
+            }
         }
         else if (value is Stack<KeyValuePair<string?, string?>> stack)
         {
@@ -187,15 +185,23 @@ public static class StringDictionaryFormatter
 #if NET6_0_OR_GREATER
             stack.EnsureCapacity(length);
 #endif
-            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), Size * length + Size);
+            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), DoubleSize * length + Size);
 
-            throw new NotImplementedException();
+            for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
+            {
+                stack.Push(UnsafeReader.ReadPairStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
+            }
         }
         else if (value is ConcurrentStack<KeyValuePair<string?, string?>> cStack)
         {
             cStack.Clear();
 
-            throw new NotImplementedException();
+            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), DoubleSize * length + Size);
+
+            for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
+            {
+                cStack.Push(UnsafeReader.ReadPairStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
+            }
         }
         else if (value is ConcurrentBag<KeyValuePair<string?, string?>> bag)
         {
@@ -204,7 +210,12 @@ public static class StringDictionaryFormatter
 #else
             if (!bag.IsEmpty) throw Ex.ClearNotSupported(bag.GetType());
 #endif
-            throw new NotImplementedException();
+            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), DoubleSize * length + Size);
+
+            for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
+            {
+                bag.Add(UnsafeReader.ReadPairStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
+            }
         }
         else if (value is IProducerConsumerCollection<KeyValuePair<string?, string?>> pcCollection)
         {
@@ -219,13 +230,25 @@ public static class StringDictionaryFormatter
             }
             else if (pcCollection.Count > 0) throw Ex.ClearNotSupported(pcCollection.GetType());
 
-            throw new NotImplementedException();
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
+            span = span.Slice(DoubleSize * length + Size);
+
+            for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
+            {
+                pcCollection.AddOrThrow(UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
+            }
         }
         else if (value is BlockingCollection<KeyValuePair<string?, string?>> bCollection)
         {
             if (bCollection.Count > 0) throw Ex.ClearNotSupported(bCollection.GetType());
 
-            throw new NotImplementedException();
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
+            span = span.Slice(DoubleSize * length + Size);
+
+            for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
+            {
+                bCollection.Add(UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
+            }
         }
         else
         {

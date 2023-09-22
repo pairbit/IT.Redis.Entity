@@ -18,21 +18,12 @@ internal class StringEnumerableFormatter
 
         if (buffer is string?[] array)
         {
-            //if (array.Length < count) throw new InvalidOperationException();
-
             ref byte spanRef = ref MemoryMarshal.GetReference(span);
             span = span.Slice(Size * length + Size);
 
             for (int i = 0, b = Size; i < array.Length; i++, b += Size)
             {
-                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
-
-                if (strlen == 0) array[i] = string.Empty;
-                else if (strlen != int.MaxValue)
-                {
-                    array[i] = encoding.GetString(span.Slice(0, strlen));
-                    span = span.Slice(strlen);
-                }
+                array[i] = UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding);
             }
         }
         else if (buffer is ICollection<string?> collection)
@@ -42,15 +33,7 @@ internal class StringEnumerableFormatter
 
             for (int i = 0, b = Size; i < length; i++, b += Size)
             {
-                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
-
-                if (strlen == int.MaxValue) collection.Add(null);
-                else if (strlen == 0) collection.Add(string.Empty);
-                else
-                {
-                    collection.Add(encoding.GetString(span.Slice(0, strlen)));
-                    span = span.Slice(strlen);
-                }
+                collection.Add(UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
             }
         }
         else if (buffer is Queue<string?> queue)
@@ -60,15 +43,7 @@ internal class StringEnumerableFormatter
 
             for (int i = 0, b = Size; i < length; i++, b += Size)
             {
-                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
-
-                if (strlen == int.MaxValue) queue.Enqueue(null);
-                else if (strlen == 0) queue.Enqueue(string.Empty);
-                else
-                {
-                    queue.Enqueue(encoding.GetString(span.Slice(0, strlen)));
-                    span = span.Slice(strlen);
-                }
+                queue.Enqueue(UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
             }
         }
         else if (buffer is Stack<string?> stack)
@@ -77,16 +52,7 @@ internal class StringEnumerableFormatter
 
             for (int i = 0, b = Size; i < length; i++, b += Size)
             {
-                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, -b));
-
-                if (strlen == int.MaxValue) stack.Push(null);
-                else if (strlen == 0) stack.Push(string.Empty);
-                else
-                {
-                    strlen = span.Length - strlen;
-                    stack.Push(encoding.GetString(span.Slice(strlen)));
-                    span = span.Slice(0, strlen);
-                }
+                stack.Push(UnsafeReader.ReadStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
             }
         }
         else if (buffer is ConcurrentStack<string?> cStack)
@@ -95,16 +61,7 @@ internal class StringEnumerableFormatter
 
             for (int i = 0, b = Size; i < length; i++, b += Size)
             {
-                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, -b));
-
-                if (strlen == int.MaxValue) cStack.Push(null);
-                else if (strlen == 0) cStack.Push(string.Empty);
-                else
-                {
-                    strlen = span.Length - strlen;
-                    cStack.Push(encoding.GetString(span.Slice(strlen)));
-                    span = span.Slice(0, strlen);
-                }
+                cStack.Push(UnsafeReader.ReadStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
             }
         }
         else if (buffer is ConcurrentBag<string?> bag)
@@ -113,16 +70,7 @@ internal class StringEnumerableFormatter
 
             for (int i = 0, b = Size; i < length; i++, b += Size)
             {
-                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, -b));
-
-                if (strlen == int.MaxValue) bag.Add(null);
-                else if (strlen == 0) bag.Add(string.Empty);
-                else
-                {
-                    strlen = span.Length - strlen;
-                    bag.Add(encoding.GetString(span.Slice(strlen)));
-                    span = span.Slice(0, strlen);
-                }
+                bag.Add(UnsafeReader.ReadStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
             }
         }
         else if (buffer is IProducerConsumerCollection<string?> pcCollection)
@@ -132,15 +80,7 @@ internal class StringEnumerableFormatter
 
             for (int i = 0, b = Size; i < length; i++, b += Size)
             {
-                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
-
-                if (strlen == int.MaxValue) pcCollection.AddOrThrow(null);
-                else if (strlen == 0) pcCollection.AddOrThrow(string.Empty);
-                else
-                {
-                    pcCollection.AddOrThrow(encoding.GetString(span.Slice(0, strlen)));
-                    span = span.Slice(strlen);
-                }
+                pcCollection.AddOrThrow(UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
             }
         }
         else
@@ -168,15 +108,7 @@ internal class StringEnumerableFormatter
 
             for (int i = 0, b = Size; i < array.Length; i++, b += Size)
             {
-                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
-
-                if (strlen == int.MaxValue) array[i] = null;
-                else if (strlen == 0) array[i] = string.Empty;
-                else
-                {
-                    array[i] = encoding.GetString(span.Slice(0, strlen));
-                    span = span.Slice(strlen);
-                }
+                array[i] = UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding);
             }
         }
         else if (value is ICollection<string?> collection)
@@ -199,15 +131,7 @@ internal class StringEnumerableFormatter
                     {
                         for (int i = 0; i < ilist.Count; i++, b += Size)
                         {
-                            var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
-
-                            if (strlen == int.MaxValue) ilist[i] = null;
-                            else if (strlen == 0) ilist[i] = string.Empty;
-                            else
-                            {
-                                ilist[i] = encoding.GetString(span.Slice(0, strlen));
-                                span = span.Slice(strlen);
-                            }
+                            ilist[i] = UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding);
                         }
 
                         length -= count;
@@ -215,30 +139,14 @@ internal class StringEnumerableFormatter
 
                     for (int i = 0; i < length; i++, b += Size)
                     {
-                        var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
-
-                        if (strlen == int.MaxValue) ilist.Add(null);
-                        else if (strlen == 0) ilist.Add(string.Empty);
-                        else
-                        {
-                            ilist.Add(encoding.GetString(span.Slice(0, strlen)));
-                            span = span.Slice(strlen);
-                        }
+                        ilist.Add(UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
                     }
                 }
                 else
                 {
                     for (int i = 0, b = Size; i < length; i++, b += Size)
                     {
-                        var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
-
-                        if (strlen == int.MaxValue) ilist[i] = null;
-                        else if (strlen == 0) ilist[i] = string.Empty;
-                        else
-                        {
-                            ilist[i] = encoding.GetString(span.Slice(0, strlen));
-                            span = span.Slice(strlen);
-                        }
+                        ilist[i] = UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding);
                     }
 
                     for (int i = count - 1; i >= length; i--) ilist.RemoveAt(i);
@@ -250,15 +158,7 @@ internal class StringEnumerableFormatter
 
                 for (int i = 0, b = Size; i < length; i++, b += Size)
                 {
-                    var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
-
-                    if (strlen == int.MaxValue) collection.Add(null);
-                    else if (strlen == 0) collection.Add(string.Empty);
-                    else
-                    {
-                        collection.Add(encoding.GetString(span.Slice(0, strlen)));
-                        span = span.Slice(strlen);
-                    }
+                    collection.Add(UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
                 }
             }
         }
@@ -274,15 +174,7 @@ internal class StringEnumerableFormatter
 
             for (int i = 0, b = Size; i < length; i++, b += Size)
             {
-                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
-
-                if (strlen == int.MaxValue) queue.Enqueue(null);
-                else if (strlen == 0) queue.Enqueue(string.Empty);
-                else
-                {
-                    queue.Enqueue(encoding.GetString(span.Slice(0, strlen)));
-                    span = span.Slice(strlen);
-                }
+                queue.Enqueue(UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
             }
         }
         else if (value is Stack<string?> stack)
@@ -296,16 +188,7 @@ internal class StringEnumerableFormatter
 
             for (int i = 0, b = Size; i < length; i++, b += Size)
             {
-                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, -b));
-
-                if (strlen == int.MaxValue) stack.Push(null);
-                else if (strlen == 0) stack.Push(string.Empty);
-                else
-                {
-                    strlen = span.Length - strlen;
-                    stack.Push(encoding.GetString(span.Slice(strlen)));
-                    span = span.Slice(0, strlen);
-                }
+                stack.Push(UnsafeReader.ReadStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
             }
         }
         else if (value is ConcurrentStack<string?> cStack)
@@ -316,16 +199,7 @@ internal class StringEnumerableFormatter
 
             for (int i = 0, b = Size; i < length; i++, b += Size)
             {
-                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, -b));
-
-                if (strlen == int.MaxValue) cStack.Push(null);
-                else if (strlen == 0) cStack.Push(string.Empty);
-                else
-                {
-                    strlen = span.Length - strlen;
-                    cStack.Push(encoding.GetString(span.Slice(strlen)));
-                    span = span.Slice(0, strlen);
-                }
+                cStack.Push(UnsafeReader.ReadStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
             }
         }
         else if (value is ConcurrentBag<string?> bag)
@@ -339,16 +213,7 @@ internal class StringEnumerableFormatter
 
             for (int i = 0, b = Size; i < length; i++, b += Size)
             {
-                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, -b));
-
-                if (strlen == int.MaxValue) bag.Add(null);
-                else if (strlen == 0) bag.Add(string.Empty);
-                else
-                {
-                    strlen = span.Length - strlen;
-                    bag.Add(encoding.GetString(span.Slice(strlen)));
-                    span = span.Slice(0, strlen);
-                }
+                bag.Add(UnsafeReader.ReadStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
             }
         }
         else if (value is IProducerConsumerCollection<string?> pcCollection)
@@ -369,15 +234,7 @@ internal class StringEnumerableFormatter
 
             for (int i = 0, b = Size; i < length; i++, b += Size)
             {
-                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
-
-                if (strlen == int.MaxValue) pcCollection.AddOrThrow(null);
-                else if (strlen == 0) pcCollection.AddOrThrow(string.Empty);
-                else
-                {
-                    pcCollection.AddOrThrow(encoding.GetString(span.Slice(0, strlen)));
-                    span = span.Slice(strlen);
-                }
+                pcCollection.AddOrThrow(UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
             }
         }
         else if (value is BlockingCollection<string?> bCollection)
@@ -389,15 +246,7 @@ internal class StringEnumerableFormatter
 
             for (int i = 0, b = Size; i < length; i++, b += Size)
             {
-                var strlen = Unsafe.ReadUnaligned<int>(ref Unsafe.Add(ref spanRef, b));
-
-                if (strlen == int.MaxValue) bCollection.Add(null);
-                else if (strlen == 0) bCollection.Add(string.Empty);
-                else
-                {
-                    bCollection.Add(encoding.GetString(span.Slice(0, strlen)));
-                    span = span.Slice(strlen);
-                }
+                bCollection.Add(UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
             }
         }
         else

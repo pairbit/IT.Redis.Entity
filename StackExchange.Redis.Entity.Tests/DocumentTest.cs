@@ -136,12 +136,12 @@ public class DocumentTest
             _db.EntitySet(Key, entity);
 
             var entity2 = new SimpleRecord();
-            entity2.StringCollection = new Stack<string?>();
-            entity2.ProducerConsumerCollection = new ConcurrentBag<string?>();
-            entity2.ConcurrentBag = new ConcurrentBag<string?>();
-            entity2.ConcurrentQueue = new ConcurrentQueue<string?>();
-            entity2.ConcurrentStack = new ConcurrentStack<string?>(new string?[] { "3" });
-            entity2.BlockingCollection = new BlockingCollection<string?>();
+            //entity2.StringCollection = new Stack<string?>();
+            //entity2.ProducerConsumerCollection = new ConcurrentBag<string?>();
+            //entity2.ConcurrentBag = new ConcurrentBag<string?>();
+            //entity2.ConcurrentQueue = new ConcurrentQueue<string?>();
+            //entity2.ConcurrentStack = new ConcurrentStack<string?>(new string?[] { "3" });
+            //entity2.BlockingCollection = new BlockingCollection<string?>();
             _db.EntityLoad(entity2, Key);
 
 #if NETCOREAPP3_1_OR_GREATER
