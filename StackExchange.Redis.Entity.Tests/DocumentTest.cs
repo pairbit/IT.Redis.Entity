@@ -124,7 +124,7 @@ public class DocumentTest
             ConcurrentStack = new ConcurrentStack<string?>(new string[] { "6", "7" }),
             BlockingCollection = new BlockingCollection<string?>(new ConcurrentQueue<string?>(new string?[] { "8", "9" })),
             StringPairs = new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>("a1", "b"), new KeyValuePair<string, string>("c2", "d") },
-            //StringDictionary = new Dictionary<string, string>() { { "g", "h" }, { "j", "k" } },
+            StringDictionary = new Dictionary<string, string>() { { "g", "h" }, { "j", "k" } },
 #if NETCOREAPP3_1_OR_GREATER
             ImmutableList = ImmutableStack.Create(new int?[] { 0, null }),
             Tuple = (0, -1),
@@ -136,12 +136,13 @@ public class DocumentTest
             _db.EntitySet(Key, entity);
 
             var entity2 = new SimpleRecord();
-            //entity2.StringCollection = new Stack<string?>();
-            //entity2.ProducerConsumerCollection = new ConcurrentBag<string?>();
-            //entity2.ConcurrentBag = new ConcurrentBag<string?>();
-            //entity2.ConcurrentQueue = new ConcurrentQueue<string?>();
-            //entity2.ConcurrentStack = new ConcurrentStack<string?>(new string?[] { "3" });
-            //entity2.BlockingCollection = new BlockingCollection<string?>();
+            entity2.StringCollection = new Stack<string?>();
+            entity2.ProducerConsumerCollection = new ConcurrentBag<string?>();
+            entity2.ConcurrentBag = new ConcurrentBag<string?>();
+            entity2.ConcurrentQueue = new ConcurrentQueue<string?>();
+            entity2.ConcurrentStack = new ConcurrentStack<string?>(new string?[] { "3" });
+            entity2.BlockingCollection = new BlockingCollection<string?>();
+            entity2.StringPairs = new List<KeyValuePair<string, string>>();
             _db.EntityLoad(entity2, Key);
 
 #if NETCOREAPP3_1_OR_GREATER
@@ -166,7 +167,7 @@ public class DocumentTest
             Assert.That(entity.ConcurrentStack.SequenceEqual(entity2.ConcurrentStack), Is.True);
 
             Assert.That(entity.StringPairs.SequenceEqual(entity2.StringPairs), Is.True);
-            //Assert.That(entity.StringDictionary.SequenceEqual(entity2.StringDictionary), Is.True);
+            Assert.That(entity.StringDictionary.SequenceEqual(entity2.StringDictionary), Is.True);
 
             Assert.That(entity.Decimal, Is.EqualTo(entity2.Decimal));
             Assert.That(entity.DateTimeKind, Is.EqualTo(entity2.DateTimeKind));

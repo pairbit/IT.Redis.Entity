@@ -42,7 +42,7 @@ public record SimpleRecord
 
     public IEnumerable<KeyValuePair<string, string>> StringPairs { get; set; }
 
-    //public IDictionary<string, string> StringDictionary { get; set; }
+    public IDictionary<string, string> StringDictionary { get; set; }
 
 #if NETCOREAPP3_1_OR_GREATER
 

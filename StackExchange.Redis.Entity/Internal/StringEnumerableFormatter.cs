@@ -343,7 +343,8 @@ internal class StringEnumerableFormatter
 
     private static RedisValue SerializeReadOnlyList(Encoding encoding, in IReadOnlyList<string?> value)
     {
-        if (value.Count == 0) return RedisValue.EmptyString;
+        var count = value.Count;
+        if (count == 0) return RedisValue.EmptyString;
 
         var length = Size;
         for (int i = 0; i < value.Count; i++)
@@ -356,9 +357,9 @@ internal class StringEnumerableFormatter
 
         var bytes = new byte[length];
 
-        Unsafe.WriteUnaligned(ref bytes[0], value.Count);
+        Unsafe.WriteUnaligned(ref bytes[0], count);
 
-        var span = bytes.AsSpan(Size * value.Count + Size);
+        var span = bytes.AsSpan(Size * count + Size);
 
         for (int i = 0, b = Size; i < value.Count; i++, b += Size)
         {
@@ -377,7 +378,8 @@ internal class StringEnumerableFormatter
 
     private static RedisValue SerializeList(Encoding encoding, in IList<string?> value)
     {
-        if (value.Count == 0) return RedisValue.EmptyString;
+        var count = value.Count;
+        if (count == 0) return RedisValue.EmptyString;
 
         var length = Size;
         for (int i = 0; i < value.Count; i++)
@@ -390,9 +392,9 @@ internal class StringEnumerableFormatter
 
         var bytes = new byte[length];
 
-        Unsafe.WriteUnaligned(ref bytes[0], value.Count);
+        Unsafe.WriteUnaligned(ref bytes[0], count);
 
-        var span = bytes.AsSpan(Size * value.Count + Size);
+        var span = bytes.AsSpan(Size * count + Size);
 
         for (int i = 0, b = Size; i < value.Count; i++, b += Size)
         {
@@ -411,7 +413,8 @@ internal class StringEnumerableFormatter
 
     private static RedisValue SerializeReadOnlyCollection(Encoding encoding, in IReadOnlyCollection<string?> value)
     {
-        if (value.Count == 0) return RedisValue.EmptyString;
+        var count = value.Count;
+        if (count == 0) return RedisValue.EmptyString;
 
         var length = Size;
         foreach (var str in value)
@@ -423,9 +426,9 @@ internal class StringEnumerableFormatter
 
         var bytes = new byte[length];
 
-        Unsafe.WriteUnaligned(ref bytes[0], value.Count);
+        Unsafe.WriteUnaligned(ref bytes[0], count);
 
-        var span = bytes.AsSpan(Size * value.Count + Size);
+        var span = bytes.AsSpan(Size * count + Size);
         var b = Size;
 
         foreach (var str in value)
@@ -445,7 +448,8 @@ internal class StringEnumerableFormatter
 
     private static RedisValue SerializeCollection(Encoding encoding, in ICollection<string?> value)
     {
-        if (value.Count == 0) return RedisValue.EmptyString;
+        var count = value.Count;
+        if (count == 0) return RedisValue.EmptyString;
 
         var length = Size;
         foreach (var str in value)
@@ -457,9 +461,9 @@ internal class StringEnumerableFormatter
 
         var bytes = new byte[length];
 
-        Unsafe.WriteUnaligned(ref bytes[0], value.Count);
+        Unsafe.WriteUnaligned(ref bytes[0], count);
 
-        var span = bytes.AsSpan(Size * value.Count + Size);
+        var span = bytes.AsSpan(Size * count + Size);
         var b = Size;
 
         foreach (var str in value)

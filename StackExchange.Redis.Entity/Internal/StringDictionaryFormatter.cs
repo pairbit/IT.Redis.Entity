@@ -291,7 +291,7 @@ public static class StringDictionaryFormatter
 
             Unsafe.WriteUnaligned(ref bytes[0], count);
 
-            var span = bytes.AsSpan(2 * Size * count + Size);
+            var span = bytes.AsSpan(DoubleSize * count + Size);
             var b = Size;
 
             foreach (var pair in value)
@@ -324,7 +324,8 @@ public static class StringDictionaryFormatter
 
     internal static RedisValue SerializeArray(Encoding encoding, in KeyValuePair<string?, string?>[] value)
     {
-        if (value.Length == 0) return RedisValue.EmptyString;
+        var count = value.Length;
+        if (count == 0) return RedisValue.EmptyString;
 
         var length = Size;
         for (int i = 0; i < value.Length; i++)
@@ -340,9 +341,9 @@ public static class StringDictionaryFormatter
 
         var bytes = new byte[length];
 
-        Unsafe.WriteUnaligned(ref bytes[0], value.Length);
+        Unsafe.WriteUnaligned(ref bytes[0], count);
 
-        var span = bytes.AsSpan(2 * Size * value.Length + Size);
+        var span = bytes.AsSpan(DoubleSize * count + Size);
 
         for (int i = 0, b = Size; i < value.Length; i++, b += Size)
         {
@@ -372,7 +373,8 @@ public static class StringDictionaryFormatter
 
     private static RedisValue SerializeReadOnlyList(Encoding encoding, in IReadOnlyList<KeyValuePair<string?, string?>> value)
     {
-        if (value.Count == 0) return RedisValue.EmptyString;
+        var count = value.Count;
+        if (count == 0) return RedisValue.EmptyString;
 
         var length = Size;
         for (int i = 0; i < value.Count; i++)
@@ -388,9 +390,9 @@ public static class StringDictionaryFormatter
 
         var bytes = new byte[length];
 
-        Unsafe.WriteUnaligned(ref bytes[0], value.Count);
+        Unsafe.WriteUnaligned(ref bytes[0], count);
 
-        var span = bytes.AsSpan(2 * Size * value.Count + Size);
+        var span = bytes.AsSpan(DoubleSize * count + Size);
 
         for (int i = 0, b = Size; i < value.Count; i++, b += Size)
         {
@@ -420,22 +422,148 @@ public static class StringDictionaryFormatter
 
     private static RedisValue SerializeList(Encoding encoding, in IList<KeyValuePair<string?, string?>> value)
     {
-        if (value.Count == 0) return RedisValue.EmptyString;
+        var count = value.Count;
+        if (count == 0) return RedisValue.EmptyString;
 
-        throw new NotImplementedException();
+        var length = Size;
+        for (int i = 0; i < value.Count; i++)
+        {
+            var pair = value[i];
+            var key = pair.Key;
+            var val = pair.Value;
+            length += Size + (key == null || key.Length == 0 ? 0 : encoding.GetByteCount(key.AsSpan())) +
+                      Size + (val == null || val.Length == 0 ? 0 : encoding.GetByteCount(val.AsSpan()));
+        }
+
+        if (length > Util.RedisValueMaxLength) throw Ex.InvalidLengthCollection(value.GetType(), length, Util.RedisValueMaxLength);
+
+        var bytes = new byte[length];
+
+        Unsafe.WriteUnaligned(ref bytes[0], count);
+
+        var span = bytes.AsSpan(DoubleSize * count + Size);
+
+        for (int i = 0, b = Size; i < value.Count; i++, b += Size)
+        {
+            var pair = value[i];
+            var key = pair.Key;
+            if (key == null) Unsafe.WriteUnaligned(ref bytes[b], int.MaxValue);
+            else if (key.Length > 0)
+            {
+                var written = encoding.GetBytes(key, span);
+                Unsafe.WriteUnaligned(ref bytes[b], written);
+                span = span.Slice(written);
+            }
+            b += Size;
+
+            var val = pair.Value;
+            if (val == null) Unsafe.WriteUnaligned(ref bytes[b], int.MaxValue);
+            else if (val.Length > 0)
+            {
+                var written = encoding.GetBytes(val, span);
+                Unsafe.WriteUnaligned(ref bytes[b], written);
+                span = span.Slice(written);
+            }
+        }
+
+        return bytes;
     }
 
     private static RedisValue SerializeReadOnlyCollection(Encoding encoding, in IReadOnlyCollection<KeyValuePair<string?, string?>> value)
     {
-        if (value.Count == 0) return RedisValue.EmptyString;
+        var count = value.Count;
+        if (count == 0) return RedisValue.EmptyString;
 
-        throw new NotImplementedException();
+        var length = Size;
+        foreach (var pair in value)
+        {
+            var key = pair.Key;
+            var val = pair.Value;
+            length += Size + (key == null || key.Length == 0 ? 0 : encoding.GetByteCount(key.AsSpan())) +
+                      Size + (val == null || val.Length == 0 ? 0 : encoding.GetByteCount(val.AsSpan()));
+        }
+
+        if (length > Util.RedisValueMaxLength) throw Ex.InvalidLengthCollection(value.GetType(), length, Util.RedisValueMaxLength);
+
+        var bytes = new byte[length];
+
+        Unsafe.WriteUnaligned(ref bytes[0], count);
+
+        var span = bytes.AsSpan(DoubleSize * count + Size);
+        var b = Size;
+
+        foreach (var pair in value)
+        {
+            var key = pair.Key;
+            if (key == null) Unsafe.WriteUnaligned(ref bytes[b], int.MaxValue);
+            else if (key.Length > 0)
+            {
+                var written = encoding.GetBytes(key, span);
+                Unsafe.WriteUnaligned(ref bytes[b], written);
+                span = span.Slice(written);
+            }
+            b += Size;
+
+            var val = pair.Value;
+            if (val == null) Unsafe.WriteUnaligned(ref bytes[b], int.MaxValue);
+            else if (val.Length > 0)
+            {
+                var written = encoding.GetBytes(val, span);
+                Unsafe.WriteUnaligned(ref bytes[b], written);
+                span = span.Slice(written);
+            }
+            b += Size;
+        }
+
+        return bytes;
     }
 
     private static RedisValue SerializeCollection(Encoding encoding, in ICollection<KeyValuePair<string?, string?>> value)
     {
-        if (value.Count == 0) return RedisValue.EmptyString;
+        var count = value.Count;
+        if (count == 0) return RedisValue.EmptyString;
 
-        throw new NotImplementedException();
+        var length = Size;
+        foreach (var pair in value)
+        {
+            var key = pair.Key;
+            var val = pair.Value;
+            length += Size + (key == null || key.Length == 0 ? 0 : encoding.GetByteCount(key.AsSpan())) +
+                      Size + (val == null || val.Length == 0 ? 0 : encoding.GetByteCount(val.AsSpan()));
+        }
+
+        if (length > Util.RedisValueMaxLength) throw Ex.InvalidLengthCollection(value.GetType(), length, Util.RedisValueMaxLength);
+
+        var bytes = new byte[length];
+
+        Unsafe.WriteUnaligned(ref bytes[0], count);
+
+        var span = bytes.AsSpan(DoubleSize * count + Size);
+        var b = Size;
+
+        foreach (var pair in value)
+        {
+            var key = pair.Key;
+            if (key == null) Unsafe.WriteUnaligned(ref bytes[b], int.MaxValue);
+            else if (key.Length > 0)
+            {
+                var written = encoding.GetBytes(key, span);
+                Unsafe.WriteUnaligned(ref bytes[b], written);
+                span = span.Slice(written);
+            }
+            b += Size;
+
+            var val = pair.Value;
+            if (val == null) Unsafe.WriteUnaligned(ref bytes[b], int.MaxValue);
+            else if (val.Length > 0)
+            {
+                var written = encoding.GetBytes(val, span);
+                Unsafe.WriteUnaligned(ref bytes[b], written);
+                span = span.Slice(written);
+            }
+            b += Size;
+        }
+
+        return bytes;
     }
 }

@@ -353,6 +353,13 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
 
                     return Activator.CreateInstance(formatterType, genericFactory);
                 }
+
+                if (keyType == typeof(string) && valueType == typeof(string))
+                {
+                    var genericFactory = Activator.CreateInstance(DictionaryFactoryProxyType.MakeGenericType(type, keyType, valueType), dictionaryFactory);
+
+                    return Activator.CreateInstance(StringDictionaryFormatterType.MakeGenericType(type), genericFactory);
+                }
             }
         }
 
