@@ -143,6 +143,7 @@ public class DocumentTest
             entity2.ConcurrentStack = new ConcurrentStack<string?>(new string?[] { "3" });
             entity2.BlockingCollection = new BlockingCollection<string?>();
             entity2.StringPairs = new List<KeyValuePair<string, string>>();
+            entity2.StringDictionary = new Dictionary<string, string>() { { "4", "5" } };
             _db.EntityLoad(entity2, Key);
 
 #if NETCOREAPP3_1_OR_GREATER
