@@ -157,6 +157,9 @@ public static class StringDictionaryFormatter
             {
                 if (collection.Count > 0) collection.Clear();
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+                if (collection is Dictionary<string, string> dictionary) dictionary.EnsureCapacity(length);
+#endif
                 for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
                 {
                     collection.Add(UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
