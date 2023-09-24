@@ -156,6 +156,9 @@ internal class StringEnumerableFormatter
             {
                 if (collection.Count > 0) collection.Clear();
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+                if (collection is HashSet<string?> hashSet) hashSet.EnsureCapacity(length);
+#endif
                 for (int i = 0, b = Size; i < length; i++, b += Size)
                 {
                     collection.Add(UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));

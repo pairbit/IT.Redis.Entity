@@ -134,6 +134,9 @@ internal static class UnmanagedEnumerableFormatter
             {
                 if (collection.Count > 0) collection.Clear();
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+                if (collection is HashSet<T> hashSet) hashSet.EnsureCapacity(length);
+#endif
                 for (int i = 0, b = 0; i < length; i++, b += size)
                 {
                     collection.Add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
@@ -169,7 +172,7 @@ internal static class UnmanagedEnumerableFormatter
         else if (value is ConcurrentStack<T> cStack)
         {
             cStack.Clear();
-
+            
             spanRef = ref Unsafe.Add(ref spanRef, span.Length);
 
             for (int i = 0, b = size; i < length; i++, b += size)

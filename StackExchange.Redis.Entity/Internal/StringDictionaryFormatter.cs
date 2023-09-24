@@ -159,6 +159,7 @@ public static class StringDictionaryFormatter
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
                 if (collection is Dictionary<string, string> dictionary) dictionary.EnsureCapacity(length);
+                else if (collection is HashSet<KeyValuePair<string?, string?>> hashSet) hashSet.EnsureCapacity(length);
 #endif
                 for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
                 {

@@ -265,6 +265,9 @@ internal static class UnmanagedEnumerableNullableFormatter
             {
                 if (collection.Count > 0) collection.Clear();
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+                if (collection is HashSet<T?> hashSet) hashSet.EnsureCapacity(length);
+#endif
                 do
                 {
                     collection.Add((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
