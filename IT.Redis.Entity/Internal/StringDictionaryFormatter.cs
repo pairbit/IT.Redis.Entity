@@ -5,7 +5,7 @@ using System.Text;
 
 namespace IT.Redis.Entity.Internal;
 
-public static class StringDictionaryFormatter
+internal static class StringDictionaryFormatter
 {
     private const int Size = 4;
     internal const int DoubleSize = Size * 2;
