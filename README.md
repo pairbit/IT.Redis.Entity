@@ -1,1 +1,1 @@
-# StackExchange.Redis.Entity
+# IT.Redis.Entity
