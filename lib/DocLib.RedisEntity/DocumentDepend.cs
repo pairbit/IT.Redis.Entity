@@ -1,5 +1,5 @@
 ﻿using StackExchange.Redis;
-using StackExchange.Redis.Entity.Attributes;
+using IT.Redis.Entity.Attributes;
 using System.Collections;
 using System.Numerics;
 

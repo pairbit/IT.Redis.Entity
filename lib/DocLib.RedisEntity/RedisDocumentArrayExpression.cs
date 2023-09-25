@@ -1,5 +1,5 @@
 ﻿using StackExchange.Redis;
-using StackExchange.Redis.Entity;
+using IT.Redis.Entity;
 using System.Linq.Expressions;
 
 namespace DocLib.RedisEntity;

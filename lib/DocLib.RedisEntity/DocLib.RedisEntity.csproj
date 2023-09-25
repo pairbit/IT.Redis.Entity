@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\StackExchange.Redis.Entity\StackExchange.Redis.Entity.csproj" />
+    <ProjectReference Include="..\..\IT.Redis.Entity\IT.Redis.Entity.csproj" />
     <ProjectReference Include="..\DocLib\DocLib.csproj" />
   </ItemGroup>
 

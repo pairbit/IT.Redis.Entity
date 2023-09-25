@@ -1,6 +1,6 @@
 ﻿using StackExchange.Redis;
-using StackExchange.Redis.Entity;
-using StackExchange.Redis.Entity.Formatters;
+using IT.Redis.Entity;
+using IT.Redis.Entity.Formatters;
 
 namespace DocLib.RedisEntity;
 

@@ -1,5 +1,5 @@
 ﻿using StackExchange.Redis;
-using StackExchange.Redis.Entity;
+using IT.Redis.Entity;
 
 namespace DocLib.RedisEntity;
 
