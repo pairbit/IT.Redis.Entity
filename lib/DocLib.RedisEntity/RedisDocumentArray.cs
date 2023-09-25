@@ -28,7 +28,7 @@ public class RedisDocumentArray : IRedisEntityReaderWriter<Document>
     public RedisDocumentArray()
     {
         _readers[0] = x => x.Name;
-        _writers[0] = (x, v) => x.Name = v;
+        _writers[0] = (x, v) => x.Name = (string)v!;
 #if NET6_0_OR_GREATER
         _readers[1] = x => x.StartDate.DayNumber;
         _writers[1] = (x, v) => x.StartDate = DateOnly.FromDayNumber((int)v);

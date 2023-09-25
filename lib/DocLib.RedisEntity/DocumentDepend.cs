@@ -34,9 +34,9 @@ public record DocumentDepend
 
     public long Price { get; set; }
 
-    public Uri Url { get; set; }
+    public Uri? Url { get; set; }
 
-    public Version Version { get; set; }
+    public Version? Version { get; set; }
 
     public bool IsDeleted { get; set; }
 
@@ -74,11 +74,11 @@ public record DocumentDepend
     //[RedisFieldIgnore]
     public UIntPtr UIntPtrValue { get; set; }
 
-    public BitArray Bits { get; set; }
+    public BitArray? Bits { get; set; }
 
-    public int[] Nums { get; set; }
+    public int[]? Nums { get; set; }
 
-    public ICollection<int> NumCollection { get; set; }
+    public ICollection<int>? NumCollection { get; set; }
 
     public static void New(DocumentDepend doc, int i)
     {

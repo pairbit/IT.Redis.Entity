@@ -20,7 +20,7 @@ public class DocumentNotNullable
 
     public DocumentSize Size { get; set; }
 
-    public byte[] Content { get; set; }
+    public byte[]? Content { get; set; }
 
     public ReadOnlyMemory<byte> Memory { get; set; }
 

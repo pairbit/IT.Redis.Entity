@@ -53,7 +53,7 @@ public class RedisDocument : IRedisEntityReaderWriter<Document>
         if (value.IsNull) return false;
         var no = (int)field;
 
-        if (no == 0) entity.Name = (string?)value;
+        if (no == 0) entity.Name = (string)value!;
 #if NET6_0_OR_GREATER
         else if (no == 1) entity.StartDate = DateOnly.FromDayNumber((int)value);
         else if (no == 2) entity.EndDate = value.IsNullOrEmpty ? null : DateOnly.FromDayNumber((int)value);

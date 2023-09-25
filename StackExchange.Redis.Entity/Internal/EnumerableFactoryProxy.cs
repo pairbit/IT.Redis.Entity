@@ -16,6 +16,7 @@ internal class EnumerableFactoryProxy<TEnumerable, T> : IEnumerableFactory<TEnum
 }
 
 internal class DictionaryFactoryProxy<TDictionary, TKey, TValue> : IDictionaryFactory<TDictionary, TKey, TValue>
+    where TKey : notnull
     where TDictionary : IEnumerable<KeyValuePair<TKey, TValue>>
 {
     private readonly IDictionaryFactory _factory;

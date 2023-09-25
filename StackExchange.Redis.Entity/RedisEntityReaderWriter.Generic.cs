@@ -64,7 +64,7 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
                     {
                         Writer = Compiler.GetWriter<T>(property),
                         Deserializer = new RedisValueDeserializerProxy(formatter),
-                        DeserializerGeneric = Activator.CreateInstance(typeof(RedisValueDeserializerProxy<>).MakeGenericType(propertyType), formatter)
+                        DeserializerGeneric = Activator.CreateInstance(typeof(RedisValueDeserializerProxy<>).MakeGenericType(propertyType), formatter)!
                     });
                     writerFields.Add(name, field);
                 }
@@ -75,7 +75,7 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
                     {
                         Reader = Compiler.GetReader<T>(property),
                         Serializer = formatter,
-                        SerializerGeneric = Activator.CreateInstance(typeof(RedisValueSerializerProxy<>).MakeGenericType(propertyType), formatter)
+                        SerializerGeneric = Activator.CreateInstance(typeof(RedisValueSerializerProxy<>).MakeGenericType(propertyType), formatter)!
                     });
                     readerFields.Add(name, field);
                 }

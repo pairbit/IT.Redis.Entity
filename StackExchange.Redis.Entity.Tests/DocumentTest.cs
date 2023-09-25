@@ -147,19 +147,19 @@ public class DocumentTest
             _db.EntityLoad(entity2, Key);
 
 #if NETCOREAPP3_1_OR_GREATER
-            Assert.That(entity.ImmutableList.Cast<int?>().SequenceEqual(entity2.ImmutableList), Is.True);
+            Assert.That(entity.ImmutableList!.Cast<int?>().SequenceEqual(entity2.ImmutableList!), Is.True);
             Assert.That(entity.Tuple, Is.EqualTo(entity2.Tuple));
             Assert.That(entity.NullableTuple, Is.EqualTo(entity2.NullableTuple));
 #endif
-            Assert.That(entity.KeyValuePairs.SequenceEqual(entity2.KeyValuePairs), Is.True);
-            Assert.That(entity.Dictionary.SequenceEqual(entity2.Dictionary), Is.True);
-            Assert.That(entity.ReadOnlyDictionary.SequenceEqual(entity2.ReadOnlyDictionary), Is.True);
-            Assert.That(entity.SortedDictionary.SequenceEqual(entity2.SortedDictionary), Is.True);
-            Assert.That(entity.SortedList.SequenceEqual(entity2.SortedList), Is.True);
-            Assert.That(entity.StringCollection.SequenceEqual(entity2.StringCollection), Is.True);
-            Assert.That(entity.Strings.SequenceEqual(entity2.Strings), Is.True);
-            Assert.That(entity.Versions.SequenceEqual(entity2.Versions), Is.True);
-            Assert.That(entity.ConcurrentDictionary.SequenceEqual(entity2.ConcurrentDictionary), Is.True);
+            Assert.That(entity.KeyValuePairs.SequenceEqual(entity2.KeyValuePairs!), Is.True);
+            Assert.That(entity.Dictionary.SequenceEqual(entity2.Dictionary!), Is.True);
+            Assert.That(entity.ReadOnlyDictionary.SequenceEqual(entity2.ReadOnlyDictionary!), Is.True);
+            Assert.That(entity.SortedDictionary.SequenceEqual(entity2.SortedDictionary!), Is.True);
+            Assert.That(entity.SortedList.SequenceEqual(entity2.SortedList!), Is.True);
+            Assert.That(entity.StringCollection.SequenceEqual(entity2.StringCollection!), Is.True);
+            Assert.That(entity.Strings.SequenceEqual(entity2.Strings!), Is.True);
+            Assert.That(entity.Versions.SequenceEqual(entity2.Versions!), Is.True);
+            Assert.That(entity.ConcurrentDictionary.SequenceEqual(entity2.ConcurrentDictionary!), Is.True);
             Assert.That(entity.ConcurrentQueue.SequenceEqual(entity2.ConcurrentQueue), Is.True);
             Assert.That(entity.BlockingCollection.SequenceEqual(entity2.BlockingCollection), Is.True);
 

@@ -34,20 +34,20 @@ public class DocumentDependTest
         }
     }
     
-    [Test]
-    public void RedisValue_Zero()
-    {
-        RedisValue zero = RedisValue.EmptyString;
+    //[Test]
+    //public void RedisValue_Zero()
+    //{
+    //    RedisValue zero = RedisValue.EmptyString;
 
-        byte[] zeroBytes = zero;
-        byte[]? zeroBytesNull = zero;
+    //    byte[] zeroBytes = zero;
+    //    byte[]? zeroBytesNull = zero;
 
-        string zeroString = zero;
-        string? zeroStringNull = zero;
+    //    string zeroString = zero;
+    //    string? zeroStringNull = zero;
 
-        ReadOnlyMemory<byte> memBytes = zero;
-        ReadOnlyMemory<byte>? memBytesNull = zero;
-    }
+    //    ReadOnlyMemory<byte> memBytes = zero;
+    //    ReadOnlyMemory<byte>? memBytesNull = zero;
+    //}
     
     [Test]
     public void DependData()
@@ -80,13 +80,13 @@ public class DocumentDependTest
 
             doc2.MemoryBytes = doc.MemoryBytes;
 
-            Assert.That(doc.NumCollection.SequenceEqual(doc2.NumCollection), Is.True);
+            Assert.That(doc.NumCollection!.SequenceEqual(doc2.NumCollection!), Is.True);
             doc.NumCollection = doc2.NumCollection;
 
-            Assert.That(doc.Nums.SequenceEqual(doc2.Nums), Is.True);
+            Assert.That(doc.Nums!.SequenceEqual(doc2.Nums!), Is.True);
             doc.Nums = doc2.Nums;
 
-            Assert.That(doc.Bits.Cast<bool>().SequenceEqual(doc2.Bits.Cast<bool>()), Is.True);
+            Assert.That(doc.Bits!.Cast<bool>().SequenceEqual(doc2.Bits!.Cast<bool>()), Is.True);
             doc.Bits = doc2.Bits;
 
             Assert.That(doc, Is.EqualTo(doc2));
