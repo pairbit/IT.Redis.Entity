@@ -25,19 +25,19 @@ jobs:
             7.0.x
     
       - name: Restore
-        run: dotnet restore StackExchange.Redis.Entity.sln
+        run: dotnet restore IT.Redis.Entity.sln
     
       - name: Build
-        run: dotnet build StackExchange.Redis.Entity.sln --configuration Release --no-restore 
+        run: dotnet build IT.Redis.Entity.sln --configuration Release --no-restore 
 
   publish:
     needs: [build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Publish StackExchange.Redis.Entity
+      - name: Publish IT.Redis.Entity
         uses: pairbit/publish-nuget@v2.6.0
         with:
-            PROJECT_FILE_PATH: StackExchange.Redis.Entity/StackExchange.Redis.Entity.csproj
+            PROJECT_FILE_PATH: IT.Redis.Entity/IT.Redis.Entity.csproj
             NUGET_KEY: ${{secrets.NUGET}}
             TAG_COMMIT: true
