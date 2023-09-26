@@ -95,7 +95,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
         }
         catch (InvalidCastException ex)
         {
-            throw new ArgumentException(nameof(field), ex);
+            throw new ArgumentException($"Field '{field}' not integer", nameof(field), ex);
         }
 
         if (index < 0 || index > _readerInfos.Length) throw new ArgumentOutOfRangeException(nameof(field));
@@ -118,7 +118,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
         }
         catch (InvalidCastException ex)
         {
-            throw new ArgumentException(nameof(field), ex);
+            throw new ArgumentException($"Field '{field}' not integer", nameof(field), ex);
         }
 
         if (index < 0 || index > _writerInfos.Length) throw new ArgumentOutOfRangeException(nameof(field));
