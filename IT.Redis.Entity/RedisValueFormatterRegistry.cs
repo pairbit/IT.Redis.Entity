@@ -109,6 +109,7 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
         Register(BitArrayFormatter.Default);
 
         Register(StringArrayFormatter.Default);
+        Register(PairStringArrayFormatter.Default);
 
         //RegisterEnumerableFactory(ArrayFactory.Default, typeof(IEnumerable<>));
         RegisterEnumerableFactory(ListFactory.Default, typeof(IList<>));

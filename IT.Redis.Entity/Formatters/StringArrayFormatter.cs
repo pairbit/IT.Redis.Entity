@@ -62,5 +62,5 @@ public class StringArrayFormatter : IRedisValueFormatter<string?[]>
         }
     }
 
-    public RedisValue Serialize(in string?[]? value) => value == null ? RedisValues.Zero : StringEnumerableFormatter.Serialize(_encoding, value);
+    public RedisValue Serialize(in string?[]? value) => value == null ? RedisValues.Zero : StringEnumerableFormatter.SerializeArray(_encoding, value);
 }

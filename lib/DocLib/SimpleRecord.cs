@@ -44,6 +44,8 @@ public record SimpleRecord
 
     public IDictionary<string, string>? StringDictionary { get; set; }
 
+    public KeyValuePair<string, string>[]? StringArray { get; set; }
+
 #if NETCOREAPP3_1_OR_GREATER
 
     public System.Collections.Immutable.IImmutableStack<int?>? ImmutableList { get; set; }

@@ -125,6 +125,7 @@ public class DocumentTest
             BlockingCollection = new BlockingCollection<string?>(new ConcurrentQueue<string?>(new string?[] { "8", "9" })),
             StringPairs = new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>("a1", "b"), new KeyValuePair<string, string>("c2", "d") },
             StringDictionary = new Dictionary<string, string>() { { "g", "h" }, { "j", "k" } },
+            StringArray = new [] { new KeyValuePair<string, string>("a12", "b"), new KeyValuePair<string, string>("c25", "d") },
 #if NETCOREAPP3_1_OR_GREATER
             ImmutableList = ImmutableStack.Create(new int?[] { 0, null }),
             Tuple = (0, -1),
@@ -169,6 +170,7 @@ public class DocumentTest
 
             Assert.That(entity.StringPairs.SequenceEqual(entity2.StringPairs), Is.True);
             Assert.That(entity.StringDictionary.SequenceEqual(entity2.StringDictionary), Is.True);
+            Assert.That(entity.StringArray.SequenceEqual(entity2.StringArray), Is.True);
 
             Assert.That(entity.Decimal, Is.EqualTo(entity2.Decimal));
             Assert.That(entity.DateTimeKind, Is.EqualTo(entity2.DateTimeKind));
