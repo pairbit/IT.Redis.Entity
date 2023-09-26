@@ -170,7 +170,7 @@ public class DocumentTest
 
             Assert.That(entity.StringPairs.SequenceEqual(entity2.StringPairs), Is.True);
             Assert.That(entity.StringDictionary.SequenceEqual(entity2.StringDictionary), Is.True);
-            Assert.That(entity.StringArray.SequenceEqual(entity2.StringArray), Is.True);
+            Assert.That(entity.StringArray.SequenceEqual(entity2.StringArray!), Is.True);
 
             Assert.That(entity.Decimal, Is.EqualTo(entity2.Decimal));
             Assert.That(entity.DateTimeKind, Is.EqualTo(entity2.DateTimeKind));
