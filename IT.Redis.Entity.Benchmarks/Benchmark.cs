@@ -15,6 +15,8 @@ public class Benchmark
     private static readonly IRedisEntityReaderWriter<Document> _rw2 = new RedisDocumentArray();
     private static readonly IRedisEntityReaderWriter<Document> _rw1 = new RedisDocument();
     private static readonly IRedisEntityReaderWriter<Document> _rw = RedisEntity<Document>.ReaderWriter;
+    private static readonly IRedisEntityReaderWriter<Document> _rwi
+        = new RedisEntityReaderWriterIndex<Document>(new RedisEntityConfiguration(RedisValueFormatterRegistry.Default));
 
     private static readonly Document Data = Document.Data;
     private static readonly HashEntry[] _entries = _rw.GetEntries(Data);
@@ -23,6 +25,9 @@ public class Benchmark
     {
 
     }
+
+    [Benchmark]
+    public HashEntry[] GetEntriesIndex() => _rwi.GetEntries(Data);
 
     [Benchmark]
     public HashEntry[] GetEntries() => _rw.GetEntries(Data);
@@ -35,6 +40,9 @@ public class Benchmark
 
     [Benchmark]
     public HashEntry[] GetEntries_ArrayExpression() => _rw3.GetEntries(Data);
+
+    [Benchmark]
+    public Document? GetEntityIndex() => _rwi.GetEntity(_entries);
 
     [Benchmark]
     public Document? GetEntity() => _rw.GetEntity(_entries);
