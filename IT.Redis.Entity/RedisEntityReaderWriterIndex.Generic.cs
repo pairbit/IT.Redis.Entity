@@ -35,7 +35,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
             if (!field.IsNull)
             {
                 if (!field.IsInteger) throw new NotSupportedException("Non-integer fields are not supported");
-                
+
                 var index = (int)field;
                 var name = property.Name;
 
@@ -88,7 +88,15 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
 
     public RedisValue Read(T entity, in RedisValue field)
     {
-        var index = (int)field;
+        int index;
+        try
+        {
+            index = (int)field;
+        }
+        catch (InvalidCastException ex)
+        {
+            throw new ArgumentException(nameof(field), ex);
+        }
 
         if (index < 0 || index > _readerInfos.Length) throw new ArgumentOutOfRangeException(nameof(field));
 
@@ -103,7 +111,15 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
     {
         if (value.IsNull) return false;
 
-        var index = (int)field;
+        int index;
+        try
+        {
+            index = (int)field;
+        }
+        catch (InvalidCastException ex)
+        {
+            throw new ArgumentException(nameof(field), ex);
+        }
 
         if (index < 0 || index > _writerInfos.Length) throw new ArgumentOutOfRangeException(nameof(field));
 
@@ -118,7 +134,15 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
 
     public IRedisValueSerializer<TField> GetSerializer<TField>(in RedisValue field)
     {
-        var index = (int)field;
+        int index;
+        try
+        {
+            index = (int)field;
+        }
+        catch (InvalidCastException ex)
+        {
+            throw new ArgumentException(nameof(field), ex);
+        }
 
         if (index < 0 || index > _readerInfos.Length) throw new ArgumentOutOfRangeException(nameof(field));
 
@@ -131,7 +155,15 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
 
     public IRedisValueDeserializer<TField> GetDeserializer<TField>(in RedisValue field)
     {
-        var index = (int)field;
+        int index;
+        try
+        {
+            index = (int)field;
+        }
+        catch (InvalidCastException ex)
+        {
+            throw new ArgumentException(nameof(field), ex);
+        }
 
         if (index < 0 || index > _writerInfos.Length) throw new ArgumentOutOfRangeException(nameof(field));
 
