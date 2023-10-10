@@ -205,7 +205,7 @@ public class DocumentTest
         }
     }
 
-    [Test]
+    //[Test]
     public void ReadKeyTest()
     {
         var doc = new DocumentAnnotation

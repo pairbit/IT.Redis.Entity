@@ -37,11 +37,11 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
 
     public RedisValue GetField(PropertyInfo property, out bool hasKey)
     {
-        if (property.GetCustomAttribute<RedisKeyAttribute>() != null)
-        {
-            hasKey = true;
-            return RedisValue.Null;
-        }
+        //if (property.GetCustomAttribute<RedisKeyAttribute>() != null)
+        //{
+        //    hasKey = false;
+        //    return RedisValue.Null;
+        //}
 
         hasKey = false;
 
