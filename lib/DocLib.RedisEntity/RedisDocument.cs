@@ -85,4 +85,9 @@ public class RedisDocument : IRedisEntityReaderWriter<Document>
 
         throw new InvalidOperationException();
     }
+
+    public RedisKey ReadKey(Document entity)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -4,6 +4,24 @@ namespace StackExchange.Redis;
 
 public static class xIDatabase
 {
+    public static void EntitySet<T>(this IDatabase db, T entity, IRedisEntityReader<T>? reader = null, CommandFlags flags = CommandFlags.None)
+    {
+        reader ??= RedisEntity<T>.Reader;
+        db.HashSet(reader.ReadKey(entity), reader.GetEntries(entity), flags);
+    }
+
+    public static void EntitySet<T>(this IDatabase db, T entity, RedisValue[] fields, IRedisEntityReader<T>? reader = null, CommandFlags flags = CommandFlags.None)
+    {
+        reader ??= RedisEntity<T>.Reader;
+        db.HashSet(reader.ReadKey(entity), reader.GetEntries(entity, fields), flags);
+    }
+
+    public static bool EntitySet<T>(this IDatabase db, T entity, RedisValue field, IRedisEntityReader<T>? reader = null, When when = When.Always, CommandFlags flags = CommandFlags.None)
+    {
+        reader ??= RedisEntity<T>.Reader;
+        return db.HashSet(reader.ReadKey(entity), field, reader.Read(entity, in field), when, flags);
+    }
+
     public static void EntitySet<T>(this IDatabase db, RedisKey key, T entity, IRedisEntityReader<T>? reader = null, CommandFlags flags = CommandFlags.None)
         => db.HashSet(key, (reader ?? RedisEntity<T>.Reader).GetEntries(entity), flags);
 

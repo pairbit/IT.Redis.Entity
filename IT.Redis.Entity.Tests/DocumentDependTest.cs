@@ -96,4 +96,18 @@ public class DocumentDependTest
             _db.KeyDelete(Key);
         }
     }
+
+    [Test]
+    public void ReadKeyTest()
+    {
+        var doc = new DocumentDepend
+        {
+            Id = Guid.NewGuid(),
+            ClientId = Guid.NewGuid(),
+            Name = "MyDoc1",
+            BigInteger = 1,
+        };
+
+        _db.EntitySet(doc);
+    }
 }

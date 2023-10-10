@@ -2,6 +2,7 @@
 using IT.Redis.Entity.Internal;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace IT.Redis.Entity;
 
@@ -34,8 +35,16 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
         return _formatter;
     }
 
-    public RedisValue GetField(PropertyInfo property)
+    public RedisValue GetField(PropertyInfo property, out bool hasKey)
     {
+        if (property.GetCustomAttribute<RedisKeyAttribute>() != null)
+        {
+            hasKey = true;
+            return RedisValue.Null;
+        }
+
+        hasKey = false;
+
         if (property.GetCustomAttribute<RedisFieldIgnoreAttribute>() != null) return RedisValue.Null;
 
         var redisField = property.GetCustomAttribute<RedisFieldAttribute>();
@@ -56,5 +65,16 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
 
         return property.GetMethod?.IsPublic == true ||
                property.SetMethod?.IsPublic == true ? property.Name : RedisValue.Null;
+    }
+
+    public byte[]? GetKeyPrefix(Type type)
+    {
+        var redisKeyPrefix = type.GetCustomAttribute<RedisKeyPrefixAttribute>();
+        return redisKeyPrefix == null ? null : Encoding.UTF8.GetBytes(redisKeyPrefix.Prefix);
+    }
+
+    public object GetFixFormatter(PropertyInfo property)
+    {
+        throw new NotImplementedException();
     }
 }

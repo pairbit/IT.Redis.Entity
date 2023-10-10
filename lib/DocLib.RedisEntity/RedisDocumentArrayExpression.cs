@@ -117,4 +117,9 @@ public class RedisDocumentArrayExpression : IRedisEntityReaderWriter<Document>
 
     public IRedisValueSerializer<TField> GetSerializer<TField>(in RedisValue field)
         => (IRedisValueSerializer<TField>)RedisDocument.GetFormatter((int)field);
+
+    public RedisKey ReadKey(Document entity)
+    {
+        throw new NotImplementedException();
+    }
 }

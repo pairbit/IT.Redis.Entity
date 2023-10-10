@@ -21,7 +21,7 @@ public class DocumentTest
         _db = connection.GetDatabase()!;
 
         //RedisValueFormatterRegistry.RegisterEnumerableFactory(LinkedListFactory.Default, typeof(IReadOnlyCollection<>));
-        RedisValueFormatterRegistry.RegisterEnumerableFactory(StackFactory.Default, typeof(IEnumerable<>), typeof(IReadOnlyCollection<>));
+        //RedisValueFormatterRegistry.RegisterEnumerableFactory(StackFactory.Default, typeof(IEnumerable<>), typeof(IReadOnlyCollection<>));
         RedisValueFormatterRegistry.RegisterEnumerableFactory(EquatableListFactory.Default, typeof(List<>));
         RedisValueFormatterRegistry.Register(new UnmanagedEnumerableFormatter<DocumentVersionInfos, DocumentVersionInfo>(x => new DocumentVersionInfos(x)));
         RedisValueFormatterRegistry.Register(new UnmanagedDictionaryFormatter<DocumentVersionInfoDictionary, Guid, DocumentVersionInfo>(
@@ -181,5 +181,40 @@ public class DocumentTest
         {
             _db.KeyDelete(Key);
         }
+    }
+
+    public record MyRecInt
+    {
+        public int MyInt { get; set; }
+    }
+
+    [Test]
+    public void Int32Test()
+    {
+        var doc = new MyRecInt { MyInt = int.MinValue };
+
+        try
+        {
+            _db.EntitySet(Key, doc);
+
+            var doc2 = _db.EntityGet<MyRecInt>(Key);
+        }
+        finally
+        {
+            _db.KeyDelete(Key);
+        }
+    }
+
+    [Test]
+    public void ReadKeyTest()
+    {
+        var doc = new DocumentAnnotation
+        {
+            Id = Guid.NewGuid(),
+            Name = "My Doc 1",
+            AttachmentIds = new EquatableList<int> { 0, 1, 3, 5 }
+        };
+
+        _db.EntitySet(doc);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using IT.Redis.Entity.Internal;
+using System.Reflection;
 
 namespace IT.Redis.Entity;
 
@@ -8,6 +9,8 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
     private readonly RedisEntityReaderWriter<T>.WriterInfo[] _writerInfos;
     private readonly IRedisEntityFields _readerFields;
     private readonly IRedisEntityFields _writerFields;
+    private readonly Func<T, KeyBuilder, byte[]>? _readerKey;
+    private readonly KeyBuilder? _keyBuilder;
 
     IRedisEntityFields IRedisEntityReader<T>.Fields => _readerFields;
 
@@ -28,11 +31,19 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
 #else
         var set = new HashSet<int>(properties.Length);
 #endif
+        var keys = new List<PropertyInfo>();
+        var keyBuilder = new KeyBuilder(configuration.GetKeyPrefix(typeof(T)));
+
         foreach (var property in properties)
         {
-            var field = configuration.GetField(property);
+            var field = configuration.GetField(property, out var hasKey);
 
-            if (!field.IsNull)
+            if (hasKey)
+            {
+                keys.Add(property);
+                keyBuilder.AddSerializer(configuration.GetFixFormatter(property));
+            }
+            else if (!field.IsNull)
             {
                 if (!field.IsInteger) throw new NotSupportedException("Non-integer fields are not supported");
 
@@ -67,7 +78,11 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
                 }
             }
         }
-
+        if (keys.Count > 0)
+        {
+            _keyBuilder = keyBuilder;
+            _readerKey = Compiler.GetReaderKey<T>(keys);
+        }
         _readerFields = new RedisEntityFields(readerFields);
         _writerFields = new RedisEntityFields(writerFields);
 
@@ -172,5 +187,12 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
         if (writerInfo == null) throw new ArgumentOutOfRangeException(nameof(field));
 
         return (IRedisValueDeserializer<TField>)writerInfo.DeserializerGeneric;
+    }
+
+    public RedisKey ReadKey(T entity)
+    {
+        if (_readerKey == null) throw new InvalidOperationException("Key not found");
+
+        return _readerKey(entity, _keyBuilder);
     }
 }
