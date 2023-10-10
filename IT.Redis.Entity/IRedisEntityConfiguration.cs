@@ -9,6 +9,4 @@ public interface IRedisEntityConfiguration
     RedisValue GetField(PropertyInfo property, out bool hasKey);
 
     IRedisValueFormatter GetFormatter(PropertyInfo property);
-
-    object GetFixFormatter(PropertyInfo property);
 }

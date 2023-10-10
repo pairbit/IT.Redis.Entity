@@ -58,7 +58,9 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
             if (hasKey)
             {
                 keys.Add(property);
-                keyBuilder.AddSerializer(configuration.GetFixFormatter(property));
+                var formatter = configuration.GetFormatter(property);
+                var formatterGeneric = Activator.CreateInstance(typeof(RedisValueFormatterProxy<>).MakeGenericType(property.PropertyType), formatter)!;
+                keyBuilder.AddSerializer(formatterGeneric);
             }
             else if (!field.IsNull)
             {
@@ -67,7 +69,7 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
                 if (!set.Add(field)) throw new InvalidOperationException($"Propery '{name}' has duplicate '{field}'");
 
                 var formatter = configuration.GetFormatter(property);
-                var propertyType = property.PropertyType;
+                var formatterGeneric = Activator.CreateInstance(typeof(RedisValueFormatterProxy<>).MakeGenericType(property.PropertyType), formatter)!;
 
                 if (property.SetMethod != null)
                 {
@@ -75,7 +77,7 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
                     {
                         Writer = Compiler.GetWriter<T>(property),
                         Deserializer = new RedisValueDeserializerProxy(formatter),
-                        DeserializerGeneric = Activator.CreateInstance(typeof(RedisValueDeserializerProxy<>).MakeGenericType(propertyType), formatter)!
+                        DeserializerGeneric = formatterGeneric
                     });
                     writerFields.Add(name, field);
                 }
@@ -86,7 +88,7 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
                     {
                         Reader = Compiler.GetReader<T>(property),
                         Serializer = formatter,
-                        SerializerGeneric = Activator.CreateInstance(typeof(RedisValueSerializerProxy<>).MakeGenericType(propertyType), formatter)!
+                        SerializerGeneric = formatterGeneric
                     });
                     readerFields.Add(name, field);
                 }
