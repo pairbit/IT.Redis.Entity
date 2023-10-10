@@ -21,13 +21,12 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
 
         if (attr != null)
         {
-            var formatter = attr.GetFormatterObject();
+            var formatter = attr.GetFormatterObject() ?? throw new InvalidOperationException();
 
-            if (formatter == null) throw new InvalidOperationException();
+            var formatterPropertyType = typeof(IRedisValueFormatter<>).MakeGenericType(property.PropertyType);
 
-            var formatterType = formatter.GetType();
-
-            //if (formatterType.IsGenericType && formatterType.GetGenericTypeDefinition().Equals)
+            if (!formatterPropertyType.IsAssignableFrom(formatter.GetType()))
+                throw new InvalidOperationException();
 
             return new RedisValueFormatterProxy(formatter);
         }
