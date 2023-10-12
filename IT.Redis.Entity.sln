@@ -15,6 +15,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IT.Redis.Entity.Benchmarks"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IT.Redis.Entity.Tests", "IT.Redis.Entity.Tests\IT.Redis.Entity.Tests.csproj", "{80042CA6-08B1-411B-9816-0463F078C1F6}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IT.Collections.Factory", "..\IT.Collections.Factory\IT.Collections.Factory\IT.Collections.Factory.csproj", "{00F49AAA-011F-4709-B563-B986B535F361}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IT.Redis.Entity.Formatters", "IT.Redis.Entity.Formatters\IT.Redis.Entity.Formatters.csproj", "{9CE0ED20-31CD-49C1-8D7B-C1510A1B3814}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +45,14 @@ Global
 		{80042CA6-08B1-411B-9816-0463F078C1F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80042CA6-08B1-411B-9816-0463F078C1F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80042CA6-08B1-411B-9816-0463F078C1F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00F49AAA-011F-4709-B563-B986B535F361}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00F49AAA-011F-4709-B563-B986B535F361}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00F49AAA-011F-4709-B563-B986B535F361}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00F49AAA-011F-4709-B563-B986B535F361}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CE0ED20-31CD-49C1-8D7B-C1510A1B3814}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CE0ED20-31CD-49C1-8D7B-C1510A1B3814}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CE0ED20-31CD-49C1-8D7B-C1510A1B3814}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CE0ED20-31CD-49C1-8D7B-C1510A1B3814}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -48,6 +60,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{33EF8CC5-86DF-4A45-801F-D08990B5DAEB} = {E9417219-61C2-4769-A87A-7F21B3869116}
 		{B4B1FA3B-E48B-4500-8F12-030EEFF7C910} = {E9417219-61C2-4769-A87A-7F21B3869116}
+		{00F49AAA-011F-4709-B563-B986B535F361} = {E9417219-61C2-4769-A87A-7F21B3869116}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B2D78239-2E18-48FD-9262-53FED8E6625D}

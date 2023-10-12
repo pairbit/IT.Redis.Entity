@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\IT.Redis.Entity.Formatters\IT.Redis.Entity.Formatters.csproj" />
     <ProjectReference Include="..\..\IT.Redis.Entity\IT.Redis.Entity.csproj" />
     <ProjectReference Include="..\DocLib\DocLib.csproj" />
   </ItemGroup>

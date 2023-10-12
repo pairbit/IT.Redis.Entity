@@ -2,7 +2,7 @@
 
 public static class RedisEntity
 {
-    private static IRedisEntityFactory _factory = new RedisEntityFactory(new RedisEntityConfiguration(RedisValueFormatterRegistry.Default));
+    private static IRedisEntityFactory _factory = new RedisEntityFactory(new RedisEntityConfiguration());
 
     public static IRedisEntityFactory Factory
     {

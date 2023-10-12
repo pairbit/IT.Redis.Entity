@@ -1,6 +1,4 @@
 ﻿using IT.Redis.Entity.Internal;
-using System;
-using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -8,13 +6,6 @@ namespace IT.Redis.Entity.Formatters;
 
 public class UnmanagedArrayFormatter<T> : IRedisValueFormatter<T[]>, IRedisValueFormatter<T?[]> where T : unmanaged
 {
-    private readonly CompressionOptions _compressionOptions;
-
-    public UnmanagedArrayFormatter(CompressionOptions? compressionOptions = null)
-    {
-        _compressionOptions = compressionOptions ?? CompressionOptions.Default;
-    }
-
     public void Deserialize(in RedisValue redisValue, ref T?[]? value)
     {
         if (redisValue == RedisValues.Zero)

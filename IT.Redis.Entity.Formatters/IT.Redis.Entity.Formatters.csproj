@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.1;net461;net472;net6.0;net7.0</TargetFrameworks>
+	<LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\IT.Collections.Factory\IT.Collections.Factory\IT.Collections.Factory.csproj" />
+    <ProjectReference Include="..\IT.Redis.Entity\IT.Redis.Entity.csproj" />
+  </ItemGroup>
+
+	<PropertyGroup Condition="$(TargetFramework) == 'net461' or $(TargetFramework) == 'net472' or $(TargetFramework) == 'netstandard2.0'">
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+</Project>

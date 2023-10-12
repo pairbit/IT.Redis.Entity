@@ -1,4 +1,5 @@
-﻿using IT.Redis.Entity.Internal;
+﻿using IT.Collections.Factory.Generic;
+using IT.Redis.Entity.Internal;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -52,7 +53,7 @@ public class StringEnumerableFormatter<TEnumerable> : IRedisValueFormatter<TEnum
                 }
             }
 
-            value = _factory.New(length, in state, StringEnumerableFormatter.Build);
+            value = _factory.New(length, StringEnumerableFormatter.Build, in state);
         }
     }
 

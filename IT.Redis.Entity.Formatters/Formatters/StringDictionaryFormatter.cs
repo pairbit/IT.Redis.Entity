@@ -1,4 +1,5 @@
-﻿using IT.Redis.Entity.Internal;
+﻿using IT.Collections.Factory.Generic;
+using IT.Redis.Entity.Internal;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -53,7 +54,7 @@ public class StringDictionaryFormatter<TDictionary> : IRedisValueFormatter<TDict
                 }
             }
 
-            value = _factory.New(length, in state, StringDictionaryFormatter.Build);
+            value = _factory.New(length, StringDictionaryFormatter.Build, in state);
         }
     }
 

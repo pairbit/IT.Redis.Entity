@@ -1,4 +1,4 @@
-﻿using IT.Redis.Entity.Internal;
+﻿using IT.Collections.Factory.Generic;
 
 namespace IT.Redis.Entity.Formatters;
 

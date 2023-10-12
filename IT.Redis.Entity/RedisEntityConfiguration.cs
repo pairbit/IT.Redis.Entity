@@ -8,7 +8,12 @@ namespace IT.Redis.Entity;
 
 public class RedisEntityConfiguration : IRedisEntityConfiguration
 {
-    private readonly IRedisValueFormatter _formatter;
+    private readonly IRedisValueFormatter _formatter = new RedisValueFormatterNotRegistered();
+
+    public RedisEntityConfiguration()
+    {
+
+    }
 
     public RedisEntityConfiguration(IRedisValueFormatter formatter)
     {

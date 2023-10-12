@@ -1,6 +1,6 @@
 ﻿using DocLib;
 using DocLib.RedisEntity;
-using IT.Redis.Entity.Factories;
+using IT.Collections.Factory;
 using IT.Redis.Entity.Formatters;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -15,6 +15,11 @@ public class DocumentTest
     private static readonly RedisKey KeyPrefix = "doc:";
     private static readonly RedisKey Key = KeyPrefix.Append("1");
 
+    static DocumentTest()
+    {
+        RedisEntity.Factory = new RedisEntityFactory(new RedisEntityConfiguration(RedisValueFormatterRegistry.Default));
+    }
+
     public DocumentTest()
     {
         var connection = ConnectionMultiplexer.Connect("localhost:6381,defaultDatabase=0,syncTimeout=5000,allowAdmin=False,connectTimeout=5000,ssl=False,abortConnect=False");
@@ -22,7 +27,7 @@ public class DocumentTest
 
         //RedisValueFormatterRegistry.RegisterEnumerableFactory(LinkedListFactory.Default, typeof(IReadOnlyCollection<>));
         //RedisValueFormatterRegistry.RegisterEnumerableFactory(StackFactory.Default, typeof(IEnumerable<>), typeof(IReadOnlyCollection<>));
-        RedisValueFormatterRegistry.RegisterEnumerableFactory(EquatableListFactory.Default, typeof(List<>));
+        EnumerableFactoryRegistry.RegisterEnumerableFactory(EquatableListFactory.Default, typeof(List<>));
         RedisValueFormatterRegistry.Register(new UnmanagedEnumerableFormatter<DocumentVersionInfos, DocumentVersionInfo>(x => new DocumentVersionInfos(x)));
         RedisValueFormatterRegistry.Register(new UnmanagedDictionaryFormatter<DocumentVersionInfoDictionary, Guid, DocumentVersionInfo>(
             x => new DocumentVersionInfoDictionary(x)));

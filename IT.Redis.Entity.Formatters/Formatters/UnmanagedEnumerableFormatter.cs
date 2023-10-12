@@ -1,4 +1,5 @@
-﻿using IT.Redis.Entity.Internal;
+﻿using IT.Collections.Factory.Generic;
+using IT.Redis.Entity.Internal;
 using System.Runtime.CompilerServices;
 
 namespace IT.Redis.Entity.Formatters;
@@ -47,7 +48,7 @@ public class UnmanagedEnumerableFormatter<TEnumerable, T> : IRedisValueFormatter
                 }
             }
 
-            value = _factory.New(length, in memory, UnmanagedEnumerableFormatter.Build);
+            value = _factory.New(length, UnmanagedEnumerableFormatter.Build, in memory);
         }
     }
 
