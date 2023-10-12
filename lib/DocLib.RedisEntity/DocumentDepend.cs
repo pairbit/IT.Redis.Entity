@@ -124,6 +124,7 @@ public record DocumentDepend
         random.NextBytes(bytes);
         doc.BigInteger = new BigInteger(bytes);
         doc.Bits = new BitArray(new bool[] { true, false, true, false, false, true, true, true });
+        //doc.Bits = new BitArray(new byte[] { 48 }); Fail
         doc.Nums = new int[] { 12, 9, 122, 999, 0, 2 };
         doc.NumCollection = new int[] { 2, 4, 43, 1, 40, 453, 88, 3 };
     }

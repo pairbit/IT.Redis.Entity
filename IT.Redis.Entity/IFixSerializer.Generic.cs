@@ -2,7 +2,7 @@
 
 public interface IFixSerializer<T>
 {
-    int GetSerializedLength(in T value);
+    int GetSerializedLength(in T? value);
 
-    int Serialize(in T value, Span<byte> span);
+    int Serialize(in T? value, Span<byte> span);
 }
