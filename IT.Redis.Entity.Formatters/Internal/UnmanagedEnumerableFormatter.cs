@@ -6,73 +6,28 @@ namespace IT.Redis.Entity.Internal;
 
 internal static class UnmanagedEnumerableFormatter
 {
-    internal static void Build<T>(IEnumerable<T> buffer, in ReadOnlyMemory<byte> memory)
+    internal static void Build<T>(Action<T?> add, bool reverse, in ReadOnlyMemory<byte> memory)
     {
         var span = memory.Span;
         var size = Unsafe.SizeOf<T>();
         var count = span.Length / size;
         ref byte spanRef = ref MemoryMarshal.GetReference(span);
 
-        if (buffer is T[] array)
-        {
-            //if (array.Length < count) throw new InvalidOperationException();
-
-            for (int i = 0, b = 0; i < array.Length; i++, b += size)
-            {
-                array[i] = Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b));
-            }
-        }
-        else if (buffer is ICollection<T> collection)
-        {
-            for (int i = 0, b = 0; i < count; i++, b += size)
-            {
-                collection.Add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
-            }
-        }
-        else if (buffer is Queue<T> queue)
-        {
-            for (int i = 0, b = 0; i < count; i++, b += size)
-            {
-                queue.Enqueue(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
-            }
-        }
-        else if (buffer is Stack<T> stack)
+        if (reverse)
         {
             spanRef = ref Unsafe.Add(ref spanRef, span.Length);
 
             for (int i = 0, b = size; i < count; i++, b += size)
             {
-                stack.Push(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)));
-            }
-        }
-        else if (buffer is ConcurrentStack<T> cStack)
-        {
-            spanRef = ref Unsafe.Add(ref spanRef, span.Length);
-
-            for (int i = 0, b = size; i < count; i++, b += size)
-            {
-                cStack.Push(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)));
-            }
-        }
-        else if (buffer is ConcurrentBag<T> bag)
-        {
-            spanRef = ref Unsafe.Add(ref spanRef, span.Length);
-
-            for (int i = 0, b = size; i < count; i++, b += size)
-            {
-                bag.Add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)));
-            }
-        }
-        else if (buffer is IProducerConsumerCollection<T> pcCollection)
-        {
-            for (int i = 0, b = 0; i < count; i++, b += size)
-            {
-                pcCollection.AddOrThrow(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
+                add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)));
             }
         }
         else
         {
-            throw new NotImplementedException($"{buffer.GetType().FullName} not implemented add");
+            for (int i = 0, b = 0; i < count; i++, b += size)
+            {
+                add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
+            }
         }
     }
 

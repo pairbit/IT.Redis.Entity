@@ -10,82 +10,30 @@ internal class StringEnumerableFormatter
     private const int Size = 4;
     internal const int MinLength = Size * 2;
 
-    internal static void Build(IEnumerable<string?> buffer, in BuildState state)
+    internal static void Build(Action<string?> add, bool reverse, in BuildState state)
     {
         var length = state.Length;
         var encoding = state.Encoding;
         var span = state.Memory.Span;
 
-        if (buffer is string?[] array)
-        {
-            ref byte spanRef = ref MemoryMarshal.GetReference(span);
-            span = span.Slice(Size * length + Size);
-
-            for (int i = 0, b = Size; i < array.Length; i++, b += Size)
-            {
-                array[i] = UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding);
-            }
-        }
-        else if (buffer is ICollection<string?> collection)
-        {
-            ref byte spanRef = ref MemoryMarshal.GetReference(span);
-            span = span.Slice(Size * length + Size);
-
-            for (int i = 0, b = Size; i < length; i++, b += Size)
-            {
-                collection.Add(UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
-            }
-        }
-        else if (buffer is Queue<string?> queue)
-        {
-            ref byte spanRef = ref MemoryMarshal.GetReference(span);
-            span = span.Slice(Size * length + Size);
-
-            for (int i = 0, b = Size; i < length; i++, b += Size)
-            {
-                queue.Enqueue(UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
-            }
-        }
-        else if (buffer is Stack<string?> stack)
+        if (reverse)
         {
             ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), Size * length + Size);
 
             for (int i = 0, b = Size; i < length; i++, b += Size)
             {
-                stack.Push(UnsafeReader.ReadStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
-            }
-        }
-        else if (buffer is ConcurrentStack<string?> cStack)
-        {
-            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), Size * length + Size);
-
-            for (int i = 0, b = Size; i < length; i++, b += Size)
-            {
-                cStack.Push(UnsafeReader.ReadStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
-            }
-        }
-        else if (buffer is ConcurrentBag<string?> bag)
-        {
-            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), Size * length + Size);
-
-            for (int i = 0, b = Size; i < length; i++, b += Size)
-            {
-                bag.Add(UnsafeReader.ReadStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
-            }
-        }
-        else if (buffer is IProducerConsumerCollection<string?> pcCollection)
-        {
-            ref byte spanRef = ref MemoryMarshal.GetReference(span);
-            span = span.Slice(Size * length + Size);
-
-            for (int i = 0, b = Size; i < length; i++, b += Size)
-            {
-                pcCollection.AddOrThrow(UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
+                add(UnsafeReader.ReadStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
             }
         }
         else
         {
-            throw new NotImplementedException($"{buffer.GetType().FullName} not implemented add");
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
+            span = span.Slice(Size * length + Size);
+
+            for (int i = 0, b = Size; i < length; i++, b += Size)
+            {
+                add(UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
+            }
         }
     }
 

@@ -16,9 +16,9 @@ public class StringEnumerableFormatter<TEnumerable> : IRedisValueFormatter<TEnum
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
     }
 
-    public StringEnumerableFormatter(EnumerableFactory<TEnumerable, string?> factory)
+    public StringEnumerableFormatter(EnumerableFactory<TEnumerable, string?> factory, Action<TEnumerable, string?> add, bool reverse)
     {
-        _factory = new EnumerableFactoryDelegate<TEnumerable, string?>(factory ?? throw new ArgumentNullException(nameof(factory)));
+        _factory = new EnumerableFactoryDelegate<TEnumerable, string?>(factory, add, reverse);
     }
 
     public void Deserialize(in RedisValue redisValue, ref TEnumerable? value)

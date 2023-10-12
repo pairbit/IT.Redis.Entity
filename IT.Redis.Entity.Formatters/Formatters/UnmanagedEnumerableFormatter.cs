@@ -15,9 +15,9 @@ public class UnmanagedEnumerableFormatter<TEnumerable, T> : IRedisValueFormatter
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
     }
 
-    public UnmanagedEnumerableFormatter(EnumerableFactory<TEnumerable, T> factory)
+    public UnmanagedEnumerableFormatter(EnumerableFactory<TEnumerable, T> factory, Action<TEnumerable, T> add, bool reverse)
     {
-        _factory = new EnumerableFactoryDelegate<TEnumerable, T>(factory ?? throw new ArgumentNullException(nameof(factory)));
+        _factory = new EnumerableFactoryDelegate<TEnumerable, T>(factory, add, reverse);
     }
 
     public void Deserialize(in RedisValue redisValue, ref TEnumerable? value)

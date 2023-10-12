@@ -17,9 +17,10 @@ public class StringDictionaryFormatter<TDictionary> : IRedisValueFormatter<TDict
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
     }
 
-    public StringDictionaryFormatter(EnumerableFactory<TDictionary, KeyValuePair<string?, string?>> factory)
+    public StringDictionaryFormatter(EnumerableFactory<TDictionary, KeyValuePair<string?, string?>> factory,
+        Action<TDictionary, KeyValuePair<string?, string?>> add, bool reverse)
     {
-        _factory = new EnumerableFactoryDelegate<TDictionary, KeyValuePair<string?, string?>>(factory ?? throw new ArgumentNullException(nameof(factory)));
+        _factory = new EnumerableFactoryDelegate<TDictionary, KeyValuePair<string?, string?>>(factory, add, reverse);
     }
 
     public void Deserialize(in RedisValue redisValue, ref TDictionary? value)

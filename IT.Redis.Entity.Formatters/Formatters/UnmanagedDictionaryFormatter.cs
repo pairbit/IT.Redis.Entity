@@ -9,7 +9,8 @@ public class UnmanagedDictionaryFormatter<TDictionary, TKey, TValue> : Unmanaged
 {
     public UnmanagedDictionaryFormatter(IDictionaryFactory<TDictionary, TKey, TValue> factory) : base(factory) { }
 
-    public UnmanagedDictionaryFormatter(DictionaryFactory<TDictionary, TKey, TValue> factory)
-        : base(new DictionaryFactoryDelegate<TDictionary, TKey, TValue>(factory ?? throw new ArgumentNullException(nameof(factory))))
+    public UnmanagedDictionaryFormatter(DictionaryFactory<TDictionary, TKey, TValue> factory,
+        Action<TDictionary, KeyValuePair<TKey, TValue>> add, bool reverse)
+        : base(new DictionaryFactoryDelegate<TDictionary, TKey, TValue>(factory, add, reverse))
     { }
 }

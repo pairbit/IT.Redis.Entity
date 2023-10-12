@@ -11,82 +11,30 @@ internal static class StringDictionaryFormatter
     internal const int DoubleSize = Size * 2;
     internal const int MinLength = Size * 3;
 
-    internal static void Build(IEnumerable<KeyValuePair<string?, string?>> buffer, in BuildState state)
+    internal static void Build(Action<KeyValuePair<string?, string?>> add, bool reverse, in BuildState state)
     {
         var length = state.Length;
         var encoding = state.Encoding;
         var span = state.Memory.Span;
 
-        if (buffer is KeyValuePair<string?, string?>[] array)
-        {
-            ref byte spanRef = ref MemoryMarshal.GetReference(span);
-            span = span.Slice(DoubleSize * length + Size);
-
-            for (int i = 0, b = Size; i < array.Length; i++, b += DoubleSize)
-            {
-                array[i] = UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding);
-            }
-        }
-        else if (buffer is ICollection<KeyValuePair<string?, string?>> collection)
-        {
-            ref byte spanRef = ref MemoryMarshal.GetReference(span);
-            span = span.Slice(DoubleSize * length + Size);
-
-            for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
-            {
-                collection.Add(UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
-            }
-        }
-        else if (buffer is Queue<KeyValuePair<string?, string?>> queue)
-        {
-            ref byte spanRef = ref MemoryMarshal.GetReference(span);
-            span = span.Slice(DoubleSize * length + Size);
-
-            for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
-            {
-                queue.Enqueue(UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
-            }
-        }
-        else if (buffer is Stack<KeyValuePair<string?, string?>> stack)
+        if (reverse)
         {
             ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), DoubleSize * length + Size);
 
             for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
             {
-                stack.Push(UnsafeReader.ReadPairStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
-            }
-        }
-        else if (buffer is ConcurrentStack<KeyValuePair<string?, string?>> cStack)
-        {
-            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), DoubleSize * length + Size);
-
-            for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
-            {
-                cStack.Push(UnsafeReader.ReadPairStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
-            }
-        }
-        else if (buffer is ConcurrentBag<KeyValuePair<string?, string?>> bag)
-        {
-            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), DoubleSize * length + Size);
-
-            for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
-            {
-                bag.Add(UnsafeReader.ReadPairStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
-            }
-        }
-        else if (buffer is IProducerConsumerCollection<KeyValuePair<string?, string?>> pcCollection)
-        {
-            ref byte spanRef = ref MemoryMarshal.GetReference(span);
-            span = span.Slice(DoubleSize * length + Size);
-
-            for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
-            {
-                pcCollection.AddOrThrow(UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
+                add(UnsafeReader.ReadPairStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
             }
         }
         else
         {
-            throw new NotImplementedException($"{buffer.GetType().FullName} not implemented add");
+            ref byte spanRef = ref MemoryMarshal.GetReference(span);
+            span = span.Slice(DoubleSize * length + Size);
+
+            for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
+            {
+                add(UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
+            }
         }
     }
 

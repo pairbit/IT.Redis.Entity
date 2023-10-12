@@ -6,7 +6,7 @@ namespace IT.Redis.Entity.Internal;
 
 internal static class UnmanagedEnumerableNullableFormatter
 {
-    internal static void Build<T>(IEnumerable<T?> buffer, in ReadOnlyMemory<byte> memory) where T : unmanaged
+    internal static void Build<T>(Action<T?> add, bool reverse, in ReadOnlyMemory<byte> memory) where T : unmanaged
     {
         var span = memory.Span;
         var size = Unsafe.SizeOf<T>();
@@ -18,60 +18,7 @@ internal static class UnmanagedEnumerableNullableFormatter
         var bits = span[iBytes];
         int i = 0, b = 0;
 
-        if (buffer is T?[] array)
-        {
-            //if (array.Length < count) throw new InvalidOperationException();
-
-            do
-            {
-                if ((bits & (1 << iBits)) == 0) array[i] = Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b));
-
-                if (++i == array.Length) break;
-
-                b += size;
-
-                if (++iBits == 8)
-                {
-                    bits = span[++iBytes];
-                    iBits = 0;
-                }
-            } while (true);
-        }
-        else if (buffer is ICollection<T?> collection)
-        {
-            do
-            {
-                collection.Add((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
-
-                if (++i == count) break;
-
-                b += size;
-
-                if (++iBits == 8)
-                {
-                    bits = span[++iBytes];
-                    iBits = 0;
-                }
-            } while (true);
-        }
-        else if (buffer is Queue<T?> queue)
-        {
-            do
-            {
-                queue.Enqueue((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
-
-                if (++i == count) break;
-
-                b += size;
-
-                if (++iBits == 8)
-                {
-                    bits = span[++iBytes];
-                    iBits = 0;
-                }
-            } while (true);
-        }
-        else if (buffer is Stack<T?> stack)
+        if (reverse)
         {
             spanRef = ref Unsafe.Add(ref spanRef, iBytes - size);
             iBits = (count % 8) - 1;
@@ -82,7 +29,7 @@ internal static class UnmanagedEnumerableNullableFormatter
 
             do
             {
-                stack.Push((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)) : null);
+                add((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)) : null);
 
                 if (--i == 0) break;
 
@@ -93,76 +40,24 @@ internal static class UnmanagedEnumerableNullableFormatter
                 }
 
                 b += size;
-            } while (true);
-        }
-        else if (buffer is ConcurrentStack<T?> cStack)
-        {
-            spanRef = ref Unsafe.Add(ref spanRef, iBytes - size);
-            iBits = (count % 8) - 1;
-            if (iBits == -1) iBits = 7;
-            iBytes = span.Length - 1;
-            bits = span[iBytes];
-            i = count;
-
-            do
-            {
-                cStack.Push((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)) : null);
-
-                if (--i == 0) break;
-
-                if (--iBits == -1)
-                {
-                    bits = span[--iBytes];
-                    iBits = 7;
-                }
-
-                b += size;
-            } while (true);
-        }
-        else if (buffer is ConcurrentBag<T?> bag)
-        {
-            spanRef = ref Unsafe.Add(ref spanRef, iBytes - size);
-            iBits = (count % 8) - 1;
-            if (iBits == -1) iBits = 7;
-            iBytes = span.Length - 1;
-            bits = span[iBytes];
-            i = count;
-
-            do
-            {
-                bag.Add((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)) : null);
-
-                if (--i == 0) break;
-
-                if (--iBits == -1)
-                {
-                    bits = span[--iBytes];
-                    iBits = 7;
-                }
-
-                b += size;
-            } while (true);
-        }
-        else if (buffer is IProducerConsumerCollection<T?> pcCollection)
-        {
-            do
-            {
-                pcCollection.AddOrThrow((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
-
-                if (++i == count) break;
-
-                b += size;
-
-                if (++iBits == 8)
-                {
-                    bits = span[++iBytes];
-                    iBits = 0;
-                }
             } while (true);
         }
         else
         {
-            throw new NotImplementedException($"{buffer.GetType().FullName} not implemented add");
+            do
+            {
+                add((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
+
+                if (++i == count) break;
+
+                b += size;
+
+                if (++iBits == 8)
+                {
+                    bits = span[++iBytes];
+                    iBits = 0;
+                }
+            } while (true);
         }
     }
 

@@ -28,9 +28,9 @@ public class DocumentTest
         //RedisValueFormatterRegistry.RegisterEnumerableFactory(LinkedListFactory.Default, typeof(IReadOnlyCollection<>));
         //RedisValueFormatterRegistry.RegisterEnumerableFactory(StackFactory.Default, typeof(IEnumerable<>), typeof(IReadOnlyCollection<>));
         EnumerableFactoryRegistry.RegisterEnumerableFactory(EquatableListFactory.Default, typeof(List<>));
-        RedisValueFormatterRegistry.Register(new UnmanagedEnumerableFormatter<DocumentVersionInfos, DocumentVersionInfo>(x => new DocumentVersionInfos(x)));
+        RedisValueFormatterRegistry.Register(new UnmanagedEnumerableFormatter<DocumentVersionInfos, DocumentVersionInfo>(x => new DocumentVersionInfos(x), (x, item) => x.Add(item), false));
         RedisValueFormatterRegistry.Register(new UnmanagedDictionaryFormatter<DocumentVersionInfoDictionary, Guid, DocumentVersionInfo>(
-            x => new DocumentVersionInfoDictionary(x)));
+            x => new DocumentVersionInfoDictionary(x), (x, item) => x.Add(item.Key, item.Value), false));
     }
 
     [Test]
