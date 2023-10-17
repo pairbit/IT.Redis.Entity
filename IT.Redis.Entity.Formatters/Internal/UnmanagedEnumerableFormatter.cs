@@ -6,28 +6,31 @@ namespace IT.Redis.Entity.Internal;
 
 internal static class UnmanagedEnumerableFormatter
 {
-    internal static void Build<T>(Action<T?> add, bool reverse, in ReadOnlyMemory<byte> memory)
+    internal static void Build<T>(Collections.Factory.TryAdd<T?> add, in ReadOnlyMemory<byte> memory)
     {
         var span = memory.Span;
         var size = Unsafe.SizeOf<T>();
         var count = span.Length / size;
         ref byte spanRef = ref MemoryMarshal.GetReference(span);
 
-        if (reverse)
+        for (int i = 0, b = 0; i < count; i++, b += size)
         {
-            spanRef = ref Unsafe.Add(ref spanRef, span.Length);
-
-            for (int i = 0, b = size; i < count; i++, b += size)
-            {
-                add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)));
-            }
+            add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
         }
-        else
+    }
+
+    internal static void BuildReverse<T>(Collections.Factory.TryAdd<T?> add, in ReadOnlyMemory<byte> memory)
+    {
+        var span = memory.Span;
+        var size = Unsafe.SizeOf<T>();
+        var count = span.Length / size;
+        ref byte spanRef = ref MemoryMarshal.GetReference(span);
+
+        spanRef = ref Unsafe.Add(ref spanRef, span.Length);
+
+        for (int i = 0, b = size; i < count; i++, b += size)
         {
-            for (int i = 0, b = 0; i < count; i++, b += size)
-            {
-                add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)));
-            }
+            add(Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)));
         }
     }
 

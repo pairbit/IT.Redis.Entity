@@ -10,30 +10,32 @@ internal class StringEnumerableFormatter
     private const int Size = 4;
     internal const int MinLength = Size * 2;
 
-    internal static void Build(Action<string?> add, bool reverse, in BuildState state)
+    internal static void Build(Collections.Factory.TryAdd<string?> add, in BuildState state)
     {
         var length = state.Length;
         var encoding = state.Encoding;
         var span = state.Memory.Span;
 
-        if (reverse)
-        {
-            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), Size * length + Size);
+        ref byte spanRef = ref MemoryMarshal.GetReference(span);
+        span = span.Slice(Size * length + Size);
 
-            for (int i = 0, b = Size; i < length; i++, b += Size)
-            {
-                add(UnsafeReader.ReadStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
-            }
+        for (int i = 0, b = Size; i < length; i++, b += Size)
+        {
+            add(UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
         }
-        else
-        {
-            ref byte spanRef = ref MemoryMarshal.GetReference(span);
-            span = span.Slice(Size * length + Size);
+    }
 
-            for (int i = 0, b = Size; i < length; i++, b += Size)
-            {
-                add(UnsafeReader.ReadString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
-            }
+    internal static void BuildReverse(Collections.Factory.TryAdd<string?> add, in BuildState state)
+    {
+        var length = state.Length;
+        var encoding = state.Encoding;
+        var span = state.Memory.Span;
+
+        ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), Size * length + Size);
+
+        for (int i = 0, b = Size; i < length; i++, b += Size)
+        {
+            add(UnsafeReader.ReadStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
         }
     }
 

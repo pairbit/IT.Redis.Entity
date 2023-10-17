@@ -1,4 +1,5 @@
-﻿using IT.Collections.Factory.Generic;
+﻿using IT.Collections.Factory;
+using IT.Collections.Factory.Generic;
 using IT.Redis.Entity.Internal;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -18,9 +19,10 @@ public class StringDictionaryFormatter<TDictionary> : IRedisValueFormatter<TDict
     }
 
     public StringDictionaryFormatter(EnumerableFactory<TDictionary, KeyValuePair<string?, string?>> factory,
-        Action<TDictionary, KeyValuePair<string?, string?>> add, bool reverse)
+        Action<TDictionary, KeyValuePair<string?, string?>> add, EnumerableType type = EnumerableType.None)
     {
-        _factory = new EnumerableFactoryDelegate<TDictionary, KeyValuePair<string?, string?>>(factory, add, reverse);
+        _factory = new EnumerableFactoryDelegate<TDictionary, KeyValuePair<string?, string?>>(
+            factory, (items, item) => { add(items, item); return true; }, type);
     }
 
     public void Deserialize(in RedisValue redisValue, ref TDictionary? value)
@@ -55,7 +57,9 @@ public class StringDictionaryFormatter<TDictionary> : IRedisValueFormatter<TDict
                 }
             }
 
-            value = _factory.New(length, StringDictionaryFormatter.Build, in state);
+            value = _factory.New(length, _factory.Type.IsReverse()
+                ? StringDictionaryFormatter.BuildReverse
+                : StringDictionaryFormatter.Build, in state);
         }
     }
 

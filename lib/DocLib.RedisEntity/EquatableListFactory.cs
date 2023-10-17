@@ -1,38 +1,68 @@
 ﻿using IT.Collections.Factory;
+using IT.Collections.Factory.Factories;
 
 namespace DocLib.RedisEntity;
 
-public class EquatableListFactory : IEnumerableFactory
+public class EquatableListFactory : ListFactory
 {
-    public static readonly EquatableListFactory Default = new();
+    public static new readonly EquatableListFactory Default = new();
 
-    public bool IsReadOnly => false;
+    public override EnumerableType Type => EnumerableType.Equatable;
 
-    public IEnumerable<T> Empty<T>() => new EquatableList<T>();
+    public
+#if NET5_0_OR_GREATER
+        override
+#else
+        new
+#endif
+        EquatableList<T> Empty<T>(in Comparers<T> comparers = default) => new(comparers.EqualityComparer);
 
-    public IEnumerable<T> New<T>(int capacity) => new EquatableList<T>(capacity);
+    public
+#if NET5_0_OR_GREATER
+        override
+#else
+        new
+#endif
+        EquatableList<T> New<T>(int capacity, in Comparers<T> comparers = default) => new(capacity, comparers.EqualityComparer);
 
-    public IEnumerable<T> New<T>(int capacity, EnumerableBuilder<T> builder)
+    public
+#if NET5_0_OR_GREATER
+        override
+#else
+        new
+#endif
+        EquatableList<T> New<T>(int capacity, EnumerableBuilder<T> builder, in Comparers<T> comparers = default)
     {
-        if (capacity == 0) return new EquatableList<T>();
+        if (capacity == 0) return new(comparers.EqualityComparer);
         if (builder == null) throw new ArgumentNullException(nameof(builder));
 
-        var list = new EquatableList<T>(capacity);
+        var list = new EquatableList<T>(capacity, comparers.EqualityComparer);
 
-        builder(list.Add, false);
+        builder(item => { list.Add(item); return true; });
 
         return list;
     }
 
-    public IEnumerable<T> New<T, TState>(int capacity, EnumerableBuilder<T, TState> builder, in TState state)
+    public
+#if NET5_0_OR_GREATER
+        override
+#else
+        new
+#endif
+        EquatableList<T> New<T, TState>(int capacity, EnumerableBuilder<T, TState> builder, in TState state, in Comparers<T> comparers = default)
     {
-        if (capacity == 0) return new EquatableList<T>();
+        if (capacity == 0) return new(comparers.EqualityComparer);
         if (builder == null) throw new ArgumentNullException(nameof(builder));
 
-        var list = new EquatableList<T>(capacity);
+        var list = new EquatableList<T>(capacity, comparers.EqualityComparer);
 
-        builder(list.Add, false, in state);
+        builder(item => { list.Add(item); return true; }, in state);
 
         return list;
     }
+
+#if !NET5_0_OR_GREATER
+    protected override List<T> NewList<T>(int capacity, in Comparers<T> comparers)
+        => new EquatableList<T>(capacity, comparers.EqualityComparer);
+#endif
 }

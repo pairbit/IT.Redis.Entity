@@ -11,30 +11,32 @@ internal static class StringDictionaryFormatter
     internal const int DoubleSize = Size * 2;
     internal const int MinLength = Size * 3;
 
-    internal static void Build(Action<KeyValuePair<string?, string?>> add, bool reverse, in BuildState state)
+    internal static void Build(Collections.Factory.TryAdd<KeyValuePair<string?, string?>> add, in BuildState state)
     {
         var length = state.Length;
         var encoding = state.Encoding;
         var span = state.Memory.Span;
 
-        if (reverse)
-        {
-            ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), DoubleSize * length + Size);
+        ref byte spanRef = ref MemoryMarshal.GetReference(span);
+        span = span.Slice(DoubleSize * length + Size);
 
-            for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
-            {
-                add(UnsafeReader.ReadPairStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
-            }
+        for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
+        {
+            add(UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
         }
-        else
-        {
-            ref byte spanRef = ref MemoryMarshal.GetReference(span);
-            span = span.Slice(DoubleSize * length + Size);
+    }
 
-            for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
-            {
-                add(UnsafeReader.ReadPairString(ref Unsafe.Add(ref spanRef, b), ref span, encoding));
-            }
+    internal static void BuildReverse(Collections.Factory.TryAdd<KeyValuePair<string?, string?>> add, in BuildState state)
+    {
+        var length = state.Length;
+        var encoding = state.Encoding;
+        var span = state.Memory.Span;
+
+        ref byte spanRef = ref Unsafe.Add(ref MemoryMarshal.GetReference(span), DoubleSize * length + Size);
+
+        for (int i = 0, b = Size; i < length; i++, b += DoubleSize)
+        {
+            add(UnsafeReader.ReadPairStringFromEnd(ref Unsafe.Add(ref spanRef, -b), ref span, encoding));
         }
     }
 

@@ -1,6 +1,7 @@
 ﻿using DocLib;
 using DocLib.RedisEntity;
 using IT.Collections.Factory;
+using IT.Collections.Factory.Factories;
 using IT.Redis.Entity.Formatters;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -27,10 +28,11 @@ public class DocumentTest
 
         //RedisValueFormatterRegistry.RegisterEnumerableFactory(LinkedListFactory.Default, typeof(IReadOnlyCollection<>));
         //RedisValueFormatterRegistry.RegisterEnumerableFactory(StackFactory.Default, typeof(IEnumerable<>), typeof(IReadOnlyCollection<>));
-        EnumerableFactoryRegistry.RegisterEnumerableFactory(EquatableListFactory.Default, typeof(List<>));
-        RedisValueFormatterRegistry.Register(new UnmanagedEnumerableFormatter<DocumentVersionInfos, DocumentVersionInfo>(x => new DocumentVersionInfos(x), (x, item) => x.Add(item), false));
+        RedisValueFormatterRegistry.EnumerableFactoryRegistry.TryRegisterFactory<ListFactory>(EquatableListFactory.Default, RegistrationBehavior.OverwriteExisting);
+
+        RedisValueFormatterRegistry.Register(new UnmanagedEnumerableFormatter<DocumentVersionInfos, DocumentVersionInfo>(x => new DocumentVersionInfos(x), (x, item) => x.Add(item)));
         RedisValueFormatterRegistry.Register(new UnmanagedDictionaryFormatter<DocumentVersionInfoDictionary, Guid, DocumentVersionInfo>(
-            x => new DocumentVersionInfoDictionary(x), (x, item) => x.Add(item.Key, item.Value), false));
+            x => new DocumentVersionInfoDictionary(x), (x, item) => x.Add(item.Key, item.Value)));
     }
 
     [Test]

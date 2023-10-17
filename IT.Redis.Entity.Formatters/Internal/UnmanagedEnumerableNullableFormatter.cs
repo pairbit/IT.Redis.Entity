@@ -6,7 +6,7 @@ namespace IT.Redis.Entity.Internal;
 
 internal static class UnmanagedEnumerableNullableFormatter
 {
-    internal static void Build<T>(Action<T?> add, bool reverse, in ReadOnlyMemory<byte> memory) where T : unmanaged
+    internal static void Build<T>(Collections.Factory.TryAdd<T?> add, in ReadOnlyMemory<byte> memory) where T : unmanaged
     {
         var span = memory.Span;
         var size = Unsafe.SizeOf<T>();
@@ -18,47 +18,55 @@ internal static class UnmanagedEnumerableNullableFormatter
         var bits = span[iBytes];
         int i = 0, b = 0;
 
-        if (reverse)
+        do
         {
-            spanRef = ref Unsafe.Add(ref spanRef, iBytes - size);
-            iBits = (count % 8) - 1;
-            if (iBits == -1) iBits = 7;
-            iBytes = span.Length - 1;
-            bits = span[iBytes];
-            i = count;
+            add((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
 
-            do
+            if (++i == count) break;
+
+            b += size;
+
+            if (++iBits == 8)
             {
-                add((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)) : null);
+                bits = span[++iBytes];
+                iBits = 0;
+            }
+        } while (true);
+    }
 
-                if (--i == 0) break;
+    internal static void BuildReverse<T>(Collections.Factory.TryAdd<T?> add, in ReadOnlyMemory<byte> memory) where T : unmanaged
+    {
+        var span = memory.Span;
+        var size = Unsafe.SizeOf<T>();
+        var count = (int)(((long)span.Length << 3) / ((size << 3) + 1));
+        ref byte spanRef = ref MemoryMarshal.GetReference(span);
 
-                if (--iBits == -1)
-                {
-                    bits = span[--iBytes];
-                    iBits = 7;
-                }
+        var iBits = 0;
+        var iBytes = size * count;
+        var bits = span[iBytes];
+        int i = 0, b = 0;
 
-                b += size;
-            } while (true);
-        }
-        else
+        spanRef = ref Unsafe.Add(ref spanRef, iBytes - size);
+        iBits = (count % 8) - 1;
+        if (iBits == -1) iBits = 7;
+        iBytes = span.Length - 1;
+        bits = span[iBytes];
+        i = count;
+
+        do
         {
-            do
+            add((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, -b)) : null);
+
+            if (--i == 0) break;
+
+            if (--iBits == -1)
             {
-                add((bits & (1 << iBits)) == 0 ? Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref spanRef, b)) : null);
+                bits = span[--iBytes];
+                iBits = 7;
+            }
 
-                if (++i == count) break;
-
-                b += size;
-
-                if (++iBits == 8)
-                {
-                    bits = span[++iBytes];
-                    iBits = 0;
-                }
-            } while (true);
-        }
+            b += size;
+        } while (true);
     }
 
     internal static bool Deserialize<T>(ref IEnumerable<T?> value, in ReadOnlySpan<byte> span, int size, int length) where T : unmanaged

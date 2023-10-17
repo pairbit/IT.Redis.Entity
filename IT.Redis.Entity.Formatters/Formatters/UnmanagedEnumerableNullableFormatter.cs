@@ -1,4 +1,5 @@
-﻿using IT.Collections.Factory.Generic;
+﻿using IT.Collections.Factory;
+using IT.Collections.Factory.Generic;
 using IT.Redis.Entity.Internal;
 using System.Runtime.CompilerServices;
 
@@ -15,9 +16,11 @@ public class UnmanagedEnumerableNullableFormatter<TEnumerable, T> : IRedisValueF
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
     }
 
-    public UnmanagedEnumerableNullableFormatter(EnumerableFactory<TEnumerable, T?> factory, Action<TEnumerable, T?> add, bool reverse)
+    public UnmanagedEnumerableNullableFormatter(EnumerableFactory<TEnumerable, T?> factory, Action<TEnumerable, T?> add, 
+        EnumerableType type = EnumerableType.None)
     {
-        _factory = new EnumerableFactoryDelegate<TEnumerable, T?>(factory, add, reverse);
+        _factory = new EnumerableFactoryDelegate<TEnumerable, T?>(
+            factory, (items, item) => { add(items, item); return true; }, type);
     }
 
     public void Deserialize(in RedisValue redisValue, ref TEnumerable? value)
@@ -48,7 +51,9 @@ public class UnmanagedEnumerableNullableFormatter<TEnumerable, T> : IRedisValueF
                 }
             }
 
-            value = _factory.New(length, UnmanagedEnumerableNullableFormatter.Build, in memory);
+            value = _factory.New(length, _factory.Type.IsReverse()
+                ? UnmanagedEnumerableNullableFormatter.BuildReverse
+                : UnmanagedEnumerableNullableFormatter.Build, in memory);
         }
     }
 

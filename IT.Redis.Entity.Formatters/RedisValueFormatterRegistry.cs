@@ -10,6 +10,8 @@ namespace IT.Redis.Entity;
 public class RedisValueFormatterRegistry : IRedisValueFormatter
 {
     public static readonly RedisValueFormatterRegistry Default = new();
+    public static readonly IEnumerableFactoryRegistry EnumerableFactoryRegistry = 
+        new ConcurrentEnumerableFactoryRegistry(-1, 30).RegisterFactoriesDefaultAndInterfaces();
 
     static class Check<T>
     {
@@ -190,8 +192,7 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
             //if (_genericFormatterTypes.TryGetValue(genericType, out genericFormatterType))
             //    return genericFormatterType.MakeGenericType(type.GetGenericArguments());
 
-            var factory = EnumerableFactoryRegistry.TryGetEnumerableFactory(genericType);
-            if (factory != null)
+            if (EnumerableFactoryRegistry.TryGetValue(genericType, out var factory) && factory is IEnumerableFactory enumerableFactory)
             {
                 var args = type.GetGenericArguments();
                 var elementType = args[0];
@@ -202,28 +203,27 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
                         ? UnmanagedEnumerableNullableFormatterType.MakeGenericType(type, elementType.GetGenericArguments()[0])
                         : UnmanagedEnumerableFormatterType.MakeGenericType(type, elementType);
 
-                    var genericFactory = Activator.CreateInstance(EnumerableFactoryProxyType.MakeGenericType(type, elementType), factory);
+                    var genericFactory = Activator.CreateInstance(EnumerableFactoryProxyType.MakeGenericType(type, elementType), enumerableFactory);
 
                     return Activator.CreateInstance(formatterType, genericFactory);
                 }
 
                 if (elementType == typeof(string))
                 {
-                    var genericFactory = Activator.CreateInstance(EnumerableFactoryProxyType.MakeGenericType(type, elementType), factory);
+                    var genericFactory = Activator.CreateInstance(EnumerableFactoryProxyType.MakeGenericType(type, elementType), enumerableFactory);
 
                     return Activator.CreateInstance(StringEnumerableFormatterType.MakeGenericType(type), genericFactory);
                 }
 
                 if (elementType == typeof(KeyValuePair<string?, string?>))
                 {
-                    var genericFactory = Activator.CreateInstance(EnumerableFactoryProxyType.MakeGenericType(type, elementType), factory);
+                    var genericFactory = Activator.CreateInstance(EnumerableFactoryProxyType.MakeGenericType(type, elementType), enumerableFactory);
 
                     return Activator.CreateInstance(StringDictionaryFormatterType.MakeGenericType(type), genericFactory);
                 }
             }
 
-            var dictionaryFactory = EnumerableFactoryRegistry.TryGetDictionaryFactory(genericType);
-            if (dictionaryFactory != null)
+            if (EnumerableFactoryRegistry.TryGetValue(genericType, out factory) && factory is IEnumerableKeyValueFactory dictionaryFactory)
             {
                 var args = type.GetGenericArguments();
 
