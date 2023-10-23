@@ -19,10 +19,10 @@ public class StringEnumerableFormatter<TEnumerable> : IRedisValueFormatter<TEnum
 
     public StringEnumerableFormatter(EnumerableFactory<TEnumerable, string?> factory, 
         Action<TEnumerable, string?> add,
-        EnumerableType type = EnumerableType.None)
+        EnumerableKind kind = EnumerableKind.None)
     {
         _factory = new EnumerableFactoryDelegate<TEnumerable, string?>(factory, 
-            (items, item) => { add(items, item); return true; }, type);
+            (items, item) => { add(items, item); return true; }, kind);
     }
 
     public void Deserialize(in RedisValue redisValue, ref TEnumerable? value)
@@ -57,7 +57,7 @@ public class StringEnumerableFormatter<TEnumerable> : IRedisValueFormatter<TEnum
                 }
             }
 
-            value = _factory.New(length, _factory.Type.IsReverse()
+            value = _factory.New(length, _factory.Kind.IsReverse()
                 ? StringEnumerableFormatter.BuildReverse
                 : StringEnumerableFormatter.Build, in state);
         }

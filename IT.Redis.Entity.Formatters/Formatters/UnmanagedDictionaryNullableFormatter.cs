@@ -11,8 +11,8 @@ public class UnmanagedDictionaryNullableFormatter<TDictionary, TKey, TValue> : U
     public UnmanagedDictionaryNullableFormatter(IDictionaryFactory<TDictionary, TKey, TValue?> factory) : base(factory) { }
 
     public UnmanagedDictionaryNullableFormatter(DictionaryFactory<TDictionary, TKey, TValue?> factory,
-        Action<TDictionary, KeyValuePair<TKey, TValue?>> add, EnumerableType type = EnumerableType.None)
+        Action<TDictionary, KeyValuePair<TKey, TValue?>> add, EnumerableKind kind = EnumerableKind.None)
         : base(new DictionaryFactoryDelegate<TDictionary, TKey, TValue?>(
-            factory, (items, item) => { add(items, item); return true; }, type))
+            factory, (items, item) => { add(items, item); return true; }, kind))
     { }
 }

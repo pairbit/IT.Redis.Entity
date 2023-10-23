@@ -11,7 +11,7 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
 {
     public static readonly RedisValueFormatterRegistry Default = new();
     public static readonly IEnumerableFactoryRegistry EnumerableFactoryRegistry = 
-        new ConcurrentEnumerableFactoryRegistry(-1, 30).RegisterFactoriesDefaultAndInterfaces();
+        new ConcurrentEnumerableFactoryRegistry().RegisterFactoriesDefault();
 
     static class Check<T>
     {

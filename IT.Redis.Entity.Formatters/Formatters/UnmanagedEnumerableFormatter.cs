@@ -16,10 +16,10 @@ public class UnmanagedEnumerableFormatter<TEnumerable, T> : IRedisValueFormatter
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
     }
 
-    public UnmanagedEnumerableFormatter(EnumerableFactory<TEnumerable, T> factory, Action<TEnumerable, T> add, EnumerableType type = EnumerableType.None)
+    public UnmanagedEnumerableFormatter(EnumerableFactory<TEnumerable, T> factory, Action<TEnumerable, T> add, EnumerableKind kind = EnumerableKind.None)
     {
         _factory = new EnumerableFactoryDelegate<TEnumerable, T>(
-            factory, (items, item) => { add(items, item); return true; }, type);
+            factory, (items, item) => { add(items, item); return true; }, kind);
     }
 
     public void Deserialize(in RedisValue redisValue, ref TEnumerable? value)
@@ -50,7 +50,7 @@ public class UnmanagedEnumerableFormatter<TEnumerable, T> : IRedisValueFormatter
                 }
             }
 
-            value = _factory.New(length, _factory.Type.IsReverse()
+            value = _factory.New(length, _factory.Kind.IsReverse()
                 ? UnmanagedEnumerableFormatter.BuildReverse
                 : UnmanagedEnumerableFormatter.Build, in memory);
         }

@@ -1,4 +1,6 @@
-﻿namespace DocLib;
+﻿using IT.Collections.Equatable;
+
+namespace DocLib;
 
 public static class DocumentGenerator
 {

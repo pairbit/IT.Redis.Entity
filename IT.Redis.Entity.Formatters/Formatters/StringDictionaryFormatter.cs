@@ -19,10 +19,10 @@ public class StringDictionaryFormatter<TDictionary> : IRedisValueFormatter<TDict
     }
 
     public StringDictionaryFormatter(EnumerableFactory<TDictionary, KeyValuePair<string?, string?>> factory,
-        Action<TDictionary, KeyValuePair<string?, string?>> add, EnumerableType type = EnumerableType.None)
+        Action<TDictionary, KeyValuePair<string?, string?>> add, EnumerableKind kind = EnumerableKind.None)
     {
         _factory = new EnumerableFactoryDelegate<TDictionary, KeyValuePair<string?, string?>>(
-            factory, (items, item) => { add(items, item); return true; }, type);
+            factory, (items, item) => { add(items, item); return true; }, kind);
     }
 
     public void Deserialize(in RedisValue redisValue, ref TDictionary? value)
@@ -57,7 +57,7 @@ public class StringDictionaryFormatter<TDictionary> : IRedisValueFormatter<TDict
                 }
             }
 
-            value = _factory.New(length, _factory.Type.IsReverse()
+            value = _factory.New(length, _factory.Kind.IsReverse()
                 ? StringDictionaryFormatter.BuildReverse
                 : StringDictionaryFormatter.Build, in state);
         }

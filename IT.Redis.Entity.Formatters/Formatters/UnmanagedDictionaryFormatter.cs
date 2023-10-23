@@ -11,8 +11,8 @@ public class UnmanagedDictionaryFormatter<TDictionary, TKey, TValue> : Unmanaged
     public UnmanagedDictionaryFormatter(IDictionaryFactory<TDictionary, TKey, TValue> factory) : base(factory) { }
 
     public UnmanagedDictionaryFormatter(DictionaryFactory<TDictionary, TKey, TValue> factory,
-        Action<TDictionary, KeyValuePair<TKey, TValue>> add, EnumerableType type = EnumerableType.None)
+        Action<TDictionary, KeyValuePair<TKey, TValue>> add, EnumerableKind kind = EnumerableKind.None)
         : base(new DictionaryFactoryDelegate<TDictionary, TKey, TValue>(
-            factory, (items, item) => { add(items, item); return true; }, type))
+            factory, (items, item) => { add(items, item); return true; }, kind))
     { }
 }
