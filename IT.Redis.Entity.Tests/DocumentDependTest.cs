@@ -107,9 +107,9 @@ public class DocumentDependTest
     {
         var id = Guid.NewGuid();
         var clientId = Guid.NewGuid();
-        string name = "";
+        string name = "3";
 
-        var redisKey = $"{id:N}";//:{clientId:N}:{name}
+        var redisKey = $"doc:{id:N}:{clientId:N}:{name}:4";
         var length = redisKey.Length;
 
         var doc = new DocumentWithKeys
@@ -117,6 +117,8 @@ public class DocumentDependTest
             Id = id,
             ClientId = clientId,
             Name = name,
+            Key4="4",
+            Key5 = "5",
             Data1 = "data-test1"
         };
 

@@ -1,8 +1,6 @@
 ﻿#if !(NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER)
 
-using System.Text;
-
-namespace IT.Redis.Entity.Internal;
+namespace System.Text;
 
 internal static class xEncoding
 {
