@@ -10,7 +10,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
     private readonly IRedisEntityFields _readerFields;
     private readonly IRedisEntityFields _writerFields;
     private readonly Func<T, KeyBuilder, byte[]>? _readerKey;
-    private readonly KeyBuilder? _keyBuilder;
+    private readonly KeyBuilder _keyBuilder;
 
     IRedisEntityFields IRedisEntityReader<T>.Fields => _readerFields;
 
@@ -41,9 +41,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
             if (hasKey)
             {
                 keys.Add(property);
-                var formatter = configuration.GetFormatter(property);
-                var formatterGeneric = Activator.CreateInstance(typeof(RedisValueFormatterProxy<>).MakeGenericType(property.PropertyType), formatter)!;
-                keyBuilder.AddSerializer(formatterGeneric);
+                keyBuilder.AddSerializer(configuration.GetUtf8Formatter(property));
             }
             else if (!field.IsNull)
             {

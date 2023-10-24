@@ -5,6 +5,11 @@ namespace IT.Redis.Entity.Internal;
 
 internal static class Compiler
 {
+    private static readonly string FieldRedisKeyName = "_redisKey";
+    private static readonly Type FieldRedisKeyType = typeof(byte[]);
+    private static readonly BindingFlags FieldRedisKeyBinding = 
+        BindingFlags.Instance | BindingFlags.NonPublic;
+
     private static readonly MethodInfo MethodDeserialize = typeof(RedisValueDeserializerProxy).GetMethod(nameof(RedisValueDeserializerProxy.Deserialize))!;
     private static readonly MethodInfo MethodSerialize = typeof(IRedisValueSerializer).GetMethod(nameof(IRedisValueSerializer.Serialize))!;
 
@@ -19,13 +24,13 @@ internal static class Compiler
      */
     internal static RedisValueReader<T> GetReader<T>(PropertyInfo property)
     {
-        var pEntity = Expression.Parameter(typeof(T), "entity");
+        var eEntity = Expression.Parameter(typeof(T), "entity");
 
-        var eProperty = Expression.Property(pEntity, property);
+        var eProperty = Expression.Property(eEntity, property);
 
         var eCall = Expression.Call(ParameterSerializer, MethodSerialize.MakeGenericMethod(property.PropertyType), eProperty);
 
-        var lambda = Expression.Lambda<RedisValueReader<T>>(eCall, pEntity, ParameterSerializer);
+        var lambda = Expression.Lambda<RedisValueReader<T>>(eCall, eEntity, ParameterSerializer);
 
         return lambda.Compile();
     }
@@ -37,15 +42,15 @@ internal static class Compiler
      */
     internal static RedisValueWriter<T> GetWriter<T>(PropertyInfo property)
     {
-        var pEntity = Expression.Parameter(typeof(T), "entity");
+        var eEntity = Expression.Parameter(typeof(T), "entity");
 
-        var eProperty = Expression.Property(pEntity, property);
+        var eProperty = Expression.Property(eEntity, property);
 
         var eCall = Expression.Call(ParameterDeserializer, MethodDeserialize.MakeGenericMethod(property.PropertyType), ParameterRedisValue, eProperty);
 
         var eAssign = Expression.Assign(eProperty, eCall);
 
-        var lambda = Expression.Lambda<RedisValueWriter<T>>(eAssign, pEntity, ParameterRedisValue, ParameterDeserializer);
+        var lambda = Expression.Lambda<RedisValueWriter<T>>(eAssign, eEntity, ParameterRedisValue, ParameterDeserializer);
 
         return lambda.Compile();
     }
@@ -53,7 +58,11 @@ internal static class Compiler
     //keyBuilder.Build(entity.Key1, entity.Key2)
     internal static Func<T, KeyBuilder, byte[]> GetReaderKey<T>(IReadOnlyList<PropertyInfo> keys)
     {
-        var pEntity = Expression.Parameter(typeof(T), "entity");
+        var entityType = typeof(T);
+
+        var eEntity = Expression.Parameter(entityType, "entity");
+
+        var eField = Expression.Field(eEntity, GetFieldRedisKey(entityType));
 
         var propertyTypes = new Type[keys.Count];
         var properties = new Expression[keys.Count];
@@ -62,17 +71,45 @@ internal static class Compiler
         {
             var key = keys[i];
             propertyTypes[i] = key.PropertyType;
-            properties[i] = Expression.Property(pEntity, key);
+            properties[i] = Expression.Property(eEntity, key);
         }
 
-        var methodBuild = typeof(KeyBuilder).GetMethod(nameof(KeyBuilder.Build), propertyTypes);
-
-        if (methodBuild == null) throw new InvalidOperationException();
+        var methodBuild = GetMethodBuild(keys.Count);
 
         var eCall = Expression.Call(ParameterKeyBuilder, methodBuild.MakeGenericMethod(propertyTypes), properties);
 
-        var lambda = Expression.Lambda<Func<T, KeyBuilder, byte[]>>(eCall, pEntity, ParameterKeyBuilder);
+        var eAssign = Expression.Assign(eField, eCall);
+
+        var eCoalesce = Expression.Coalesce(eField, eAssign);
+
+        var lambda = Expression.Lambda<Func<T, KeyBuilder, byte[]>>(eCoalesce, eEntity, ParameterKeyBuilder);
 
         return lambda.Compile();
+    }
+
+    private static FieldInfo GetFieldRedisKey(Type type)
+    {
+        var field = type.GetField(FieldRedisKeyName, FieldRedisKeyBinding);
+
+        if (field == null || field.FieldType != FieldRedisKeyType)
+            throw new InvalidOperationException($"Entity type '{type.FullName}' does not contain field '{FieldRedisKeyName}' with type '{FieldRedisKeyType.FullName}'");
+
+        return field;
+    }
+
+    private static MethodInfo GetMethodBuild(int count)
+    {
+        var methods = typeof(KeyBuilder).GetMethods(BindingFlags.Instance | BindingFlags.Public);
+        for (int i = 0; i < methods.Length; i++)
+        {
+            var method = methods[i];
+            if (method.Name == nameof(KeyBuilder.Build) && method.ContainsGenericParameters)
+            {
+                var args = method.GetGenericArguments();
+                if (args.Length == count) return method;
+            }
+        }
+
+        throw new InvalidOperationException($"Method '{nameof(KeyBuilder.Build)}' with {count} arguments not found");
     }
 }

@@ -15,65 +15,78 @@ internal class KeyBuilder
 
     public byte[] Build<TKey>(in TKey key)
     {
-        var keySerializer = GetSerializer<TKey>(0);
+        var f = GetFormatter<TKey>(0);
 
-        var bytes = new byte[_prefix.Length + keySerializer.GetSerializedLength(in key)];
+        var bytes = new byte[_prefix.Length + f.GetLength(in key)];
 
         var span = bytes.AsSpan();
 
         _prefix.CopyTo(span);
 
-        keySerializer.Serialize(in key, span);
+        f.Format(in key, span);
 
         return bytes;
     }
 
     public byte[] Build<TKey1, TKey2>(in TKey1 key1, in TKey2 key2)
     {
-        var keySerializer1 = GetSerializer<TKey1>(0);
-        var keySerializer2 = GetSerializer<TKey2>(1);
+        var f1 = GetFormatter<TKey1>(0);
+        var f2 = GetFormatter<TKey2>(1);
 
         var bytes = new byte[_prefix.Length + 
-            keySerializer1.GetSerializedLength(in key1) + 
-            keySerializer2.GetSerializedLength(in key2)];
+            f1.GetLength(in key1) + 
+            f2.GetLength(in key2)];
 
         var span = bytes.AsSpan();
 
         _prefix.CopyTo(span);
 
-        keySerializer1.Serialize(in key1, span);
+        f1.Format(in key1, span);
 
-        keySerializer2.Serialize(in key2, span);
+        f2.Format(in key2, span);
 
         return bytes;
     }
 
     public byte[] Build<TKey1, TKey2, TKey3>(in TKey1 key1, in TKey2 key2, in TKey3 key3)
     {
-        var keySerializer1 = GetSerializer<TKey1>(0);
-        var keySerializer2 = GetSerializer<TKey2>(1);
-        var keySerializer3 = GetSerializer<TKey3>(2);
+        var f1 = GetFormatter<TKey1>(0);
+        var f2 = GetFormatter<TKey2>(1);
+        var f3 = GetFormatter<TKey3>(2);
 
-        var bytes = new byte[_prefix.Length +
-            keySerializer1.GetSerializedLength(in key1) +
-            keySerializer2.GetSerializedLength(in key2) +
-            keySerializer3.GetSerializedLength(in key3)];
+        var prefix = _prefix;
+        var offset = prefix.Length;
+        var sep = _separator;
+
+        var bytes = new byte[3 + offset +
+            f1.GetLength(in key1) +
+            f2.GetLength(in key2) +
+            f3.GetLength(in key3)];
 
         var span = bytes.AsSpan();
 
-        _prefix.CopyTo(span);
+        if (offset > 0)
+        {
+            prefix.CopyTo(span);
 
-        span = span.Slice(keySerializer1.Serialize(in key1, span));
+            span[offset++] = sep;
+        }
 
-        keySerializer2.Serialize(in key2, span);
+        offset += f1.Format(in key1, span.Slice(offset));
 
-        keySerializer3.Serialize(in key3, span);
+        span[offset++] = sep;
+
+        offset += f2.Format(in key2, span.Slice(offset));
+
+        span[offset++] = sep;
+
+        f3.Format(in key3, span.Slice(offset));
 
         return bytes;
     }
 
-    private IFixSerializer<TKey> GetSerializer<TKey>(int index)
+    private IUtf8Formatter<TKey> GetFormatter<TKey>(int index)
     {
-        return (IFixSerializer<TKey>)_serializers[index];
+        return (IUtf8Formatter<TKey>)_serializers[index];
     }
 }

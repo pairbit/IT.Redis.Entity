@@ -102,17 +102,42 @@ public class DocumentDependTest
         }
     }
 
-    //[Test]
+    [Test]
     public void ReadKeyTest()
     {
-        var doc = new DocumentDepend
+        var id = Guid.NewGuid();
+        var clientId = Guid.NewGuid();
+        var name = "MyDoc1";
+
+        var redisKey = $"dep:doc:{id:N}:{clientId:N}:{name}";
+        var length = redisKey.Length;
+
+        var doc = new DocumentWithKeys
         {
-            Id = Guid.NewGuid(),
-            ClientId = Guid.NewGuid(),
-            Name = "MyDoc1",
-            BigInteger = 1,
+            Id = id,
+            ClientId = clientId,
+            Name = name,
+            Data1 = "data-test1"
         };
 
-        _db.EntitySet(doc);
+        Assert.That(doc.RedisKey, Is.Null);
+
+        var reader = RedisEntity<DocumentWithKeys>.Reader;
+
+        try
+        {
+            _db.EntitySet(doc, reader.Fields[nameof(DocumentWithKeys.Data1)]);
+            
+            Assert.That(doc.RedisKey, Is.Not.Null);
+            Assert.That(doc.RedisKey.Length, Is.EqualTo(length));
+
+            doc.Data2 = "test-data2";
+
+            _db.EntitySet(doc, reader.Fields[nameof(DocumentWithKeys.Data2)]);
+        }
+        finally
+        {
+            _db.KeyDelete(doc.RedisKey);
+        }
     }
 }

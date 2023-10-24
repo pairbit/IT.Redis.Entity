@@ -5,7 +5,6 @@ using System.Numerics;
 
 namespace DocLib.RedisEntity;
 
-[RedisKeyPrefix("dep:doc")]
 public record DocumentDepend
 {
     private static readonly Random _random
@@ -14,16 +13,13 @@ public record DocumentDepend
 #else
         = new();
 #endif
-    
-    [RedisKey]
+
     [GuidHexFormatter("D")]
     public Guid Id { get; set; }
 
-    [RedisKey]
     [GuidHexFormatter]
     public Guid ClientId { get; set; }
     
-    [RedisKey]
     public string? Name { get; set; }
 
     public char Character { get; set; }

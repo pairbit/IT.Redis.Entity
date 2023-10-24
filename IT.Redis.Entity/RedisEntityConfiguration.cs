@@ -1,4 +1,5 @@
 ﻿using IT.Redis.Entity.Attributes;
+using IT.Redis.Entity.Formatters.Utf8;
 using IT.Redis.Entity.Internal;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -41,11 +42,11 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
 
     public RedisValue GetField(PropertyInfo property, out bool hasKey)
     {
-        //if (property.GetCustomAttribute<RedisKeyAttribute>() != null)
-        //{
-        //    hasKey = false;
-        //    return RedisValue.Null;
-        //}
+        if (property.GetCustomAttribute<RedisKeyAttribute>() != null)
+        {
+            hasKey = true;
+            return RedisValue.Null;
+        }
 
         hasKey = false;
 
@@ -77,8 +78,11 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
         return redisKeyPrefix == null ? null : Encoding.UTF8.GetBytes(redisKeyPrefix.Prefix);
     }
 
-    public object GetFixFormatter(PropertyInfo property)
+    public object GetUtf8Formatter(PropertyInfo property)
     {
-        throw new NotImplementedException();
+        if (property.PropertyType == typeof(Guid)) return GuidUtf8Formatter.Default;
+        if (property.PropertyType == typeof(string)) return StringUtf8Formatter.Default;
+
+        throw new NotSupportedException();
     }
 }
