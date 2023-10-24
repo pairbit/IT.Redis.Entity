@@ -222,9 +222,13 @@ public class DocumentTest
             AttachmentIds = new EquatableList<int> { 0, 1, 3, 5 }
         };
 
+        var reader = RedisEntity<DocumentAnnotation>.Reader;
+
         try
         {
-            _db.EntitySet(doc);
+            _db.EntitySet(doc, reader.Fields[nameof(DocumentAnnotation.AttachmentIds)]);
+
+            _db.EntitySet(doc, reader.Fields[nameof(DocumentAnnotation.Name)]);
         }
         finally
         {
