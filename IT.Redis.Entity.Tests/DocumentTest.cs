@@ -228,6 +228,15 @@ public class DocumentTest
         {
             _db.EntitySet(doc, reader.Fields[nameof(DocumentAnnotation.AttachmentIds)]);
 
+            var doc2 = new DocumentAnnotation();
+
+            Assert.That(_db.EntityLoad(doc2), Is.False);
+
+            doc2.Id = doc.Id;
+
+            Assert.That(_db.EntityLoad(doc2), Is.True);
+            Assert.That(doc.AttachmentIds, Is.EqualTo(doc2.AttachmentIds));
+
             _db.EntitySet(doc, reader.Fields[nameof(DocumentAnnotation.Name)]);
         }
         finally

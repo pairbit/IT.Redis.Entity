@@ -22,6 +22,31 @@ public static class xIDatabase
         return db.HashSet(reader.ReadKey(entity), field, reader.Read(entity, in field), when, flags);
     }
 
+    public static bool EntityLoadAll<T>(this IDatabase db, T entity, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None)
+    {
+        writer ??= RedisEntity<T>.Writer;
+        return writer.Write(entity, db.HashGetAll(writer.ReadKey(entity), flags));
+    }
+
+    public static bool EntityLoad<T>(this IDatabase db, T entity, RedisValue field, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None)
+    {
+        writer ??= RedisEntity<T>.Writer;
+        return writer.Write(entity, in field, db.HashGet(writer.ReadKey(entity), field, flags));
+    }
+
+    public static bool EntityLoad<T>(this IDatabase db, T entity, RedisValue[] fields, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None)
+    {
+        writer ??= RedisEntity<T>.Writer;
+        return writer.Write(entity, fields, db.HashGet(writer.ReadKey(entity), fields, flags));
+    }
+
+    public static bool EntityLoad<T>(this IDatabase db, T entity, IRedisEntityWriter<T>? writer = null, CommandFlags flags = CommandFlags.None)
+    {
+        writer ??= RedisEntity<T>.Writer;
+        var fields = writer.Fields.All;
+        return writer.Write(entity, fields, db.HashGet(writer.ReadKey(entity), fields, flags));
+    }
+
     public static void EntitySet<T>(this IDatabase db, RedisKey key, T entity, IRedisEntityReader<T>? reader = null, CommandFlags flags = CommandFlags.None)
         => db.HashSet(key, (reader ?? RedisEntity<T>.Reader).GetEntries(entity), flags);
 

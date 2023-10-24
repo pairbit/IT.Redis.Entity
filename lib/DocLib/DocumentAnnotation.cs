@@ -7,6 +7,7 @@ namespace DocLib;
 [Table("doc", Schema = "app")]
 public record DocumentAnnotation
 {
+    private Guid _id;
     private byte[]? _redisKey;
 
     [NotMapped]
@@ -14,7 +15,18 @@ public record DocumentAnnotation
 
     [Key]
     [Column(Order = 0)]
-    public Guid Id { get; set; }
+    public Guid Id
+    {
+        get => _id;
+        set 
+        { 
+            if (_id != value)
+            {
+                _id = value;
+                _redisKey = null;
+            }
+        }
+    }
 
     [Column(Order = 1)]
     public string Name { get; set; } = null!;
