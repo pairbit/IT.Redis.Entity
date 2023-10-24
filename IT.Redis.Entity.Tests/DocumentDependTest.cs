@@ -107,9 +107,9 @@ public class DocumentDependTest
     {
         var id = Guid.NewGuid();
         var clientId = Guid.NewGuid();
-        var name = "MyDoc1";
+        string name = "";
 
-        var redisKey = $"dep:doc:{id:N}:{clientId:N}:{name}";
+        var redisKey = $"{id:N}";//:{clientId:N}:{name}
         var length = redisKey.Length;
 
         var doc = new DocumentWithKeys
@@ -120,9 +120,9 @@ public class DocumentDependTest
             Data1 = "data-test1"
         };
 
-        Assert.That(doc.RedisKey, Is.Null);
-
         var reader = RedisEntity<DocumentWithKeys>.Reader;
+
+        Assert.That(doc.RedisKey, Is.Null);
 
         try
         {

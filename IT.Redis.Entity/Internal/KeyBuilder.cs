@@ -17,11 +17,17 @@ internal class KeyBuilder
     {
         var f = GetFormatter<TKey>(0);
 
-        var bytes = new byte[_prefix.Length + f.GetLength(in key)];
+        var prefix = _prefix;
+        var offset = prefix.Length;
 
+        var bytes = new byte[offset + f.GetLength(in key)];
         var span = bytes.AsSpan();
 
-        _prefix.CopyTo(span);
+        if (offset > 0)
+        {
+            prefix.CopyTo(span);
+            span = span.Slice(offset);
+        }
 
         f.Format(in key, span);
 
@@ -33,17 +39,26 @@ internal class KeyBuilder
         var f1 = GetFormatter<TKey1>(0);
         var f2 = GetFormatter<TKey2>(1);
 
-        var bytes = new byte[_prefix.Length + 
-            f1.GetLength(in key1) + 
+        var sep = _separator;
+        var prefix = _prefix;
+        var offset = prefix.Length;
+
+        var bytes = new byte[1 + offset +
+            f1.GetLength(in key1) +
             f2.GetLength(in key2)];
 
         var span = bytes.AsSpan();
 
-        _prefix.CopyTo(span);
+        if (offset > 0)
+        {
+            prefix.CopyTo(span);
+            span = span.Slice(offset);
+            offset = 0;
+        }
 
-        f1.Format(in key1, span);
-
-        f2.Format(in key2, span);
+        offset += f1.Format(in key1, span);
+        span[offset++] = sep;
+        f2.Format(in key2, span.Slice(offset));
 
         return bytes;
     }
@@ -54,11 +69,11 @@ internal class KeyBuilder
         var f2 = GetFormatter<TKey2>(1);
         var f3 = GetFormatter<TKey3>(2);
 
+        var sep = _separator;
         var prefix = _prefix;
         var offset = prefix.Length;
-        var sep = _separator;
 
-        var bytes = new byte[3 + offset +
+        var bytes = new byte[2 + offset +
             f1.GetLength(in key1) +
             f2.GetLength(in key2) +
             f3.GetLength(in key3)];
@@ -68,18 +83,14 @@ internal class KeyBuilder
         if (offset > 0)
         {
             prefix.CopyTo(span);
-
-            span[offset++] = sep;
+            span = span.Slice(offset);
+            offset = 0;
         }
 
-        offset += f1.Format(in key1, span.Slice(offset));
-
+        offset += f1.Format(in key1, span);
         span[offset++] = sep;
-
         offset += f2.Format(in key2, span.Slice(offset));
-
         span[offset++] = sep;
-
         f3.Format(in key3, span.Slice(offset));
 
         return bytes;
