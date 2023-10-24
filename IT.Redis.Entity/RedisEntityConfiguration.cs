@@ -1,9 +1,10 @@
 ﻿using IT.Redis.Entity.Attributes;
 using IT.Redis.Entity.Formatters.Utf8;
 using IT.Redis.Entity.Internal;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 using System.Runtime.Serialization;
-using System.Text;
 
 namespace IT.Redis.Entity;
 
@@ -42,7 +43,8 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
 
     public RedisValue GetField(PropertyInfo property, out bool hasKey)
     {
-        if (property.GetCustomAttribute<RedisKeyAttribute>() != null)
+        if (property.GetCustomAttribute<RedisKeyAttribute>() != null ||
+            property.GetCustomAttribute<KeyAttribute>() != null)
         {
             hasKey = true;
             return RedisValue.Null;
@@ -68,14 +70,28 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
             if (dataMember.IsNameSetExplicitly) return dataMember.Name;
         }
 
+        if (property.GetCustomAttribute<NotMappedAttribute>() != null) return RedisValue.Null;
+
+        var column = property.GetCustomAttribute<ColumnAttribute>();
+        if (column != null)
+        {
+            if (column.Order >= 0) return column.Order;
+            if (column.Name != null) return column.Name;
+        }
+
         return property.GetMethod?.IsPublic == true ||
                property.SetMethod?.IsPublic == true ? property.Name : RedisValue.Null;
     }
 
-    public byte[]? GetKeyPrefix(Type type)
+    public string? GetKeyPrefix(Type type)
     {
         var redisKeyPrefix = type.GetCustomAttribute<RedisKeyPrefixAttribute>();
-        return redisKeyPrefix == null ? null : Encoding.UTF8.GetBytes(redisKeyPrefix.Prefix);
+        if (redisKeyPrefix != null) return redisKeyPrefix.Prefix;
+
+        var table = type.GetCustomAttribute<TableAttribute>();
+        if (table != null) return table.Schema == null ? table.Name : $"{table.Schema}:{table.Name}";
+
+        return null;
     }
 
     public object GetUtf8Formatter(PropertyInfo property)

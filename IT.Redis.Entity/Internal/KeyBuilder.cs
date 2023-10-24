@@ -1,15 +1,19 @@
-﻿namespace IT.Redis.Entity.Internal;
+﻿using System.Text;
+
+namespace IT.Redis.Entity.Internal;
 
 internal class KeyBuilder
 {
     public static readonly int MaxKeys = 5;
+    private static readonly char _separatorChar = ':';
+    private static readonly byte _separator = (byte)_separatorChar;
+
     private readonly List<object> _serializers = new(MaxKeys);
     private readonly byte[] _prefix;
-    private readonly byte _separator = (byte)':';
 
-    public KeyBuilder(byte[]? prefix)
+    public KeyBuilder(string? prefix)
     {
-        _prefix = prefix ?? Array.Empty<byte>();
+        _prefix = GetPrefix(prefix);
     }
 
     public void AddSerializer(object serializer)
@@ -183,5 +187,24 @@ internal class KeyBuilder
     private IUtf8Formatter<TKey> GetFormatter<TKey>(int index)
     {
         return (IUtf8Formatter<TKey>)_serializers[index];
+    }
+
+    private static byte[] GetPrefix(string? prefix)
+    {
+        if (prefix == null) return Array.Empty<byte>();
+
+        var encoding = Encoding.UTF8;
+        var length = prefix.Length;
+
+        if (prefix[length - 1] == _separatorChar)
+            return encoding.GetBytes(prefix);
+
+        var bytes = new byte[length + 1];
+
+        encoding.GetBytes(prefix, bytes);
+
+        bytes[length] = _separator;
+
+        return bytes;
     }
 }

@@ -2,7 +2,7 @@
 
 namespace DocLib.RedisEntity;
 
-[RedisKeyPrefix("doc:")]
+[RedisKeyPrefix("doc")]
 public record DocumentWithKeys
 {
 #pragma warning disable IDE0044 // Add readonly modifier

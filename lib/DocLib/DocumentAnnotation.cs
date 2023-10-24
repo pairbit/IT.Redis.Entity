@@ -7,6 +7,11 @@ namespace DocLib;
 [Table("doc", Schema = "app")]
 public record DocumentAnnotation
 {
+    private byte[]? _redisKey;
+
+    [NotMapped]
+    public byte[]? RedisKey => _redisKey;
+
     [Key]
     [Column(Order = 0)]
     public Guid Id { get; set; }

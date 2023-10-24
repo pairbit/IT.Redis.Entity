@@ -212,7 +212,7 @@ public class DocumentTest
         }
     }
 
-    //[Test]
+    [Test]
     public void ReadKeyTest()
     {
         var doc = new DocumentAnnotation
@@ -222,6 +222,13 @@ public class DocumentTest
             AttachmentIds = new EquatableList<int> { 0, 1, 3, 5 }
         };
 
-        _db.EntitySet(doc);
+        try
+        {
+            _db.EntitySet(doc);
+        }
+        finally
+        {
+            _db.KeyDelete(doc.RedisKey);
+        }
     }
 }

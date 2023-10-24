@@ -4,7 +4,7 @@ namespace IT.Redis.Entity;
 
 public interface IRedisEntityConfiguration
 {
-    byte[]? GetKeyPrefix(Type type);
+    string? GetKeyPrefix(Type type);
 
     RedisValue GetField(PropertyInfo property, out bool hasKey);
 
