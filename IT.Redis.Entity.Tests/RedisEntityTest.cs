@@ -176,10 +176,10 @@ public abstract class RedisEntityTest
 
         var doc2 = new Document();
 
-        Assert.That(_db.EntityLoadAll(doc2, Key), Is.False);
-        Assert.That(_db.EntityLoad(doc2, Key, Field_IsDeleted, writer), Is.False);
-        Assert.That(_db.EntityLoad(doc2, Key, EndDate_Modified), Is.False);
-        Assert.That(_db.EntityLoad(doc2, Key, writer), Is.False);
+        Assert.That(_db.EntityLoadAll(Key, doc2), Is.False);
+        Assert.That(_db.EntityLoad(Key, doc2,Field_IsDeleted, writer), Is.False);
+        Assert.That(_db.EntityLoad(Key, doc2, EndDate_Modified), Is.False);
+        Assert.That(_db.EntityLoad(Key, doc2, writer), Is.False);
 
         Assert.That(doc2, Is.EqualTo(Document.Empty));
 
@@ -187,7 +187,7 @@ public abstract class RedisEntityTest
         {
             _db.EntitySet(Key, Document.Data, reader);
 
-            Assert.That(_db.EntityLoadAll(doc2, Key, writer), Is.True);
+            Assert.That(_db.EntityLoadAll(Key, doc2, writer), Is.True);
 
             Assert.That(doc2, Is.EqualTo(Document.Data));
             Assert.That(_db.EntityGetAll(Key, writer), Is.EqualTo(Document.Data));
@@ -200,7 +200,7 @@ public abstract class RedisEntityTest
 
             var doc3 = new Document();
 
-            Assert.That(_db.EntityLoad(doc3, Key, EndDate_Modified, writer), Is.True);
+            Assert.That(_db.EntityLoad(Key, doc3, EndDate_Modified, writer), Is.True);
             Assert.That(doc2, Is.Not.EqualTo(doc3));
 #if NET6_0_OR_GREATER
             Assert.That(doc2.EndDate, Is.EqualTo(doc3.EndDate));
@@ -211,7 +211,7 @@ public abstract class RedisEntityTest
             //Assert.That(_db.EntityGet<Document, IDocumentView>(Doc.Key1), Is.EqualTo(doc3));
 
             Assert.That(_db.EntityGet(Key, writer), Is.EqualTo(doc2));
-            Assert.That(_db.EntityLoad(doc3, Key, writer), Is.True);
+            Assert.That(_db.EntityLoad(Key, doc3, writer), Is.True);
 
             Assert.That(doc2, Is.EqualTo(doc3));
 
@@ -221,7 +221,7 @@ public abstract class RedisEntityTest
 
             Assert.That(_db.EntitySet(Key, doc2, Field_IsDeleted, reader), Is.False);
 
-            Assert.That(_db.EntityLoad(doc3, Key, Field_IsDeleted, writer), Is.True);
+            Assert.That(_db.EntityLoad(Key, doc3, Field_IsDeleted, writer), Is.True);
 
             Assert.That(doc2, Is.EqualTo(doc3));
 
@@ -247,7 +247,7 @@ public abstract class RedisEntityTest
 
         long price2 = default;
 
-        _db.EntityLoadField(ref price2, in Key, in fieldPrice, writer);
+        _db.EntityLoadField(in Key, ref price2, in fieldPrice, writer);
 
         Assert.That(price2, Is.EqualTo(price));
 

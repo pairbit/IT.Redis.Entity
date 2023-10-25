@@ -67,7 +67,7 @@ public class DocumentDependTest
             var doc2 = new DocumentDepend();
             doc2.NumCollection = new List<int>() { 4};
             
-            _db.EntityLoad(doc2, Key);
+            _db.EntityLoad(Key, doc2);
 
             if (doc.Content != null && doc2.Content != null)
             {

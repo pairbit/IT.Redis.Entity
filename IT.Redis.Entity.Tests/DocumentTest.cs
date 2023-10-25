@@ -94,7 +94,7 @@ public class DocumentTest
             //doc2.Decimals = new Queue<decimal?>(new decimal?[] { 4534 });
             doc2.Decimals = new Stack<decimal?>(new decimal?[] { 4534 });
             doc2.Chars = new Stack<char>(new char[] { '0' });
-            _db.EntityLoad<IDocument>(doc2, Key);
+            _db.EntityLoad<IDocument>(Key, doc2);
 
             Assert.That(ReferenceEquals(doc, doc2), Is.False);
             Assert.That(doc2!.TagIds!.Equals(doc!.TagIds), Is.True);
@@ -152,7 +152,7 @@ public class DocumentTest
             entity2.BlockingCollection = new BlockingCollection<string?>();
             entity2.StringPairs = new List<KeyValuePair<string, string>>();
             entity2.StringDictionary = new Dictionary<string, string>() { { "4", "5" } };
-            _db.EntityLoad(entity2, Key);
+            _db.EntityLoad(Key, entity2);
 
 #if NETCOREAPP3_1_OR_GREATER
             Assert.That(entity.ImmutableList!.Cast<int?>().SequenceEqual(entity2.ImmutableList!), Is.True);
