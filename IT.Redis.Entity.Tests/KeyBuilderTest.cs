@@ -72,13 +72,41 @@ public class KeyBuilderTest
     }
 
     [Test]
-    public void Key8Test()
+    public void KeysTest()
     {
         var builder = KeyBuilder.Default;
 
-        var key = builder.BuildKey(null, 255, 1, 2, 3, 4, 5, 6, 7, 8);
+        Assert.That(builder
+            .BuildKey(null, 255, 1)
+            .SequenceEqual(U8("1")), Is.True);
 
-        Assert.That(key.SequenceEqual(U8("1:2:3:4:5:6:7:8")), Is.True);
+        Assert.That(builder
+            .BuildKey(null, 255, 1, 2)
+            .SequenceEqual(U8("1:2")), Is.True);
+
+        Assert.That(builder
+            .BuildKey(null, 255, 1, 2, 3)
+            .SequenceEqual(U8("1:2:3")), Is.True);
+
+        Assert.That(builder
+            .BuildKey(null, 255, 1, 2, 3, 4)
+            .SequenceEqual(U8("1:2:3:4")), Is.True);
+
+        Assert.That(builder
+            .BuildKey(null, 255, 1, 2, 3, 4, 5)
+            .SequenceEqual(U8("1:2:3:4:5")), Is.True);
+
+        Assert.That(builder
+            .BuildKey(null, 255, 1, 2, 3, 4, 5, 6)
+            .SequenceEqual(U8("1:2:3:4:5:6")), Is.True);
+
+        Assert.That(builder
+            .BuildKey(null, 255, 1, 2, 3, 4, 5, 6, 7)
+            .SequenceEqual(U8("1:2:3:4:5:6:7")), Is.True);
+
+        Assert.That(builder
+            .BuildKey(null, 255, 1, 2, 3, 4, 5, 6, 7, 8)
+            .SequenceEqual(U8("1:2:3:4:5:6:7:8")), Is.True);
     }
 
     [Test]
