@@ -245,6 +245,16 @@ public class DocumentTest
             _db.KeyDelete(doc.RedisKey);
         }
     }
+    
+    [Test]
+    public void RedisKeyBuilderKey8()
+    {
+        var builder = RedisKeyBuilder.Default;
+
+        var key = builder.BuildKey(null, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8);
+
+        Assert.That(key.SequenceEqual(U8("1:2:3:4:5:6:7:8")), Is.True);
+    }
 
     [Test]
     public void RedisKeyBuilderKey()
@@ -263,7 +273,7 @@ public class DocumentTest
         Assert.That(builder.BuildKey(null, 0, 0, id).SequenceEqual(empty), Is.True);
         Assert.That(builder.BuildKey(Array.Empty<byte>(), 0, 0, id).SequenceEqual(empty), Is.True);
         Assert.That(builder.BuildKey(new byte[10], 0, 0, id).SequenceEqual(empty), Is.True);
-        Assert.That(builder.BuildKey(emptyWithPostfix, 0, 0, id) == emptyWithPostfix, Is.True);
+        Assert.That(builder.BuildKey(emptyWithPostfix, 0, 0, id).SequenceEqual(empty), Is.True);
 
         Assert.That(builder.BuildKey(null, 1, 0, id).SequenceEqual(idb), Is.True);
 
@@ -316,4 +326,6 @@ public class DocumentTest
         Assert.That(bits |= 64, Is.EqualTo(127)); Assert.That(bits & 64, Is.EqualTo(64));
         Assert.That(bits |= 128, Is.EqualTo(255)); Assert.That(bits & 128, Is.EqualTo(128));
     }
+
+    private byte[] U8(string str) => Encoding.UTF8.GetBytes(str);
 }

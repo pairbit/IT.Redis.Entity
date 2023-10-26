@@ -18,6 +18,7 @@ public class Utf8FormatterDefault : IUtf8Formatter
         {
             if (typeof(T) == typeof(Guid)) return (IUtf8Formatter<T>)GuidUtf8Formatter.Default;
             if (typeof(T) == typeof(string)) return (IUtf8Formatter<T>)StringUtf8Formatter.Default;
+            if (typeof(T) == typeof(int)) return (IUtf8Formatter<T>)Int32Utf8Formatter.Default;
 
             throw new InvalidOperationException();
         }
