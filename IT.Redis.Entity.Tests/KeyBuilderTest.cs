@@ -1,10 +1,27 @@
-﻿using System.Buffers.Text;
+﻿using IT.Redis.Entity.Internal;
+using System.Buffers.Text;
 using System.Text;
 
 namespace IT.Redis.Entity.Tests;
 
 public class KeyBuilderTest
 {
+    struct MyTypeId { }
+    
+    [Test]
+    public void Utf8FormatterNotFoundTest()
+    {
+        var exception = Ex.Utf8FormatterNotFound(typeof(MyTypeId));
+
+        Assert.That(Assert.Throws<ArgumentException>(() =>
+            KeyBuilder.Default.BuildKey(null, 0, default(MyTypeId))).Message,
+            Is.EqualTo(exception.Message));
+
+        Assert.That(Assert.Throws<ArgumentException>(() =>
+            KeyBuilder.Fixed.BuildKey(null, 0, default(MyTypeId))).Message,
+            Is.EqualTo(exception.Message));
+    }
+
     [Test]
     public void Key1Test()
     {
