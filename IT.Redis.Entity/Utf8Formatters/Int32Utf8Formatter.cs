@@ -1,4 +1,5 @@
 ﻿using IT.Redis.Entity.Internal;
+using System.Buffers;
 using System.Buffers.Text;
 
 namespace IT.Redis.Entity.Utf8Formatters;
@@ -19,7 +20,7 @@ public static class Int32Utf8Formatter
         public bool TryFormat(in int value, Span<byte> span, out int written)
         {
             if (value < 0) throw new ArgumentOutOfRangeException(nameof(value));
-            
+
             return Utf8Formatter.TryFormat(value, span, out written);
         }
     }
@@ -35,7 +36,7 @@ public static class Int32Utf8Formatter
         public static readonly Fixed L7 = new(7);
         public static readonly Fixed L8 = new(8);
         public static readonly Fixed L9 = new(9);
-        public static readonly Fixed L10 = new(10);
+        public static readonly IUtf8Formatter<Int32> L10 = new Fixed10();
 
         private readonly byte _length;
 
@@ -58,6 +59,20 @@ public static class Int32Utf8Formatter
             if (value < 0 || value > MaxValue.Int32(_length)) throw new ArgumentOutOfRangeException(nameof(value));
 
             return Utf8Formatter.TryFormat(value, span, out written, new System.Buffers.StandardFormat('d', _length));
+        }
+    }
+
+    private class Fixed10 : IUtf8Formatter<Int32>
+    {
+        private static readonly StandardFormat _format = new('d', 10);
+
+        public int GetLength(in int value) => 10;
+
+        public bool TryFormat(in int value, Span<byte> span, out int written)
+        {
+            if (value < 0) throw new ArgumentOutOfRangeException(nameof(value));
+
+            return Utf8Formatter.TryFormat(value, span, out written, _format);
         }
     }
 }
