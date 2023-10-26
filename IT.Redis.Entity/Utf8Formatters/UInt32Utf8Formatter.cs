@@ -11,15 +11,11 @@ public static class UInt32Utf8Formatter
 
         public int GetLength(in uint value)
         {
-            if (value < 0) throw new ArgumentOutOfRangeException(nameof(value));
-
             return value <= 9 ? 1 : (int)Math.Floor(Math.Log10(value)) + 1;
         }
 
         public bool TryFormat(in uint value, Span<byte> span, out int written)
         {
-            if (value < 0) throw new ArgumentOutOfRangeException(nameof(value));
-
             return Utf8Formatter.TryFormat(value, span, out written);
         }
     }
@@ -48,14 +44,14 @@ public static class UInt32Utf8Formatter
 
         public int GetLength(in uint value)
         {
-            if (value < 0 || value > MaxValue.UInt32(_length)) throw new ArgumentOutOfRangeException(nameof(value));
+            if (value > MaxValue.UInt32(_length)) throw new ArgumentOutOfRangeException(nameof(value));
 
             return _length;
         }
 
         public bool TryFormat(in uint value, Span<byte> span, out int written)
         {
-            if (value < 0 || value > MaxValue.UInt32(_length)) throw new ArgumentOutOfRangeException(nameof(value));
+            if (value > MaxValue.UInt32(_length)) throw new ArgumentOutOfRangeException(nameof(value));
 
             return Utf8Formatter.TryFormat(value, span, out written, new System.Buffers.StandardFormat('d', _length));
         }

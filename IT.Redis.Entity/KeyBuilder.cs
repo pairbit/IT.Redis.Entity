@@ -34,7 +34,6 @@ public class KeyBuilder : IKeyBuilder
     public byte[] BuildKey<TKey1, TKey2>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2)
     {
         var f = _utf8Formatter;
-        var sep = _separator;
         var lenKey1 = f.GetLength(in key1);
         var length = 1 + lenKey1 + f.GetLength(in key2);
 
@@ -48,7 +47,7 @@ public class KeyBuilder : IKeyBuilder
 
         if ((bits & 2) == 2)
         {
-            key[lenKey1++] = sep;
+            key[lenKey1++] = _separator;
             f.Format(in key2, key.AsSpan(lenKey1));
         }
 
