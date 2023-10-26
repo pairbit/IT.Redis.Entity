@@ -1,4 +1,5 @@
 ﻿using DocLib.RedisEntity;
+using System.Text;
 
 namespace IT.Redis.Entity.Tests;
 
@@ -112,30 +113,27 @@ public class DocumentDependTest
         var redisKey = $"doc:{id:N}:{clientId:N}:{name}:4";
         var length = redisKey.Length;
 
-        var doc = new DocumentWithKeys
+        var doc = new DocumentWithReadOnlyKeys(id, clientId, name, "4")
         {
-            Id = id,
-            ClientId = clientId,
-            Name = name,
-            Key4="4",
             Key5 = "5",
             Data1 = "data-test1"
         };
 
-        var reader = RedisEntity<DocumentWithKeys>.Reader;
+        var reader = RedisEntity<DocumentWithReadOnlyKeys>.Reader;
 
         Assert.That(doc.RedisKey, Is.Null);
 
         try
         {
-            _db.EntitySet(doc, reader.Fields[nameof(DocumentWithKeys.Data1)]);
-            
+            _db.EntitySet(doc, reader.Fields[nameof(DocumentWithReadOnlyKeys.Data1)]);
+
             Assert.That(doc.RedisKey, Is.Not.Null);
             Assert.That(doc.RedisKey.Length, Is.EqualTo(length));
+            Assert.That(doc.RedisKey.SequenceEqual(Encoding.UTF8.GetBytes(redisKey)), Is.True);
 
             doc.Data2 = "test-data2";
 
-            _db.EntitySet(doc, reader.Fields[nameof(DocumentWithKeys.Data2)]);
+            _db.EntitySet(doc, reader.Fields[nameof(DocumentWithReadOnlyKeys.Data2)]);
         }
         finally
         {

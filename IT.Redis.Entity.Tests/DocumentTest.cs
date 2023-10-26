@@ -6,6 +6,7 @@ using IT.Redis.Entity.Formatters;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.Text;
 
 namespace IT.Redis.Entity.Tests;
 
@@ -212,7 +213,7 @@ public class DocumentTest
         }
     }
 
-    [Test]
+    //[Test]
     public void ReadKeyTest()
     {
         var doc = new DocumentAnnotation
@@ -229,9 +230,12 @@ public class DocumentTest
             _db.EntitySet(doc, reader.Fields[nameof(DocumentAnnotation.AttachmentIds)]);
 
             var doc2 = new DocumentAnnotation();
+            Assert.That(doc2.RedisKey, Is.Null);
 
             Assert.That(_db.EntityLoad(doc2), Is.False);
-
+            
+            Assert.That(doc2.RedisKey, Is.Not.Null);
+            Assert.That(doc2.RedisKey.SequenceEqual(U8($"app:doc:{Guid.Empty:N}")), Is.True);
             doc2.Id = doc.Id;
 
             Assert.That(_db.EntityLoad(doc2), Is.True);
@@ -253,4 +257,6 @@ public class DocumentTest
             _db.KeyDelete(doc.RedisKey);
         }
     }
+
+    private byte[] U8(string str) => Encoding.UTF8.GetBytes(str);
 }

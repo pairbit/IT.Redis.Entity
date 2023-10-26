@@ -9,6 +9,9 @@ public record DocumentAnnotation
 {
     private Guid _id;
     private byte[]? _redisKey;
+#pragma warning disable IDE0052 // Remove unread private members
+    private byte _redisKeyBits;
+#pragma warning restore IDE0052 // Remove unread private members
 
     [NotMapped]
     public byte[]? RedisKey => _redisKey;
@@ -23,7 +26,7 @@ public record DocumentAnnotation
             if (_id != value)
             {
                 _id = value;
-                _redisKey = null;
+                _redisKeyBits = 1;
             }
         }
     }

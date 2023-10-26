@@ -5,9 +5,12 @@ namespace IT.Redis.Entity.Internal;
 
 internal static class Compiler
 {
+    private static readonly string FieldRedisKeyBitsName = "_redisKeyBits";
+    private static readonly Type FieldRedisKeyBitsType = typeof(byte);
+
     private static readonly string FieldRedisKeyName = "_redisKey";
     private static readonly Type FieldRedisKeyType = typeof(byte[]);
-    private static readonly BindingFlags FieldRedisKeyBinding = 
+    private static readonly BindingFlags FieldRedisKeyBinding =
         BindingFlags.Instance | BindingFlags.NonPublic;
 
     private static readonly MethodInfo MethodDeserialize = typeof(RedisValueDeserializerProxy).GetMethod(nameof(RedisValueDeserializerProxy.Deserialize))!;
@@ -62,37 +65,55 @@ internal static class Compiler
 
         var eEntity = Expression.Parameter(entityType, "entity");
 
-        var eField = Expression.Field(eEntity, GetFieldRedisKey(entityType));
+        var eFieldRedisKey = Expression.Field(eEntity,
+            GetField(entityType, FieldRedisKeyName, FieldRedisKeyType));
 
         var propertyTypes = new Type[keys.Count];
-        var properties = new Expression[keys.Count];
+        var eArguments = new Expression[2 + keys.Count];
 
+        var hasKeySetter = false;
+        eArguments[0] = Expression.Constant(null, FieldRedisKeyType);
+        eArguments[1] = Expression.Constant((byte)0, FieldRedisKeyBitsType);
         for (int i = 0; i < keys.Count; i++)
         {
             var key = keys[i];
             propertyTypes[i] = key.PropertyType;
-            properties[i] = Expression.Property(eEntity, key);
+            eArguments[i + 2] = Expression.Property(eEntity, key);
+
+            if (key.SetMethod != null) hasKeySetter = true;
         }
 
         var methodBuild = GetMethodBuild(keys.Count);
 
-        var eCall = Expression.Call(ParameterKeyBuilder, methodBuild.MakeGenericMethod(propertyTypes), properties);
+        var eCall = Expression.Call(ParameterKeyBuilder, methodBuild.MakeGenericMethod(propertyTypes), eArguments);
 
-        var eAssign = Expression.Assign(eField, eCall);
+        var eAssign = Expression.Assign(eFieldRedisKey, eCall);
 
-        var eCoalesce = Expression.Coalesce(eField, eAssign);
+        Expression eBody;
 
-        var lambda = Expression.Lambda<Func<T, EntityKeyBuilder, byte[]>>(eCoalesce, eEntity, ParameterKeyBuilder);
+        if (hasKeySetter)
+        {
+            var eFieldBits = Expression.Field(eEntity, GetField(entityType, FieldRedisKeyBitsName, FieldRedisKeyBitsType));
+
+            throw new NotImplementedException();
+            //eBody
+        }
+        else
+        {
+            eBody = Expression.Coalesce(eFieldRedisKey, eAssign);
+        }
+
+        var lambda = Expression.Lambda<Func<T, EntityKeyBuilder, byte[]>>(eBody, eEntity, ParameterKeyBuilder);
 
         return lambda.Compile();
     }
 
-    private static FieldInfo GetFieldRedisKey(Type type)
+    private static FieldInfo GetField(Type entityType, string fieldName, Type fieldType)
     {
-        var field = type.GetField(FieldRedisKeyName, FieldRedisKeyBinding);
+        var field = entityType.GetField(fieldName, FieldRedisKeyBinding);
 
-        if (field == null || field.FieldType != FieldRedisKeyType)
-            throw new InvalidOperationException($"Entity type '{type.FullName}' does not contain field '{FieldRedisKeyName}' with type '{FieldRedisKeyType.FullName}'");
+        if (field == null || field.FieldType != fieldType)
+            throw new InvalidOperationException($"Entity type '{entityType.FullName}' does not contain field '{fieldName}' with type '{fieldType.FullName}'");
 
         return field;
     }
@@ -103,13 +124,13 @@ internal static class Compiler
         for (int i = 0; i < methods.Length; i++)
         {
             var method = methods[i];
-            if (method.Name == nameof(EntityKeyBuilder.Build) && method.ContainsGenericParameters)
+            if (method.Name == nameof(EntityKeyBuilder.BuildKey) && method.ContainsGenericParameters)
             {
                 var args = method.GetGenericArguments();
                 if (args.Length == count) return method;
             }
         }
 
-        throw new InvalidOperationException($"Method '{nameof(EntityKeyBuilder.Build)}' with {count} arguments not found");
+        throw new InvalidOperationException($"Method '{nameof(EntityKeyBuilder.BuildKey)}' with {count} arguments not found");
     }
 }
