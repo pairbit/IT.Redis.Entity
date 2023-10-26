@@ -17,10 +17,10 @@ public class KeyBuilderTest
         Assert.That(builder.BuildKey(empty, 0, id) == empty, Is.True);
         Assert.That(builder.BuildKey(idb, 0, id) == idb, Is.True);
 
-        Assert.That(builder.BuildKey(null, 0, id).SequenceEqual(empty), Is.True);
-        Assert.That(builder.BuildKey(Array.Empty<byte>(), 0, id).SequenceEqual(empty), Is.True);
-        Assert.That(builder.BuildKey(new byte[idb.Length - 1], 0, id).SequenceEqual(empty), Is.True);
-        Assert.That(builder.BuildKey(new byte[idb.Length + 1], 0, id).SequenceEqual(empty), Is.True);
+        Assert.That(builder.BuildKey(null, 0, id).SequenceEqual(idb), Is.True);
+        Assert.That(builder.BuildKey(Array.Empty<byte>(), 0, id).SequenceEqual(idb), Is.True);
+        Assert.That(builder.BuildKey(new byte[idb.Length - 1], 0, id).SequenceEqual(idb), Is.True);
+        Assert.That(builder.BuildKey(new byte[idb.Length + 1], 0, id).SequenceEqual(idb), Is.True);
 
         var key = builder.BuildKey(null, 1, id);
         Assert.That(key.SequenceEqual(idb), Is.True);
@@ -46,10 +46,10 @@ public class KeyBuilderTest
         Assert.That(builder.BuildKey(empty, 0, prefix, id) == empty, Is.True);
         Assert.That(builder.BuildKey(pid, 0, prefix, id) == pid, Is.True);
 
-        Assert.That(builder.BuildKey(null, 0, prefix, id).SequenceEqual(empty), Is.True);
-        Assert.That(builder.BuildKey(Array.Empty<byte>(), 0, prefix, id).SequenceEqual(empty), Is.True);
-        Assert.That(builder.BuildKey(new byte[pid.Length - 1], 0, prefix, id).SequenceEqual(empty), Is.True);
-        Assert.That(builder.BuildKey(new byte[pid.Length + 1], 0, prefix, id).SequenceEqual(empty), Is.True);
+        Assert.That(builder.BuildKey(null, 0, prefix, id).SequenceEqual(pid), Is.True);
+        Assert.That(builder.BuildKey(Array.Empty<byte>(), 0, prefix, id).SequenceEqual(pid), Is.True);
+        Assert.That(builder.BuildKey(new byte[pid.Length - 1], 0, prefix, id).SequenceEqual(pid), Is.True);
+        Assert.That(builder.BuildKey(new byte[pid.Length + 1], 0, prefix, id).SequenceEqual(pid), Is.True);
 
         var key = builder.BuildKey(null, 3, prefix, id);
         Assert.That(key.SequenceEqual(pid), Is.True);
@@ -107,6 +107,32 @@ public class KeyBuilderTest
         Assert.That(builder
             .BuildKey(null, 255, 1, 2, 3, 4, 5, 6, 7, 8)
             .SequenceEqual(U8("1:2:3:4:5:6:7:8")), Is.True);
+    }
+
+    [Test]
+    public void AllocTest()
+    {
+        var builder = KeyBuilder.Default;
+        var key = builder.BuildKey(null, 255, "prefix", 0);
+
+        Assert.That(key.SequenceEqual(U8("prefix:0")), Is.True);
+
+        var alloc = 0;
+
+        for (int i = 1; i <= 100; i++)
+        {
+            var newKey = builder.BuildKey(key, 2, "prefix", i);
+
+            Assert.That(newKey.SequenceEqual(U8($"prefix:{i}")), Is.True);
+
+            if (newKey != key)
+            {
+                alloc++;
+                key = newKey;
+            }
+        }
+
+        Assert.That(alloc, Is.EqualTo(2));
     }
 
     [Test]

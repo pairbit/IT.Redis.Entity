@@ -21,7 +21,10 @@ public class KeyBuilder : IKeyBuilder
         var length = f.GetLength(in key1);
 
         if (key == null || key.Length != length)
+        {
             key = new byte[length];
+            bits = 255;
+        }
 
         if ((bits & 1) == 1) f.Format(in key1, key);
 
@@ -36,7 +39,10 @@ public class KeyBuilder : IKeyBuilder
         var length = 1 + lenKey1 + f.GetLength(in key2);
 
         if (key == null || key.Length != length)
+        {
             key = new byte[length];
+            bits = 255;
+        }
 
         if ((bits & 1) == 1) f.Format(in key1, key.AsSpan());
 
@@ -58,7 +64,10 @@ public class KeyBuilder : IKeyBuilder
         var length = 2 + lenKey1 + lenKey2 + f.GetLength(in key3);
 
         if (key == null || key.Length != length)
+        {
             key = new byte[length];
+            bits = 255;
+        }
 
         if ((bits & 1) == 1) f.Format(in key1, key.AsSpan());
 
@@ -91,7 +100,10 @@ public class KeyBuilder : IKeyBuilder
                        + f.GetLength(in key4);
 
         if (key == null || key.Length != length)
+        {
             key = new byte[length];
+            bits = 255;
+        }
 
         if ((bits & 1) == 1) f.Format(in key1, key.AsSpan());
 
@@ -133,7 +145,10 @@ public class KeyBuilder : IKeyBuilder
                        + f.GetLength(in key5);
 
         if (key == null || key.Length != length)
+        {
             key = new byte[length];
+            bits = 255;
+        }
 
         if ((bits & 1) == 1) f.Format(in key1, key.AsSpan());
 
@@ -184,7 +199,10 @@ public class KeyBuilder : IKeyBuilder
                        + lenKey5 + f.GetLength(in key6);
 
         if (key == null || key.Length != length)
+        {
             key = new byte[length];
+            bits = 255;
+        }
 
         if ((bits & 1) == 1) f.Format(in key1, key.AsSpan());
 
@@ -244,7 +262,10 @@ public class KeyBuilder : IKeyBuilder
                        + lenKey5 + lenKey6 + f.GetLength(in key7);
 
         if (key == null || key.Length != length)
+        {
             key = new byte[length];
+            bits = 255;
+        }
 
         if ((bits & 1) == 1) f.Format(in key1, key.AsSpan());
 
@@ -313,7 +334,10 @@ public class KeyBuilder : IKeyBuilder
                        + lenKey5 + lenKey6 + lenKey7 + f.GetLength(in key8);
 
         if (key == null || key.Length != length)
+        {
             key = new byte[length];
+            bits = 255;
+        }
 
         if ((bits & 1) == 1) f.Format(in key1, key.AsSpan());
 
