@@ -44,6 +44,8 @@ public class Utf8FormatterFixed : IUtf8Formatter
             if (type == typeof(ushort)) return (IUtf8Formatter<T>)UInt16Utf8Formatter.Fixed.L5;
             if (type == typeof(byte)) return (IUtf8Formatter<T>)ByteUtf8Formatter.Fixed.L3;
             if (type == typeof(sbyte)) return (IUtf8Formatter<T>)SByteUtf8Formatter.Fixed.L3;
+            if (type == typeof(byte[])) return (IUtf8Formatter<T>)ByteArrayUtf8Formatter.Default;
+            if (type == typeof(string)) return (IUtf8Formatter<T>)StringUtf8Formatter.Default;
 
             return null;
         }

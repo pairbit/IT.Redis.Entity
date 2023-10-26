@@ -112,27 +112,8 @@ public class KeyBuilderTest
     [Test]
     public void AllocTest()
     {
-        var builder = KeyBuilder.Default;
-        var key = builder.BuildKey(null, 255, "prefix", 0);
-
-        Assert.That(key.SequenceEqual(U8("prefix:0")), Is.True);
-
-        var alloc = 0;
-
-        for (int i = 1; i <= 100; i++)
-        {
-            var newKey = builder.BuildKey(key, 2, "prefix", i);
-
-            Assert.That(newKey.SequenceEqual(U8($"prefix:{i}")), Is.True);
-
-            if (newKey != key)
-            {
-                alloc++;
-                key = newKey;
-            }
-        }
-
-        Assert.That(alloc, Is.EqualTo(2));
+        AllocForByteTest(KeyBuilder.Default, 2);
+        AllocForByteTest(KeyBuilder.Fixed, 0, "d3");
     }
 
     [Test]
@@ -187,6 +168,31 @@ public class KeyBuilderTest
         Assert.That(bits |= 32, Is.EqualTo(63)); Assert.That(bits & 32, Is.EqualTo(32));
         Assert.That(bits |= 64, Is.EqualTo(127)); Assert.That(bits & 64, Is.EqualTo(64));
         Assert.That(bits |= 128, Is.EqualTo(255)); Assert.That(bits & 128, Is.EqualTo(128));
+    }
+
+    private void AllocForByteTest(IKeyBuilder builder, int allocations, string? numFormat = null)
+    {
+        var prefix = U8("prefix");
+        var key = builder.BuildKey(null, 0, prefix, (byte)0);
+
+        Assert.That(key.SequenceEqual(U8("prefix:" + (0).ToString(numFormat))), Is.True);
+
+        var alloc = 0;
+
+        for (byte i = 1; i <= 100; i++)
+        {
+            var newKey = builder.BuildKey(key, 2, prefix, i);
+
+            Assert.That(newKey.SequenceEqual(U8($"prefix:{i.ToString(numFormat)}")), Is.True);
+
+            if (newKey != key)
+            {
+                alloc++;
+                key = newKey;
+            }
+        }
+
+        Assert.That(alloc, Is.EqualTo(allocations));
     }
 
     private byte[] U8(string str) => Encoding.UTF8.GetBytes(str);
