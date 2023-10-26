@@ -7,6 +7,10 @@
 //bench.KE_Default();
 //bench.KE_Fixed();
 
+var bench = new KeyBuilderBenchmark { Max = 3 };
+
+if (bench.Fixed_Manual() != bench.Fixed()) throw new System.Exception();
+
 //BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(Benchmark));
 BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(KeyBuilderBenchmark));
 
