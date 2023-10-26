@@ -2,7 +2,8 @@
 
 public class KeyBuilder : IKeyBuilder
 {
-    public static readonly IKeyBuilder Default = new KeyBuilder(new Utf8FormatterDefault());
+    public static readonly IKeyBuilder Default = new KeyBuilder(new Utf8FormatterVar());
+    public static readonly IKeyBuilder Fixed = new KeyBuilder(new Utf8FormatterFixed());
     public static readonly int MaxKeys = 8;
 
     private readonly byte _separator;

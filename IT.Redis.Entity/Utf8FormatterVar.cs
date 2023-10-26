@@ -3,7 +3,7 @@ using IT.Redis.Entity.Utf8Formatters;
 
 namespace IT.Redis.Entity;
 
-public class Utf8FormatterDefault : IUtf8Formatter
+public class Utf8FormatterVar : IUtf8Formatter
 {
     public int GetLength<T>(in T value)
     {
@@ -38,9 +38,11 @@ public class Utf8FormatterDefault : IUtf8Formatter
         {
             var type = typeof(T);
             if (type == typeof(Guid)) return (IUtf8Formatter<T>)GuidUtf8Formatter.Default;
-            if (type == typeof(string)) return (IUtf8Formatter<T>)StringUtf8Formatter.Default;
-            if (type == typeof(int)) return (IUtf8Formatter<T>)Int32Utf8Formatter.Default;
+            if (type == typeof(int)) return (IUtf8Formatter<T>)Int32Utf8Formatter.Var.Default;
+            if (type == typeof(short)) return (IUtf8Formatter<T>)Int16Utf8Formatter.Var.Default;
+            if (type == typeof(byte)) return (IUtf8Formatter<T>)ByteUtf8Formatter.Var.Default;
             if (type == typeof(byte[])) return (IUtf8Formatter<T>)ByteArrayUtf8Formatter.Default;
+            if (type == typeof(string)) return (IUtf8Formatter<T>)StringUtf8Formatter.Default;
 
             return null;
         }

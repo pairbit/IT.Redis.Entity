@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Buffers.Text;
+using System.Text;
 
 namespace IT.Redis.Entity.Tests;
 
@@ -78,6 +79,33 @@ public class KeyBuilderTest
         var key = builder.BuildKey(null, 255, 1, 2, 3, 4, 5, 6, 7, 8);
 
         Assert.That(key.SequenceEqual(U8("1:2:3:4:5:6:7:8")), Is.True);
+    }
+
+    [Test]
+    public void KeyFixed()
+    {
+        var builder = KeyBuilder.Fixed;
+
+        Assert.That(builder.BuildKey(null, 1, 0).SequenceEqual(U8("0000000000")), Is.True);
+        Assert.That(builder.BuildKey(null, 1, int.MaxValue).SequenceEqual(U8("2147483647")), Is.True);
+
+        Assert.That(builder.BuildKey(null, 1, (short)0).SequenceEqual(U8("00000")), Is.True);
+        Assert.That(builder.BuildKey(null, 1, short.MaxValue).SequenceEqual(U8("32767")), Is.True);
+
+        Assert.That(builder.BuildKey(null, 1, (byte)0).SequenceEqual(U8("000")), Is.True);
+        Assert.That(builder.BuildKey(null, 1, byte.MaxValue).SequenceEqual(U8("255")), Is.True);
+    }
+
+    [Test]
+    public void IntFormatD()
+    {
+        var i = int.MaxValue;
+        var bytes = new byte[10];
+        var format = "d" + bytes.Length;
+        var standardFormat = System.Buffers.StandardFormat.Parse(format);
+        var str = i.ToString(format);
+        Utf8Formatter.TryFormat(i, bytes, out var written, standardFormat);
+        Assert.That(bytes.SequenceEqual(U8(str)), Is.True);
     }
 
     [Test]
