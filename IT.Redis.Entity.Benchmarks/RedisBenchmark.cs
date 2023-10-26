@@ -23,19 +23,19 @@ public class RedisBenchmark
         _db = connection.GetDatabase()!;
     }
 
-    [Benchmark]
+    //[Benchmark]
     public void KES()
     {
         if (_db.KeyExists(KeyString)) throw new InvalidOperationException();
     }
 
-    [Benchmark]
+    //[Benchmark]
     public void KEB()
     {
         if (_db.KeyExists(KeyBytes)) throw new InvalidOperationException();
     }
 
-    [Benchmark]
+    //[Benchmark]
     public void KE_String()
     {
         for (byte i = 0; i < Max; i++)
@@ -45,7 +45,7 @@ public class RedisBenchmark
         }
     }
 
-    [Benchmark]
+    //[Benchmark]
     public void KE_Default()
     {
         var builder = KeyBuilder.Default;
@@ -61,7 +61,7 @@ public class RedisBenchmark
         }
     }
 
-    [Benchmark]
+    //[Benchmark]
     public void KE_Fixed()
     {
         var builder = KeyBuilder.Fixed;
