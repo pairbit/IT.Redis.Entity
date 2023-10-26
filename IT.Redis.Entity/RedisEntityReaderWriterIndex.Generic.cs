@@ -9,8 +9,8 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
     private readonly RedisEntityReaderWriter<T>.WriterInfo[] _writerInfos;
     private readonly IRedisEntityFields _readerFields;
     private readonly IRedisEntityFields _writerFields;
-    private readonly Func<T, KeyBuilder, byte[]>? _readerKey;
-    private readonly KeyBuilder _keyBuilder;
+    private readonly Func<T, EntityKeyBuilder, byte[]>? _readerKey;
+    private readonly EntityKeyBuilder _keyBuilder;
 
     IRedisEntityFields IRedisEntityReader<T>.Fields => _readerFields;
 
@@ -32,7 +32,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
         var set = new HashSet<int>(properties.Length);
 #endif
         var keys = new List<PropertyInfo>();
-        var keyBuilder = new KeyBuilder(configuration.GetKeyPrefix(typeof(T)));
+        var keyBuilder = new EntityKeyBuilder(configuration.GetKeyPrefix(typeof(T)));
 
         foreach (var property in properties)
         {

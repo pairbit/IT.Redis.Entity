@@ -16,7 +16,7 @@ internal static class Compiler
     private static readonly ParameterExpression ParameterRedisValue = Expression.Parameter(typeof(RedisValue), "redisValue");
     private static readonly ParameterExpression ParameterDeserializer = Expression.Parameter(typeof(RedisValueDeserializerProxy), "deserializer");
     private static readonly ParameterExpression ParameterSerializer = Expression.Parameter(typeof(IRedisValueSerializer), "serializer");
-    private static readonly ParameterExpression ParameterKeyBuilder = Expression.Parameter(typeof(KeyBuilder), "keyBuilder");
+    private static readonly ParameterExpression ParameterKeyBuilder = Expression.Parameter(typeof(EntityKeyBuilder), "keyBuilder");
 
     /*
      Expression<Func<Document, IRedisValueSerializer, RedisValue>> exp =
@@ -56,7 +56,7 @@ internal static class Compiler
     }
 
     //keyBuilder.Build(entity.Key1, entity.Key2)
-    internal static Func<T, KeyBuilder, byte[]> GetReaderKey<T>(IReadOnlyList<PropertyInfo> keys)
+    internal static Func<T, EntityKeyBuilder, byte[]> GetReaderKey<T>(IReadOnlyList<PropertyInfo> keys)
     {
         var entityType = typeof(T);
 
@@ -82,7 +82,7 @@ internal static class Compiler
 
         var eCoalesce = Expression.Coalesce(eField, eAssign);
 
-        var lambda = Expression.Lambda<Func<T, KeyBuilder, byte[]>>(eCoalesce, eEntity, ParameterKeyBuilder);
+        var lambda = Expression.Lambda<Func<T, EntityKeyBuilder, byte[]>>(eCoalesce, eEntity, ParameterKeyBuilder);
 
         return lambda.Compile();
     }
@@ -99,17 +99,17 @@ internal static class Compiler
 
     private static MethodInfo GetMethodBuild(int count)
     {
-        var methods = typeof(KeyBuilder).GetMethods(BindingFlags.Instance | BindingFlags.Public);
+        var methods = typeof(EntityKeyBuilder).GetMethods(BindingFlags.Instance | BindingFlags.Public);
         for (int i = 0; i < methods.Length; i++)
         {
             var method = methods[i];
-            if (method.Name == nameof(KeyBuilder.Build) && method.ContainsGenericParameters)
+            if (method.Name == nameof(EntityKeyBuilder.Build) && method.ContainsGenericParameters)
             {
                 var args = method.GetGenericArguments();
                 if (args.Length == count) return method;
             }
         }
 
-        throw new InvalidOperationException($"Method '{nameof(KeyBuilder.Build)}' with {count} arguments not found");
+        throw new InvalidOperationException($"Method '{nameof(EntityKeyBuilder.Build)}' with {count} arguments not found");
     }
 }

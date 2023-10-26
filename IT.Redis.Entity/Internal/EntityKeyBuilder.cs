@@ -2,7 +2,7 @@
 
 namespace IT.Redis.Entity.Internal;
 
-internal class KeyBuilder
+internal class EntityKeyBuilder
 {
     public static readonly int MaxKeys = 5;
     private static readonly char _separatorChar = ':';
@@ -11,7 +11,7 @@ internal class KeyBuilder
     private readonly List<object> _serializers = new(MaxKeys);
     private readonly byte[] _prefix;
 
-    public KeyBuilder(string? prefix)
+    public EntityKeyBuilder(string? prefix)
     {
         _prefix = GetPrefix(prefix);
     }
