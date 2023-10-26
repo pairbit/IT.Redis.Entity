@@ -6,35 +6,16 @@ namespace IT.Redis.Entity;
 public class Utf8FormatterFixed : IUtf8Formatter
 {
     public int GetLength<T>(in T value)
-    {
-        if (!Cache<T>.HasFormatter) throw Ex.Utf8FormatterNotFound(typeof(T));
-
-        return Cache<T>.Formatter.GetLength(in value);
-    }
+        => Cache<T>.Formatter.GetLength(in value);
 
     public bool TryFormat<T>(in T value, Span<byte> bytes, out int written)
-    {
-        if (!Cache<T>.HasFormatter) throw Ex.Utf8FormatterNotFound(typeof(T));
-
-        return Cache<T>.Formatter.TryFormat(in value, bytes, out written);
-    }
+        => Cache<T>.Formatter.TryFormat(in value, bytes, out written);
 
     static class Cache<T>
     {
-        public static readonly IUtf8Formatter<T> Formatter = null!;
-        public static readonly bool HasFormatter;
+        public static readonly IUtf8Formatter<T> Formatter = GetFormatter();
 
-        static Cache()
-        {
-            var formatter = GetFormatter();
-            if (formatter != null)
-            {
-                Formatter = formatter;
-                HasFormatter = true;
-            }
-        }
-
-        static IUtf8Formatter<T>? GetFormatter()
+        static IUtf8Formatter<T> GetFormatter()
         {
             var type = typeof(T);
             if (type == typeof(Guid)) return (IUtf8Formatter<T>)GuidUtf8Formatter.Default;
@@ -47,7 +28,7 @@ public class Utf8FormatterFixed : IUtf8Formatter
             if (type == typeof(byte[])) return (IUtf8Formatter<T>)ByteArrayUtf8Formatter.Default;
             if (type == typeof(string)) return (IUtf8Formatter<T>)StringUtf8Formatter.Default;
 
-            return null;
+            return new Utf8FormatterNotFound<T>();
         }
     }
 }

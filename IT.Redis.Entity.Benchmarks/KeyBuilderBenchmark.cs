@@ -16,7 +16,7 @@ public class KeyBuilderBenchmark
     private static readonly byte[] _prefix = Encoding.UTF8.GetBytes(_prefixString);
     private static readonly byte[] _zeroD10 = Encoding.UTF8.GetBytes($"{_prefixString}:{0:D10}");
 
-    [Params(11, 101, 1_001, 10_001, 100_001)]
+    [Params(101)]//, 1_001, 10_001, 100_001
     public int Max { get; set; }
 
     [Benchmark]
