@@ -39,7 +39,7 @@ public class KeyBuilderBenchmark
 
         for (int i = 1; i < Max; i++)
         {
-            key = builder.BuildKey(key, 2, prefix, i);
+            key = builder.BuildKey(key, 2, in prefix, in i);
         }
 
         return key;
@@ -54,7 +54,7 @@ public class KeyBuilderBenchmark
 
         for (int i = 1; i < Max; i++)
         {
-            key = builder.BuildKey(key, 2, prefix, i);
+            key = builder.BuildKey(key, 2, in prefix, in i);
         }
         return key;
     }
