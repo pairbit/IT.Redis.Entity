@@ -235,9 +235,18 @@ public class DocumentTest
             doc2.Id = doc.Id;
 
             Assert.That(_db.EntityLoad(doc2), Is.True);
-            Assert.That(doc.AttachmentIds, Is.EqualTo(doc2.AttachmentIds));
+            Assert.That(doc2.AttachmentIds, Is.EqualTo(doc.AttachmentIds));
+            Assert.That(doc2.Name, Is.Null);
 
             _db.EntitySet(doc, reader.Fields[nameof(DocumentAnnotation.Name)]);
+
+            var doc3 = _db.EntityGet<DocumentAnnotation>(doc2.RedisKey);
+            
+            Assert.That(doc3, Is.Not.Null);
+            Assert.That(doc3.Id, Is.EqualTo(Guid.Empty));
+            Assert.That(doc3.RedisKey, Is.Null);
+            Assert.That(doc3.Name, Is.EqualTo(doc.Name));
+            Assert.That(doc3.AttachmentIds, Is.EqualTo(doc.AttachmentIds));
         }
         finally
         {
