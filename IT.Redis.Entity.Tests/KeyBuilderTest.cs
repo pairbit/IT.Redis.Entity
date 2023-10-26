@@ -7,7 +7,7 @@ public class KeyBuilderTest
     [Test]
     public void Key1Test()
     {
-        var builder = RedisKeyBuilder.Default;
+        var builder = KeyBuilder.Default;
 
         var id = Guid.NewGuid();
         var idb = U8(id.ToString("N"));
@@ -35,7 +35,7 @@ public class KeyBuilderTest
     [Test]
     public void Key2Test()
     {
-        var builder = RedisKeyBuilder.Default;
+        var builder = KeyBuilder.Default;
 
         var id = Guid.NewGuid();
         var prefix = U8("prefix");
@@ -73,7 +73,7 @@ public class KeyBuilderTest
     [Test]
     public void Key8Test()
     {
-        var builder = RedisKeyBuilder.Default;
+        var builder = KeyBuilder.Default;
 
         var key = builder.BuildKey(null, 255, 1, 2, 3, 4, 5, 6, 7, 8);
 

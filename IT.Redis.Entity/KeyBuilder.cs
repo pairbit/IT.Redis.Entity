@@ -1,14 +1,14 @@
 ﻿namespace IT.Redis.Entity;
 
-public class RedisKeyBuilder : IKeyBuilder
+public class KeyBuilder : IKeyBuilder
 {
-    public static readonly IKeyBuilder Default = new RedisKeyBuilder(new Utf8FormatterDefault());
+    public static readonly IKeyBuilder Default = new KeyBuilder(new Utf8FormatterDefault());
     public static readonly int MaxKeys = 8;
 
     private readonly byte _separator;
     private readonly IUtf8Formatter _utf8Formatter;
 
-    public RedisKeyBuilder(IUtf8Formatter utf8Formatter, byte separator = (byte)':')
+    public KeyBuilder(IUtf8Formatter utf8Formatter, byte separator = (byte)':')
     {
         _utf8Formatter = utf8Formatter ?? throw new ArgumentNullException(nameof(utf8Formatter));
         _separator = separator;
