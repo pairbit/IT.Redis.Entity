@@ -39,8 +39,11 @@ public class Utf8FormatterFixed : IUtf8Formatter
             var type = typeof(T);
             if (type == typeof(Guid)) return (IUtf8Formatter<T>)GuidUtf8Formatter.Default;
             if (type == typeof(int)) return (IUtf8Formatter<T>)Int32Utf8Formatter.Fixed.L10;
+            if (type == typeof(uint)) return (IUtf8Formatter<T>)UInt32Utf8Formatter.Fixed.L10;
             if (type == typeof(short)) return (IUtf8Formatter<T>)Int16Utf8Formatter.Fixed.L5;
+            if (type == typeof(ushort)) return (IUtf8Formatter<T>)UInt16Utf8Formatter.Fixed.L5;
             if (type == typeof(byte)) return (IUtf8Formatter<T>)ByteUtf8Formatter.Fixed.L3;
+            if (type == typeof(sbyte)) return (IUtf8Formatter<T>)SByteUtf8Formatter.Fixed.L3;
 
             return null;
         }

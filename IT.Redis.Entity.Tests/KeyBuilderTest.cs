@@ -88,12 +88,15 @@ public class KeyBuilderTest
 
         Assert.That(builder.BuildKey(null, 1, 0).SequenceEqual(U8("0000000000")), Is.True);
         Assert.That(builder.BuildKey(null, 1, int.MaxValue).SequenceEqual(U8("2147483647")), Is.True);
+        Assert.That(builder.BuildKey(null, 1, uint.MaxValue).SequenceEqual(U8("4294967295")), Is.True);
 
         Assert.That(builder.BuildKey(null, 1, (short)0).SequenceEqual(U8("00000")), Is.True);
         Assert.That(builder.BuildKey(null, 1, short.MaxValue).SequenceEqual(U8("32767")), Is.True);
+        Assert.That(builder.BuildKey(null, 1, ushort.MaxValue).SequenceEqual(U8("65535")), Is.True);
 
         Assert.That(builder.BuildKey(null, 1, (byte)0).SequenceEqual(U8("000")), Is.True);
         Assert.That(builder.BuildKey(null, 1, byte.MaxValue).SequenceEqual(U8("255")), Is.True);
+        Assert.That(builder.BuildKey(null, 1, sbyte.MaxValue).SequenceEqual(U8("127")), Is.True);
     }
 
     [Test]
