@@ -1,6 +1,6 @@
 ﻿using IT.Redis.Entity.Attributes;
-using IT.Redis.Entity.Formatters.Utf8;
 using IT.Redis.Entity.Internal;
+using IT.Redis.Entity.Utf8Formatters;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;

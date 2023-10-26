@@ -1,7 +1,7 @@
 ﻿using System.Buffers;
 using System.Buffers.Text;
 
-namespace IT.Redis.Entity.Formatters.Utf8;
+namespace IT.Redis.Entity.Utf8Formatters;
 
 public class GuidUtf8Formatter : IUtf8Formatter<Guid>
 {

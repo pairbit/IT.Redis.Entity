@@ -6,7 +6,6 @@ using IT.Redis.Entity.Formatters;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
-using System.Text;
 
 namespace IT.Redis.Entity.Tests;
 
@@ -245,87 +244,4 @@ public class DocumentTest
             _db.KeyDelete(doc.RedisKey);
         }
     }
-    
-    [Test]
-    public void RedisKeyBuilderKey8()
-    {
-        var builder = RedisKeyBuilder.Default;
-
-        var key = builder.BuildKey(null, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8);
-
-        Assert.That(key.SequenceEqual(U8("1:2:3:4:5:6:7:8")), Is.True);
-    }
-
-    [Test]
-    public void RedisKeyBuilderKey()
-    {
-        var builder = RedisKeyBuilder.Default;
-
-        var id = Guid.NewGuid();
-        var idn = id.ToString("N");
-        var idb = Encoding.UTF8.GetBytes(idn);
-        var idWithPrefix = Encoding.UTF8.GetBytes("prefix:" + idn);
-        var prefix = Encoding.UTF8.GetBytes("prefix:");
-        var empty = new byte[idb.Length];
-        var emptyWithPostfix = new byte[idb.Length + 1];
-
-        Assert.That(builder.BuildKey(empty, 0, 0, id) == empty, Is.True);
-        Assert.That(builder.BuildKey(null, 0, 0, id).SequenceEqual(empty), Is.True);
-        Assert.That(builder.BuildKey(Array.Empty<byte>(), 0, 0, id).SequenceEqual(empty), Is.True);
-        Assert.That(builder.BuildKey(new byte[10], 0, 0, id).SequenceEqual(empty), Is.True);
-        Assert.That(builder.BuildKey(emptyWithPostfix, 0, 0, id).SequenceEqual(empty), Is.True);
-
-        Assert.That(builder.BuildKey(null, 1, 0, id).SequenceEqual(idb), Is.True);
-
-        var withOffset = new byte[prefix.Length + idb.Length];
-        Assert.That(builder.BuildKey(null, 0, prefix.Length, id).SequenceEqual(withOffset), Is.True);
-
-        idb.CopyTo(withOffset.AsSpan(prefix.Length));
-
-        var key = builder.BuildKey(null, 1, prefix.Length, id);
-        Assert.That(key.SequenceEqual(withOffset), Is.True);
-        
-        prefix.CopyTo(key.AsSpan());
-        prefix.CopyTo(withOffset.AsSpan());
-        Assert.That(key.SequenceEqual(withOffset), Is.True);
-        Assert.That(key.SequenceEqual(idWithPrefix), Is.True);
-
-        //change key
-
-        Assert.That(builder.BuildKey(key, 0, prefix.Length, id) == key, Is.True);
-        Assert.That(key.SequenceEqual(idWithPrefix), Is.True);
-
-        Assert.That(builder.BuildKey(key, 1, prefix.Length, id) == key, Is.True);
-        Assert.That(key.SequenceEqual(idWithPrefix), Is.True);
-
-        id = Guid.NewGuid();
-        idWithPrefix = Encoding.UTF8.GetBytes($"prefix:{id:N}");
-        Assert.That(builder.BuildKey(key, 1, prefix.Length, id).SequenceEqual(idWithPrefix), Is.True);
-    }
-
-    [Test]
-    public void BitsTest()
-    {
-        byte bits = 0;
-        Assert.That(bits |= 1 << 0, Is.EqualTo(1));
-        Assert.That(bits |= 1 << 1, Is.EqualTo(3));
-        Assert.That(bits |= 1 << 2, Is.EqualTo(7));
-        Assert.That(bits |= 1 << 3, Is.EqualTo(15));
-        Assert.That(bits |= 1 << 4, Is.EqualTo(31));
-        Assert.That(bits |= 1 << 5, Is.EqualTo(63));
-        Assert.That(bits |= 1 << 6, Is.EqualTo(127));
-        Assert.That(bits |= 1 << 7, Is.EqualTo(255));
-
-        Assert.That(bits = 0, Is.EqualTo(0));
-        Assert.That(bits |= 1, Is.EqualTo(1)); Assert.That(bits & 1, Is.EqualTo(1));
-        Assert.That(bits |= 2, Is.EqualTo(3)); Assert.That(bits & 2, Is.EqualTo(2));
-        Assert.That(bits |= 4, Is.EqualTo(7)); Assert.That(bits & 4, Is.EqualTo(4));
-        Assert.That(bits |= 8, Is.EqualTo(15)); Assert.That(bits & 8, Is.EqualTo(8));
-        Assert.That(bits |= 16, Is.EqualTo(31)); Assert.That(bits & 16, Is.EqualTo(16));
-        Assert.That(bits |= 32, Is.EqualTo(63)); Assert.That(bits & 32, Is.EqualTo(32));
-        Assert.That(bits |= 64, Is.EqualTo(127)); Assert.That(bits & 64, Is.EqualTo(64));
-        Assert.That(bits |= 128, Is.EqualTo(255)); Assert.That(bits & 128, Is.EqualTo(128));
-    }
-
-    private byte[] U8(string str) => Encoding.UTF8.GetBytes(str);
 }

@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace IT.Redis.Entity.Formatters.Utf8;
+namespace IT.Redis.Entity.Utf8Formatters;
 
 public class StringUtf8Formatter : IUtf8Formatter<string>
 {
