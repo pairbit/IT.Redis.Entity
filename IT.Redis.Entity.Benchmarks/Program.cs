@@ -1,7 +1,14 @@
 ﻿using IT.Redis.Entity.Benchmarks;
 
-var bench = new Benchmark();
-BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(IT.Redis.Entity.Benchmarks.Benchmark));
+var bench = new RedisBenchmark();
+bench.KES();
+bench.KEB();
+bench.KE_String();
+bench.KE_Default();
+bench.KE_Fixed();
+
+//BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(Benchmark));
+BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(RedisBenchmark));
 
 //using DocLib;
 //using DocLib.RedisEntity;

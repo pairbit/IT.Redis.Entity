@@ -117,6 +117,24 @@ public class KeyBuilderTest
     }
 
     [Test]
+    public void RedisKeyModifyTest()
+    {
+        var builder = KeyBuilder.Default;
+        var prefix = U8("prefix");
+
+        var key = builder.BuildKey(null, 0, prefix, (sbyte)0);
+
+        RedisKey redisKey = key;
+        RedisKey redisKey2 = "prefix:0";
+
+        Assert.That(redisKey.Equals(redisKey2), Is.True);
+
+        builder.BuildKey(key, 2, prefix, (sbyte)1);
+
+        Assert.That(redisKey.Equals("prefix:1"), Is.True);
+    }
+
+    [Test]
     public void KeyFixed()
     {
         var builder = KeyBuilder.Fixed;
@@ -179,7 +197,7 @@ public class KeyBuilderTest
 
         var alloc = 0;
 
-        for (byte i = 1; i <= 100; i++)
+        for (byte i = 1; i < 255; i++)
         {
             var newKey = builder.BuildKey(key, 2, prefix, i);
 
