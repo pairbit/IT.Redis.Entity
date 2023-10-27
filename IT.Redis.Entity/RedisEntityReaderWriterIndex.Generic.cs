@@ -16,6 +16,8 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
 
     IRedisEntityFields IRedisEntityWriter<T>.Fields => _writerFields;
 
+    public IKeyBuilder KeyBuilder => _keyBuilder;
+
     public RedisEntityReaderWriterIndex(IRedisEntityConfiguration configuration)
     {
         if (configuration == null) throw new ArgumentNullException(nameof(configuration));
@@ -78,11 +80,8 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
                 }
             }
         }
-        if (keys.Count > 0)
-        {
-            _keyBuilder = keyBuilder;
-            _readerKey = Compiler.GetReaderKey<T>(keys);
-        }
+        if (keys.Count > 0) _readerKey = Compiler.GetReaderKey<T>(keys);
+        _keyBuilder = keyBuilder;
         _readerFields = new RedisEntityFields(readerFields);
         _writerFields = new RedisEntityFields(writerFields);
 
@@ -115,9 +114,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
 
         if (index < 0 || index > _readerInfos.Length) throw new ArgumentOutOfRangeException(nameof(field));
 
-        var readerInfo = _readerInfos[index];
-
-        if (readerInfo == null) throw new ArgumentOutOfRangeException(nameof(field));
+        var readerInfo = _readerInfos[index] ?? throw new ArgumentOutOfRangeException(nameof(field));
 
         return readerInfo.Reader(entity, readerInfo.Serializer);
     }
@@ -138,9 +135,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
 
         if (index < 0 || index > _writerInfos.Length) throw new ArgumentOutOfRangeException(nameof(field));
 
-        var writerInfo = _writerInfos[index];
-
-        if (writerInfo == null) throw new ArgumentOutOfRangeException(nameof(field));
+        var writerInfo = _writerInfos[index] ?? throw new ArgumentOutOfRangeException(nameof(field));
 
         writerInfo.Writer(entity, value, writerInfo.Deserializer);
 
@@ -161,9 +156,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
 
         if (index < 0 || index > _readerInfos.Length) throw new ArgumentOutOfRangeException(nameof(field));
 
-        var readerInfo = _readerInfos[index];
-
-        if (readerInfo == null) throw new ArgumentOutOfRangeException(nameof(field));
+        var readerInfo = _readerInfos[index] ?? throw new ArgumentOutOfRangeException(nameof(field));
 
         return (IRedisValueSerializer<TField>)readerInfo.SerializerGeneric;
     }
@@ -182,9 +175,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
 
         if (index < 0 || index > _writerInfos.Length) throw new ArgumentOutOfRangeException(nameof(field));
 
-        var writerInfo = _writerInfos[index];
-
-        if (writerInfo == null) throw new ArgumentOutOfRangeException(nameof(field));
+        var writerInfo = _writerInfos[index] ?? throw new ArgumentOutOfRangeException(nameof(field));
 
         return (IRedisValueDeserializer<TField>)writerInfo.DeserializerGeneric;
     }

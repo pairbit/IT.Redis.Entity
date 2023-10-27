@@ -8,10 +8,13 @@ namespace DocLib;
 public record DocumentAnnotation
 {
     private Guid _id;
+#pragma warning disable IDE0044 // Add readonly modifier
+#pragma warning disable CS0649 // Field 'DocumentAnnotation._redisKey' is never assigned to, and will always have its default value null
     private byte[]? _redisKey;
-#pragma warning disable IDE0052 // Remove unread private members
+#pragma warning restore CS0649 // Field 'DocumentAnnotation._redisKey' is never assigned to, and will always have its default value null
+#pragma warning restore IDE0044 // Add readonly modifier
+
     private byte _redisKeyBits;
-#pragma warning restore IDE0052 // Remove unread private members
 
     [NotMapped]
     public byte[]? RedisKey => _redisKey;

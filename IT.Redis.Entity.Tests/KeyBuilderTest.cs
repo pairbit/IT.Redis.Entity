@@ -191,7 +191,7 @@ public class KeyBuilderTest
         var format = "d" + bytes.Length;
         var standardFormat = System.Buffers.StandardFormat.Parse(format);
         var str = i.ToString(format);
-        Utf8Formatter.TryFormat(i, bytes, out var written, standardFormat);
+        Utf8Formatter.TryFormat(i, bytes, out _, standardFormat);
         Assert.That(bytes.SequenceEqual(U8(str)), Is.True);
     }
 

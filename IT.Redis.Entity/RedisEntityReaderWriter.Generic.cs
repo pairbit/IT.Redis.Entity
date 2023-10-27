@@ -34,6 +34,8 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
 
     IRedisEntityFields IRedisEntityWriter<T>.Fields => _writerFields;
 
+    public IKeyBuilder KeyBuilder => _keyBuilder;
+
     public RedisEntityReaderWriter(IRedisEntityConfiguration configuration)
     {
         if (configuration == null) throw new ArgumentNullException(nameof(configuration));
@@ -93,11 +95,8 @@ public class RedisEntityReaderWriter<T> : IRedisEntityReaderWriter<T>
             }
         }
 
-        if (keys.Count > 0)
-        {
-            _keyBuilder = keyBuilder;
-            _readerKey = Compiler.GetReaderKey<T>(keys);
-        }
+        if (keys.Count > 0) _readerKey = Compiler.GetReaderKey<T>(keys);
+        _keyBuilder = keyBuilder;
         _readerFields = new RedisEntityFields(readerFields);
         _writerFields = new RedisEntityFields(writerFields);
         _readerInfos = readerInfos;

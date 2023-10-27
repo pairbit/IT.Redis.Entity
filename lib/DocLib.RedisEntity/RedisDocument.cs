@@ -25,6 +25,8 @@ public class RedisDocument : IRedisEntityReaderWriter<Document>
 
     public IRedisEntityFields Fields => _fields;
 
+    public IKeyBuilder KeyBuilder => throw new NotImplementedException();
+
     public IRedisValueDeserializer<TField> GetDeserializer<TField>(in RedisValue field) => (IRedisValueDeserializer<TField>)GetFormatter((int)field);
 
     public IRedisValueSerializer<TField> GetSerializer<TField>(in RedisValue field) => (IRedisValueSerializer<TField>)GetFormatter((int)field);

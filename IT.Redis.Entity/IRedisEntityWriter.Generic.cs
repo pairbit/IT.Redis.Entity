@@ -4,6 +4,8 @@ public interface IRedisEntityWriter<T>
 {
     IRedisEntityFields Fields { get; }
 
+    IKeyBuilder KeyBuilder { get; }
+
     RedisKey ReadKey(T entity);
 
     bool Write(T entity, in RedisValue field, in RedisValue value);

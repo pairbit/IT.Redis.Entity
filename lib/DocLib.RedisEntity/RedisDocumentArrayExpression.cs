@@ -23,6 +23,8 @@ public class RedisDocumentArrayExpression : IRedisEntityReaderWriter<Document>
 
     public IRedisEntityFields Fields => _fields;
 
+    public IKeyBuilder KeyBuilder => throw new NotImplementedException();
+
     private readonly Func<Document, RedisValue>[] _readers = new Func<Document, RedisValue>[9];
     private readonly Action<Document, RedisValue>[] _writers = new Action<Document, RedisValue>[9];
 

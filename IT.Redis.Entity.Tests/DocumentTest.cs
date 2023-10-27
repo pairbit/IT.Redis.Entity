@@ -217,22 +217,22 @@ public class DocumentTest
     public void ReadKeyTest()
     {
         var reader = RedisEntity<DocumentAnnotation>.Reader;
-
+        var id = Guid.NewGuid();
         var doc = new DocumentAnnotation
         {
-            Id = Guid.NewGuid(),
+            Id = id,
             Name = "My Doc 1",
             AttachmentIds = new EquatableList<int> { 0, 1, 3, 5 }
         };
         var idempty = U8($"app:doc:{Guid.Empty:N}");
-        var idbytes = U8($"app:doc:{doc.Id:N}");
+        var idbytes = U8($"app:doc:{id:N}");
 
         try
         {
             Assert.That(doc.RedisKeyBits, Is.EqualTo(1));
             Assert.That(doc.RedisKey, Is.Null);
-            
-            _db.EntitySet(doc, reader.Fields[nameof(DocumentAnnotation.AttachmentIds)]);
+
+            Assert.That(_db.EntitySet(doc, reader.Fields[nameof(DocumentAnnotation.AttachmentIds)]), Is.True);
             
             Assert.That(doc.RedisKeyBits, Is.EqualTo(0));
             Assert.That(doc.RedisKey, Is.Not.Null);
@@ -247,7 +247,7 @@ public class DocumentTest
             Assert.That(doc2.RedisKeyBits, Is.EqualTo(0));
             Assert.That(doc2.RedisKey, Is.Not.Null);
             Assert.That(doc2.RedisKey.SequenceEqual(idempty), Is.True);
-            doc2.Id = doc.Id;
+            doc2.Id = id;
             Assert.That(doc2.RedisKeyBits, Is.EqualTo(1));
             Assert.That(doc2.RedisKey.SequenceEqual(idempty), Is.True);
 
@@ -255,11 +255,10 @@ public class DocumentTest
 
             Assert.That(doc2.RedisKeyBits, Is.EqualTo(0));
             Assert.That(doc2.RedisKey.SequenceEqual(idbytes), Is.True);
-
             Assert.That(doc2.AttachmentIds, Is.EqualTo(doc.AttachmentIds));
             Assert.That(doc2.Name, Is.Null);
 
-            _db.EntitySet(doc, reader.Fields[nameof(DocumentAnnotation.Name)]);
+            Assert.That(_db.EntitySet(doc, reader.Fields[nameof(DocumentAnnotation.Name)]), Is.True);
 
             var doc3 = _db.EntityGet<DocumentAnnotation>(doc2.RedisKey);
             
@@ -268,6 +267,9 @@ public class DocumentTest
             Assert.That(doc3.RedisKey, Is.Null);
             Assert.That(doc3.Name, Is.EqualTo(doc.Name));
             Assert.That(doc3.AttachmentIds, Is.EqualTo(doc.AttachmentIds));
+
+            var redisKey = reader.KeyBuilder.BuildKey(null, 0, id);
+            Assert.That(redisKey.SequenceEqual(idbytes), Is.True);
         }
         finally
         {
