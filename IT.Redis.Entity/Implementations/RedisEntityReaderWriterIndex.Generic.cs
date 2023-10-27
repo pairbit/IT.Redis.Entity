@@ -34,7 +34,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
         var set = new HashSet<int>(properties.Length);
 #endif
         var keys = new List<PropertyInfo>();
-        var keyBuilder = new EntityKeyBuilder(configuration.GetKeyPrefix(typeof(T)));
+        var keyBuilder = new EntityKeyBuilder(typeof(T), configuration.GetKeyPrefix(typeof(T)));
 
         foreach (var property in properties)
         {
@@ -43,7 +43,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
             if (hasKey)
             {
                 keys.Add(property);
-                keyBuilder.AddSerializer(configuration.GetUtf8Formatter(property));
+                keyBuilder.AddKeyInfo(property, configuration.GetUtf8Formatter(property));
             }
             else if (!field.IsNull)
             {

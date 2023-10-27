@@ -43,6 +43,4 @@ public record DocumentWithReadOnlyKeys
     public string? Data1 { get; set; }
 
     public string? Data2 { get; set; }
-
-    public void RedisKeyClear() => _redisKey = null;
 }

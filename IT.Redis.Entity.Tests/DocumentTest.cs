@@ -133,7 +133,7 @@ public class DocumentTest
             BlockingCollection = new BlockingCollection<string?>(new ConcurrentQueue<string?>(new string?[] { "8", "9" })),
             StringPairs = new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>("a1", "b"), new KeyValuePair<string, string>("c2", "d") },
             StringDictionary = new Dictionary<string, string>() { { "g", "h" }, { "j", "k" } },
-            StringArray = new [] { new KeyValuePair<string, string>("a12", "b"), new KeyValuePair<string, string>("c25", "d") },
+            StringArray = new[] { new KeyValuePair<string, string>("a12", "b"), new KeyValuePair<string, string>("c25", "d") },
 #if NETCOREAPP3_1_OR_GREATER
             ImmutableList = ImmutableStack.Create(new int?[] { 0, null }),
             Tuple = (0, -1),
@@ -233,7 +233,7 @@ public class DocumentTest
             Assert.That(doc.RedisKey, Is.Null);
 
             Assert.That(_db.EntitySet(doc, reader.Fields[nameof(DocumentAnnotation.AttachmentIds)]), Is.True);
-            
+
             Assert.That(doc.RedisKeyBits, Is.EqualTo(0));
             Assert.That(doc.RedisKey, Is.Not.Null);
             Assert.That(doc.RedisKey.SequenceEqual(idbytes), Is.True);
@@ -243,7 +243,7 @@ public class DocumentTest
             Assert.That(doc2.RedisKeyBits, Is.EqualTo(0));
 
             Assert.That(_db.EntityLoad(doc2), Is.False);
-            
+
             Assert.That(doc2.RedisKeyBits, Is.EqualTo(0));
             Assert.That(doc2.RedisKey, Is.Not.Null);
             Assert.That(doc2.RedisKey.SequenceEqual(idempty), Is.True);
@@ -261,7 +261,7 @@ public class DocumentTest
             Assert.That(_db.EntitySet(doc, reader.Fields[nameof(DocumentAnnotation.Name)]), Is.True);
 
             var doc3 = _db.EntityGet<DocumentAnnotation>(doc2.RedisKey);
-            
+
             Assert.That(doc3, Is.Not.Null);
             Assert.That(doc3.Id, Is.EqualTo(Guid.Empty));
             Assert.That(doc3.RedisKey, Is.Null);

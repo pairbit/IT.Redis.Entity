@@ -1,6 +1,9 @@
-﻿using System.Text;
+﻿using System.Reflection;
+using System.Text;
 
 namespace IT.Redis.Entity.Internal;
+
+internal readonly record struct KeyInfo(PropertyInfo Property, object Utf8Formatter);
 
 internal class EntityKeyBuilder : IKeyBuilder
 {
@@ -8,19 +11,21 @@ internal class EntityKeyBuilder : IKeyBuilder
     private static readonly char _separatorChar = ':';
     private static readonly byte _separator = (byte)_separatorChar;
 
-    private readonly List<object> _serializers = new(MaxKeys);
+    private readonly List<KeyInfo> _keys = new(MaxKeys);
     private readonly byte[] _prefix;
+    private readonly Type _entityType;
 
-    public EntityKeyBuilder(string? prefix)
+    public EntityKeyBuilder(Type entityType, string? prefix)
     {
+        _entityType = entityType;
         _prefix = GetPrefix(prefix);
     }
 
-    public void AddSerializer(object serializer)
+    public void AddKeyInfo(PropertyInfo property, object utf8Formatter)
     {
-        if (_serializers.Count == MaxKeys) throw new InvalidOperationException($"A composite key containing more than {MaxKeys} fields is not supported");
+        if (_keys.Count == MaxKeys) throw new InvalidOperationException($"A composite key containing more than {MaxKeys} fields is not supported");
 
-        _serializers.Add(serializer);
+        _keys.Add(new KeyInfo(property, utf8Formatter));
     }
 
     public byte[] BuildKey<TKey1>(byte[]? key, byte bits, in TKey1 key1)
@@ -322,7 +327,25 @@ internal class EntityKeyBuilder : IKeyBuilder
 
     private IUtf8Formatter<TKey> GetFormatter<TKey>(int index)
     {
-        return (IUtf8Formatter<TKey>)_serializers[index];
+        KeyInfo key;
+
+        try
+        {
+            key = _keys[index];
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            throw Ex.InvalidKeyCount(_entityType, _keys);
+        }
+
+        try
+        {
+            return (IUtf8Formatter<TKey>)key.Utf8Formatter;
+        }
+        catch (InvalidCastException)
+        {
+            throw Ex.InvalidKeyType(typeof(TKey), key.Property);
+        }
     }
 
     private static byte[] GetPrefix(string? prefix)
