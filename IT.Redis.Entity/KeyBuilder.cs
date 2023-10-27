@@ -71,8 +71,7 @@ public class KeyBuilder : IKeyBuilder
             if ((bits & 1) == 1) f.Format(in key1, key);
             offset += lenKey1 + 1;
             if ((bits & 2) == 2) f.Format(in key2, key.AsSpan(offset));
-            offset += lenKey2 + 1;
-            if ((bits & 4) == 4) f.Format(in key3, key.AsSpan(offset));
+            if ((bits & 4) == 4) f.Format(in key3, key.AsSpan(offset + lenKey2 + 1));
         }
         return key;
     }
@@ -102,8 +101,7 @@ public class KeyBuilder : IKeyBuilder
             if ((bits & 2) == 2) f.Format(in key2, key.AsSpan(offset));
             offset += lenKey2 + 1;
             if ((bits & 4) == 4) f.Format(in key3, key.AsSpan(offset));
-            offset += lenKey3 + 1;
-            if ((bits & 8) == 8) f.Format(in key4, key.AsSpan(offset));
+            if ((bits & 8) == 8) f.Format(in key4, key.AsSpan(offset + lenKey3 + 1));
         }
         return key;
     }
@@ -137,8 +135,7 @@ public class KeyBuilder : IKeyBuilder
             if ((bits & 4) == 4) f.Format(in key3, key.AsSpan(offset));
             offset += lenKey3 + 1;
             if ((bits & 8) == 8) f.Format(in key4, key.AsSpan(offset));
-            offset += lenKey4 + 1;
-            if ((bits & 16) == 16) f.Format(in key5, key.AsSpan(offset));
+            if ((bits & 16) == 16) f.Format(in key5, key.AsSpan(offset + lenKey4 + 1));
         }
         return key;
     }
@@ -176,8 +173,7 @@ public class KeyBuilder : IKeyBuilder
             if ((bits & 8) == 8) f.Format(in key4, key.AsSpan(offset));
             offset += lenKey4 + 1;
             if ((bits & 16) == 16) f.Format(in key5, key.AsSpan(offset));
-            offset += lenKey5 + 1;
-            if ((bits & 32) == 32) f.Format(in key6, key.AsSpan(offset));
+            if ((bits & 32) == 32) f.Format(in key6, key.AsSpan(offset + lenKey5 + 1));
         }
         return key;
     }
@@ -219,8 +215,7 @@ public class KeyBuilder : IKeyBuilder
             if ((bits & 16) == 16) f.Format(in key5, key.AsSpan(offset));
             offset += lenKey5 + 1;
             if ((bits & 32) == 32) f.Format(in key6, key.AsSpan(offset));
-            offset += lenKey6 + 1;
-            if ((bits & 64) == 64) f.Format(in key7, key.AsSpan(offset));
+            if ((bits & 64) == 64) f.Format(in key7, key.AsSpan(offset + lenKey6 + 1));
         }
         return key;
     }
@@ -266,8 +261,7 @@ public class KeyBuilder : IKeyBuilder
             if ((bits & 32) == 32) f.Format(in key6, key.AsSpan(offset));
             offset += lenKey6 + 1;
             if ((bits & 64) == 64) f.Format(in key7, key.AsSpan(offset));
-            offset += lenKey7 + 1;
-            if ((bits & 128) == 128) f.Format(in key8, key.AsSpan(offset));
+            if ((bits & 128) == 128) f.Format(in key8, key.AsSpan(offset + lenKey7 + 1));
         }
         return key;
     }
