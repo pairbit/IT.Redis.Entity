@@ -24,9 +24,9 @@ public class KeyBuilder : IKeyBuilder
             key = new byte[length];
             f.Format(in key1, key);
         }
-        else
+        else if ((bits & 1) == 1)
         {
-            if ((bits & 1) == 1) f.Format(in key1, key);
+            f.Format(in key1, key);
         }
         return key;
     }
