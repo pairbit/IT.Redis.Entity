@@ -72,8 +72,9 @@ internal static class Compiler
         var eArguments = new Expression[2 + keys.Count];
 
         var hasKeySetter = false;
-        eArguments[0] = Expression.Constant(null, FieldRedisKeyType);
-        eArguments[1] = Expression.Constant((byte)0, FieldRedisKeyBitsType);
+        var eNullBytes = Expression.Constant(null, FieldRedisKeyType);
+        var eZeroByte = Expression.Constant((byte)0, FieldRedisKeyBitsType);
+
         for (int i = 0; i < keys.Count; i++)
         {
             var key = keys[i];
@@ -83,23 +84,41 @@ internal static class Compiler
             if (key.SetMethod != null) hasKeySetter = true;
         }
 
-        var methodBuild = GetMethodBuild(keys.Count);
-
-        var eCall = Expression.Call(ParameterKeyBuilder, methodBuild.MakeGenericMethod(propertyTypes), eArguments);
-
-        var eAssign = Expression.Assign(eFieldRedisKey, eCall);
+        var methodBuild = GetMethodBuild(keys.Count).MakeGenericMethod(propertyTypes);
 
         Expression eBody;
 
         if (hasKeySetter)
         {
             var eFieldBits = Expression.Field(eEntity, GetField(entityType, FieldRedisKeyBitsName, FieldRedisKeyBitsType));
+            
+            var eTest = Expression.Or(
+                Expression.GreaterThan(eFieldBits, eZeroByte),
+                Expression.Equal(eFieldRedisKey, eNullBytes));
 
-            throw new NotImplementedException();
-            //eBody
+            eArguments[0] = eFieldRedisKey;
+            eArguments[1] = eFieldBits;
+
+            var eCall = Expression.Call(ParameterKeyBuilder, methodBuild, eArguments);
+
+            var eAssign = Expression.Assign(eFieldRedisKey, eCall);
+
+            var eIfThen = Expression.IfThen(eTest, Expression.Block(
+                    eAssign,
+                    Expression.Assign(eFieldBits, eZeroByte)
+                ));
+
+            eBody = Expression.Block(eIfThen, eFieldRedisKey);
         }
         else
         {
+            eArguments[0] = eNullBytes;
+            eArguments[1] = eZeroByte;
+
+            var eCall = Expression.Call(ParameterKeyBuilder, methodBuild, eArguments);
+
+            var eAssign = Expression.Assign(eFieldRedisKey, eCall);
+
             eBody = Expression.Coalesce(eFieldRedisKey, eAssign);
         }
 

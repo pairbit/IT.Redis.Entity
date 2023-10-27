@@ -213,32 +213,49 @@ public class DocumentTest
         }
     }
 
-    //[Test]
+    [Test]
     public void ReadKeyTest()
     {
+        var reader = RedisEntity<DocumentAnnotation>.Reader;
+
         var doc = new DocumentAnnotation
         {
             Id = Guid.NewGuid(),
             Name = "My Doc 1",
             AttachmentIds = new EquatableList<int> { 0, 1, 3, 5 }
         };
-
-        var reader = RedisEntity<DocumentAnnotation>.Reader;
+        var idempty = U8($"app:doc:{Guid.Empty:N}");
+        var idbytes = U8($"app:doc:{doc.Id:N}");
 
         try
         {
+            Assert.That(doc.RedisKeyBits, Is.EqualTo(1));
+            Assert.That(doc.RedisKey, Is.Null);
+            
             _db.EntitySet(doc, reader.Fields[nameof(DocumentAnnotation.AttachmentIds)]);
+            
+            Assert.That(doc.RedisKeyBits, Is.EqualTo(0));
+            Assert.That(doc.RedisKey, Is.Not.Null);
+            Assert.That(doc.RedisKey.SequenceEqual(idbytes), Is.True);
 
             var doc2 = new DocumentAnnotation();
             Assert.That(doc2.RedisKey, Is.Null);
+            Assert.That(doc2.RedisKeyBits, Is.EqualTo(0));
 
             Assert.That(_db.EntityLoad(doc2), Is.False);
             
+            Assert.That(doc2.RedisKeyBits, Is.EqualTo(0));
             Assert.That(doc2.RedisKey, Is.Not.Null);
-            Assert.That(doc2.RedisKey.SequenceEqual(U8($"app:doc:{Guid.Empty:N}")), Is.True);
+            Assert.That(doc2.RedisKey.SequenceEqual(idempty), Is.True);
             doc2.Id = doc.Id;
+            Assert.That(doc2.RedisKeyBits, Is.EqualTo(1));
+            Assert.That(doc2.RedisKey.SequenceEqual(idempty), Is.True);
 
             Assert.That(_db.EntityLoad(doc2), Is.True);
+
+            Assert.That(doc2.RedisKeyBits, Is.EqualTo(0));
+            Assert.That(doc2.RedisKey.SequenceEqual(idbytes), Is.True);
+
             Assert.That(doc2.AttachmentIds, Is.EqualTo(doc.AttachmentIds));
             Assert.That(doc2.Name, Is.Null);
 

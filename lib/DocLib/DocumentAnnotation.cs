@@ -16,6 +16,9 @@ public record DocumentAnnotation
     [NotMapped]
     public byte[]? RedisKey => _redisKey;
 
+    [NotMapped]
+    public byte RedisKeyBits => _redisKeyBits;
+
     [Key]
     [Column(Order = 0)]
     public Guid Id
