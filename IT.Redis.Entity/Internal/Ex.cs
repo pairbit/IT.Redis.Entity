@@ -4,6 +4,9 @@ namespace IT.Redis.Entity.Internal;
 
 internal static class Ex
 {
+    public static ArgumentException FieldNotInteger(RedisValue field, Exception ex, string? paramName = null)
+        => new($"Field '{field}' is not integer", paramName, ex);
+
     public static ArgumentException InvalidKeyCount(Type entityType, IReadOnlyList<KeyInfo> keys)
         => new(keys.Count > 0 ? keys.Count == 1
             ? $"Entity '{entityType.FullName}' contains one key '{keys[0].Property.Name}'"
