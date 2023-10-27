@@ -120,9 +120,9 @@ public static class xIDatabase
 
     public static TField? EntityGetField<TEntity, TField>(this IDatabase db, in RedisKey key, in RedisValue field, IRedisEntityWriter<TEntity>? writer = null, CommandFlags flags = CommandFlags.None)
     {
-        TField? value = default;
-
         var redisValue = db.HashGet(key, field, flags);
+
+        TField? value = default;
 
         if (!redisValue.IsNull) (writer ?? RedisEntity<TEntity>.Writer).GetDeserializer<TField>(in field).Deserialize(in redisValue, ref value);
 
