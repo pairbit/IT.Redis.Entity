@@ -87,6 +87,20 @@ public class KeyBuilderTest
         Assert.That(key.SequenceEqual(pid), Is.False);
         Assert.That(key.SequenceEqual(U8($"PREFIX:{id:N}")), Is.True);
     }
+    
+    [Test]
+    public void Key8Test()
+    {
+        var builder = KeyBuilder.Default;
+
+        var key = builder.BuildKey(null, 0, 1, 2, 3, 4, 5, 6, 7, 8);
+
+        Assert.That(key.SequenceEqual(U8("1:2:3:4:5:6:7:8")), Is.True);
+
+        Assert.That(builder.BuildKey(key, 255, 8, 7, 6, 5, 4, 3, 2, 1) == key, Is.True);
+
+        Assert.That(key.SequenceEqual(U8("8:7:6:5:4:3:2:1")), Is.True);
+    }
 
     [Test]
     public void KeysTest()
