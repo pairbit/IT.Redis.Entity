@@ -1,5 +1,6 @@
 ﻿using DocLib;
 using DocLib.RedisEntity;
+using IT.Redis.Entity.Configurations;
 
 namespace IT.Redis.Entity.Tests;
 
@@ -16,6 +17,11 @@ public class EntityKeyBuilderTest
             BuildKey(null, 0, Guid.NewGuid(), Guid.NewGuid(), "name", "key4", 44)).Message,
             Is.EqualTo($"Entity '{typeof(DocumentWithReadOnlyKeys).FullName}' contains 4 keys 'Id, ClientId, Name, Key4'"));
 
+#if NETCOREAPP3_1_OR_GREATER
+        RedisEntity<DocumentAnnotation>.ReaderWriterFactory =
+            () => new RedisEntityReaderWriter<DocumentAnnotation>(
+                new DataAnnotationConfiguration(RedisValueFormatterRegistry.Default));
+
         Assert.That(Assert.Throws<ArgumentException>(() => RedisEntity<DocumentAnnotation>.Reader.KeyBuilder.
             BuildKey(null, 0, 5)).Message,
             Is.EqualTo($"Type '{typeof(int).FullName}' is not the type of key '{nameof(DocumentAnnotation.Id)}' of entity '{typeof(DocumentAnnotation).FullName}'"));
@@ -23,5 +29,6 @@ public class EntityKeyBuilderTest
         Assert.That(Assert.Throws<ArgumentException>(() => RedisEntity<DocumentAnnotation>.Reader.KeyBuilder.
             BuildKey(null, 0, Guid.NewGuid(), 6)).Message,
             Is.EqualTo($"Entity '{typeof(DocumentAnnotation).FullName}' contains one key '{nameof(DocumentAnnotation.Id)}'"));
+#endif
     }
 }

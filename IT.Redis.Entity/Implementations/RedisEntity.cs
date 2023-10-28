@@ -1,4 +1,6 @@
-﻿namespace IT.Redis.Entity;
+﻿using IT.Redis.Entity.Configurations;
+
+namespace IT.Redis.Entity;
 
 public static class RedisEntity
 {

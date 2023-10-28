@@ -11,7 +11,9 @@ public record DocumentWithReadOnlyKeys
     private readonly string? _key4;
 
 #pragma warning disable IDE0044 // Add readonly modifier
+#pragma warning disable CS0649 // Field 'DocumentWithReadOnlyKeys._redisKey' is never assigned to, and will always have its default value null
     private byte[]? _redisKey;
+#pragma warning restore CS0649 // Field 'DocumentWithReadOnlyKeys._redisKey' is never assigned to, and will always have its default value null
 #pragma warning restore IDE0044 // Add readonly modifier
 
     public DocumentWithReadOnlyKeys(Guid id, Guid clientId, string? name, string? key4)

@@ -1,4 +1,5 @@
 ﻿using DocLib.RedisEntity;
+using IT.Redis.Entity.Configurations;
 using System.Text;
 
 namespace IT.Redis.Entity.Tests;

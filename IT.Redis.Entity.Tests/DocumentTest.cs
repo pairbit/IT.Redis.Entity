@@ -2,6 +2,7 @@
 using IT.Collections.Equatable;
 using IT.Collections.Equatable.Factory;
 using IT.Collections.Factory;
+using IT.Redis.Entity.Configurations;
 using IT.Redis.Entity.Formatters;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -213,9 +214,13 @@ public class DocumentTest
         }
     }
 
+#if NETCOREAPP3_1_OR_GREATER
     [Test]
     public void ReadKeyTest()
     {
+        RedisEntity<DocumentAnnotation>.ReaderWriterFactory =
+            () => new RedisEntityReaderWriter<DocumentAnnotation>(new DataAnnotationConfiguration(RedisValueFormatterRegistry.Default));
+
         var reader = RedisEntity<DocumentAnnotation>.Reader;
         var id = Guid.NewGuid();
         var doc = new DocumentAnnotation
@@ -273,9 +278,11 @@ public class DocumentTest
         }
         finally
         {
-            _db.KeyDelete(doc.RedisKey);
+            if (doc.RedisKey != null)
+                _db.KeyDelete(doc.RedisKey);
         }
     }
+#endif
 
     private byte[] U8(string str) => Encoding.UTF8.GetBytes(str);
 }

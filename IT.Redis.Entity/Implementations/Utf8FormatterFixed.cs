@@ -11,24 +11,25 @@ public class Utf8FormatterFixed : IUtf8Formatter
     public bool TryFormat<T>(in T value, Span<byte> bytes, out int written)
         => Cache<T>.Formatter.TryFormat(in value, bytes, out written);
 
+    internal static object? GetFormatter(Type type)
+    {
+        if (type == typeof(Guid)) return GuidUtf8Formatter.Default;
+        if (type == typeof(int)) return Int32Utf8Formatter.Fixed.L10;
+        if (type == typeof(uint)) return UInt32Utf8Formatter.Fixed.L10;
+        if (type == typeof(short)) return Int16Utf8Formatter.Fixed.L5;
+        if (type == typeof(ushort)) return UInt16Utf8Formatter.Fixed.L5;
+        if (type == typeof(byte)) return ByteUtf8Formatter.Fixed.L3;
+        if (type == typeof(sbyte)) return SByteUtf8Formatter.Fixed.L3;
+        if (type == typeof(byte[])) return ByteArrayUtf8Formatter.Default;
+        if (type == typeof(string)) return StringUtf8Formatter.Default;
+
+        return null;
+    }
+
     static class Cache<T>
     {
-        public static readonly IUtf8Formatter<T> Formatter = GetFormatter();
-
-        static IUtf8Formatter<T> GetFormatter()
-        {
-            var type = typeof(T);
-            if (type == typeof(Guid)) return (IUtf8Formatter<T>)GuidUtf8Formatter.Default;
-            if (type == typeof(int)) return (IUtf8Formatter<T>)Int32Utf8Formatter.Fixed.L10;
-            if (type == typeof(uint)) return (IUtf8Formatter<T>)UInt32Utf8Formatter.Fixed.L10;
-            if (type == typeof(short)) return (IUtf8Formatter<T>)Int16Utf8Formatter.Fixed.L5;
-            if (type == typeof(ushort)) return (IUtf8Formatter<T>)UInt16Utf8Formatter.Fixed.L5;
-            if (type == typeof(byte)) return (IUtf8Formatter<T>)ByteUtf8Formatter.Fixed.L3;
-            if (type == typeof(sbyte)) return (IUtf8Formatter<T>)SByteUtf8Formatter.Fixed.L3;
-            if (type == typeof(byte[])) return (IUtf8Formatter<T>)ByteArrayUtf8Formatter.Default;
-            if (type == typeof(string)) return (IUtf8Formatter<T>)StringUtf8Formatter.Default;
-
-            return new Utf8FormatterNotFound<T>();
-        }
+        public static readonly IUtf8Formatter<T> Formatter =
+            ((IUtf8Formatter<T>?)GetFormatter(typeof(T))) ??
+            new Utf8FormatterNotFound<T>();
     }
 }

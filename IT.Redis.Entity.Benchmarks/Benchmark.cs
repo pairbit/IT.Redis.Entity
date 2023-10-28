@@ -2,6 +2,7 @@
 using BenchmarkDotNet.Order;
 using DocLib;
 using DocLib.RedisEntity;
+using IT.Redis.Entity.Configurations;
 using StackExchange.Redis;
 
 namespace IT.Redis.Entity.Benchmarks;
