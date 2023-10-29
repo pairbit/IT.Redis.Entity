@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace IT.Redis.Entity.Configurations;
 
-public class DataAnnotationConfiguration : RedisEntityConfiguration
+public class DataAnnotationConfiguration : AnnotationConfiguration
 {
     public DataAnnotationConfiguration(IRedisValueFormatter formatter)
         : base(formatter)
@@ -20,8 +20,8 @@ public class DataAnnotationConfiguration : RedisEntityConfiguration
         return base.GetKeyPrefix(type);
     }
 
-    protected override bool IsKey(PropertyInfo property)
-        => property.GetCustomAttribute<KeyAttribute>() != null || base.IsKey(property);
+    protected override bool HasKey(PropertyInfo property)
+        => property.GetCustomAttribute<KeyAttribute>() != null || base.HasKey(property);
 
     protected override bool IsIgnore(PropertyInfo property)
         => property.GetCustomAttribute<NotMappedAttribute>() != null || base.IsIgnore(property);

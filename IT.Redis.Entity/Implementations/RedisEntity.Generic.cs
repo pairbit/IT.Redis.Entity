@@ -4,7 +4,7 @@ namespace IT.Redis.Entity;
 
 public class RedisEntity<T>
 {
-    public static readonly PropertyInfo[] Properties = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+    internal static readonly PropertyInfo[] Properties = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
     private static Lazy<IRedisEntityReaderWriter<T>> _readerWriter = new(() => RedisEntity.Factory.NewReaderWriter<T>());
     private static Lazy<IRedisEntityReader<T>> _reader = new(() => _readerWriter.Value);

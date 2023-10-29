@@ -3,11 +3,13 @@ using System.Runtime.Serialization;
 
 namespace IT.Redis.Entity.Configurations;
 
-public class DataContractConfiguration : RedisEntityConfiguration
+public class DataContractConfiguration : AnnotationConfiguration
 {
     public DataContractConfiguration(IRedisValueFormatter formatter) 
         : base(formatter)
     { }
+
+    //DataContractAttribute
 
     protected override bool IsIgnore(PropertyInfo property)
         => property.GetCustomAttribute<IgnoreDataMemberAttribute>() != null || base.IsIgnore(property);

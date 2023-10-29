@@ -5,6 +5,8 @@ namespace IT.Redis.Entity;
 
 public class Utf8FormatterVar : IUtf8Formatter
 {
+    public static readonly Utf8FormatterVar Default = new();
+
     public int GetLength<T>(in T value)
         => Cache<T>.Formatter.GetLength(in value);
 
@@ -13,7 +15,7 @@ public class Utf8FormatterVar : IUtf8Formatter
 
     internal static object? GetFormatter(Type type)
     {
-        if (type == typeof(Guid)) return GuidUtf8Formatter.Default;
+        if (type == typeof(Guid)) return GuidHexUtf8Formatter.Default;
         if (type == typeof(int)) return Int32Utf8Formatter.Var.Default;
         if (type == typeof(uint)) return UInt32Utf8Formatter.Var.Default;
         if (type == typeof(short)) return Int16Utf8Formatter.Var.Default;

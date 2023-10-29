@@ -13,7 +13,7 @@ public class DocumentDependTest
 
     static DocumentDependTest()
     {
-        RedisEntity.Factory = new RedisEntityFactory(new RedisEntityConfiguration(RedisValueFormatterRegistry.Default));
+        RedisEntity.Factory = new RedisEntityFactory(new AnnotationConfiguration(RedisValueFormatterRegistry.Default));
     }
 
     public DocumentDependTest()

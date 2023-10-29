@@ -17,7 +17,7 @@ public class Benchmark
     private static readonly IRedisEntityReaderWriter<Document> _rw1 = new RedisDocument();
     private static readonly IRedisEntityReaderWriter<Document> _rw = RedisEntity<Document>.ReaderWriter;
     private static readonly IRedisEntityReaderWriter<Document> _rwi
-        = new RedisEntityReaderWriterIndex<Document>(new RedisEntityConfiguration(RedisValueFormatterRegistry.Default));
+        = new RedisEntityReaderWriterIndex<Document>(new AnnotationConfiguration(RedisValueFormatterRegistry.Default));
 
     private static readonly Document Data = Document.Data;
     private static readonly HashEntry[] _entries = _rw.GetEntries(Data);

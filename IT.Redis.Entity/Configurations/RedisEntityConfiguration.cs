@@ -1,94 +1,67 @@
-﻿using IT.Redis.Entity.Attributes;
-using IT.Redis.Entity.Internal;
+﻿using IT.Redis.Entity.Internal;
 using System.Reflection;
 
 namespace IT.Redis.Entity.Configurations;
 
 public class RedisEntityConfiguration : IRedisEntityConfiguration
 {
-    private readonly IRedisValueFormatter _formatter = new RedisValueFormatterNotRegistered();
+    private readonly IRedisValueFormatter _formatter;
+    private readonly IReadOnlyDictionary<Type, string>? _keyPrefixes;
+    private readonly IReadOnlyDictionary<PropertyInfo, RedisFieldInfo> _fields;
 
-    public RedisEntityConfiguration()
+    public RedisEntityConfiguration(
+        IRedisValueFormatter? formatter,
+        IReadOnlyDictionary<Type, string>? keyPrefixes,
+        IReadOnlyDictionary<PropertyInfo, RedisFieldInfo> fields)
     {
-
+        _formatter = formatter ?? RedisValueFormatterNotRegistered.Default;
+        _keyPrefixes = keyPrefixes;
+        _fields = fields;
     }
 
-    public RedisEntityConfiguration(IRedisValueFormatter formatter)
-    {
-        _formatter = formatter ?? throw new ArgumentNullException(nameof(formatter));
-    }
+    public string? GetKeyPrefix(Type type)
+        => _keyPrefixes != null && _keyPrefixes.TryGetValue(type, out var keyPrefix) ? keyPrefix : null;
 
-    public virtual IRedisValueFormatter GetFormatter(PropertyInfo property)
+    public RedisValue GetField(PropertyInfo property, out bool hasKey)
     {
-        var attr = property.GetCustomAttribute<RedisValueFormatterAttribute>(true);
+        hasKey = false;
 
-        if (attr != null)
+        if (_fields.TryGetValue(property, out var fieldInfo))
         {
-            var formatter = attr.GetFormatterObject() ?? throw new InvalidOperationException();
+            if (fieldInfo.Ignored) return RedisValue.Null;
 
-            var formatterPropertyType = typeof(IRedisValueFormatter<>).MakeGenericType(property.PropertyType);
-
-            if (!formatterPropertyType.IsAssignableFrom(formatter.GetType()))
-                throw new InvalidOperationException();
-
-            return new RedisValueFormatterProxy(formatter);
-        }
-
-        return _formatter;
-    }
-
-    public virtual RedisValue GetField(PropertyInfo property, out bool isKey)
-    {
-        if (IsKey(property))
-        {
-            isKey = true;
-            return RedisValue.Null;
-        }
-
-        isKey = false;
-
-        if (IsIgnore(property)) return RedisValue.Null;
-
-        TryGetField(property, out var field);
-
-        return field;
-    }
-
-    public virtual string? GetKeyPrefix(Type type)
-        => type.GetCustomAttribute<RedisKeyPrefixAttribute>()?.Prefix;
-
-    public virtual object GetUtf8Formatter(PropertyInfo property)
-        => Utf8FormatterVar.GetFormatter(property.PropertyType) ?? throw new NotSupportedException();
-
-    protected virtual bool IsKey(PropertyInfo property) => property.GetCustomAttribute<RedisKeyAttribute>() != null;
-
-    protected virtual bool IsIgnore(PropertyInfo property) => property.GetCustomAttribute<RedisFieldIgnoreAttribute>() != null;
-
-    protected virtual bool TryGetField(PropertyInfo property, out RedisValue field)
-    {
-        var redisField = property.GetCustomAttribute<RedisFieldAttribute>();
-        if (redisField != null)
-        {
-            if (redisField.Id >= 0)
+            if (fieldInfo.HasKey)
             {
-                field = redisField.Id;
-                return true;
+                hasKey = true;
+                return RedisValue.Null;
             }
-            if (redisField.Name != null)
-            {
-                field = redisField.Name;
-                return true;
-            }
+
+            return fieldInfo.Field;
         }
 
         if (property.GetMethod?.IsPublic == true ||
-            property.SetMethod?.IsPublic == true)
-        {
-            field = property.Name;
-            return true;
-        }
+            property.SetMethod?.IsPublic == true) return property.Name;
 
-        field = RedisValue.Null;
-        return false;
+        return RedisValue.Null;
+    }
+
+    public IRedisValueFormatter GetFormatter(PropertyInfo property)
+    {
+        if (_fields.TryGetValue(property, out var fieldInfo))
+        {
+            var formatter = fieldInfo.Formatter;
+            if (formatter != null) return new RedisValueFormatterProxy(formatter);
+        }
+        return _formatter;
+    }
+
+    public object GetUtf8Formatter(PropertyInfo property)
+    {
+        if (_fields.TryGetValue(property, out var fieldInfo))
+        {
+            var utf8Formatter = fieldInfo.Utf8Formatter;
+            if (utf8Formatter != null) return utf8Formatter;
+        }
+        return Utf8FormatterVar.GetFormatter(property.PropertyType) ?? throw Ex.Utf8FormatterNotFound(property.PropertyType);
     }
 }

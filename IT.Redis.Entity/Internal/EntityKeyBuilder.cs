@@ -23,6 +23,9 @@ internal class EntityKeyBuilder : IKeyBuilder
 
     public void AddKeyInfo(PropertyInfo property, object utf8Formatter)
     {
+        if (property == null) throw new ArgumentNullException(nameof(property));
+        if (utf8Formatter == null) throw new ArgumentNullException(nameof(utf8Formatter));
+
         if (_keys.Count == MaxKeys) throw new InvalidOperationException($"A composite key containing more than {MaxKeys} fields is not supported");
 
         _keys.Add(new KeyInfo(property, utf8Formatter));

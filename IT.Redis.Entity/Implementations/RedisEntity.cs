@@ -1,10 +1,8 @@
-﻿using IT.Redis.Entity.Configurations;
-
-namespace IT.Redis.Entity;
+﻿namespace IT.Redis.Entity;
 
 public static class RedisEntity
 {
-    private static IRedisEntityFactory _factory = new RedisEntityFactory(new RedisEntityConfiguration());
+    private static IRedisEntityFactory _factory = new RedisEntityFactory(new Configurations.AnnotationConfiguration());
 
     public static IRedisEntityFactory Factory
     {
