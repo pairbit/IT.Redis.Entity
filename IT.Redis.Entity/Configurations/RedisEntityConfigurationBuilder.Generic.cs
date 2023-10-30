@@ -6,32 +6,30 @@ namespace IT.Redis.Entity.Configurations;
 public class RedisEntityConfigurationBuilder<TEntity>
 {
     private readonly IRedisValueFormatter? _formatter;
-    private readonly IDictionary<Type, string> _keyPrefixes;
+    private readonly IDictionary<Type, RedisTypeInfo> _types;
     private readonly IDictionary<PropertyInfo, RedisFieldInfo> _fields;
 
     public RedisEntityConfigurationBuilder(IRedisValueFormatter? formatter = null)
     {
-        var capacity = RedisEntity<TEntity>.Properties.Length;
-
-        _keyPrefixes = new Dictionary<Type, string>(capacity);
-        _fields = new Dictionary<PropertyInfo, RedisFieldInfo>(capacity);
+        _types = new Dictionary<Type, RedisTypeInfo>(1);
+        _fields = new Dictionary<PropertyInfo, RedisFieldInfo>(RedisEntity<TEntity>.Properties.Length);
         _formatter = formatter;
     }
 
     public RedisEntityConfigurationBuilder(
         IRedisValueFormatter? formatter,
-        IDictionary<Type, string> keyPrefixes,
+        IDictionary<Type, RedisTypeInfo> types,
         IDictionary<PropertyInfo, RedisFieldInfo> fields)
     {
-        _keyPrefixes = keyPrefixes ?? throw new ArgumentNullException(nameof(keyPrefixes));
+        _types = types ?? throw new ArgumentNullException(nameof(types));
         _fields = fields ?? throw new ArgumentNullException(nameof(fields));
         _formatter = formatter;
     }
 
     public RedisEntityConfiguration Build()
     {
-        var keyPrefixes = _keyPrefixes.TryGetValue(typeof(TEntity), out var keyPrefix)
-            ? new Dictionary<Type, string>(1) { { typeof(TEntity), keyPrefix } }
+        var types = _types.TryGetValue(typeof(TEntity), out var typeInfo)
+            ? new Dictionary<Type, RedisTypeInfo>(1) { { typeof(TEntity), typeInfo.Clone() } }
             : null;
 
         var fields = new Dictionary<PropertyInfo, RedisFieldInfo>(_fields.Count);
@@ -43,8 +41,21 @@ public class RedisEntityConfigurationBuilder<TEntity>
                 fields.Add(item.Key, item.Value.Clone());
             }
         }
+        return new RedisEntityConfiguration(_formatter, types, fields);
+    }
 
-        return new RedisEntityConfiguration(_formatter, keyPrefixes, fields);
+    public RedisEntityConfigurationBuilder<TEntity> HasAllFieldsNumeric()
+    {
+        if (_types.TryGetValue(typeof(TEntity), out var typeInfo))
+        {
+            typeInfo.HasAllFieldsNumeric = true;
+        }
+        else
+        {
+            _types.Add(typeof(TEntity), new RedisTypeInfo { HasAllFieldsNumeric = true });
+        }
+
+        return this;
     }
 
     public RedisEntityConfigurationBuilder<TEntity> HasKeyPrefix(string keyPrefix)
@@ -52,13 +63,14 @@ public class RedisEntityConfigurationBuilder<TEntity>
         if (keyPrefix == null) throw new ArgumentNullException(nameof(keyPrefix));
         if (keyPrefix.Length == 0) throw new ArgumentException("Key prefix is empty", nameof(keyPrefix));
 
-        if (_keyPrefixes.TryGetValue(typeof(TEntity), out var keyPrefixes))
+        if (_types.TryGetValue(typeof(TEntity), out var typeInfo))
         {
-            _keyPrefixes[typeof(TEntity)] = $"{keyPrefixes}:{keyPrefix}";
+            typeInfo.KeyPrefix = typeInfo.KeyPrefix == null
+                ? keyPrefix : $"{typeInfo.KeyPrefix}:{keyPrefix}";
         }
         else
         {
-            _keyPrefixes.Add(typeof(TEntity), keyPrefix);
+            _types.Add(typeof(TEntity), new RedisTypeInfo { KeyPrefix = keyPrefix });
         }
 
         return this;

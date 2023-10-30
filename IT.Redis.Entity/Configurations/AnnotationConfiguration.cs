@@ -15,6 +15,9 @@ public class AnnotationConfiguration : IRedisEntityConfiguration
         _formatter = formatter ?? throw new ArgumentNullException(nameof(formatter));
     }
 
+    public bool HasAllFieldsNumeric(Type type) 
+        => type.GetCustomAttribute<RedisFieldsAllNumericAttribute>() != null;
+
     public virtual IRedisValueFormatter GetFormatter(PropertyInfo property)
     {
         var attr = property.GetCustomAttribute<RedisValueFormatterAttribute>(true);
@@ -78,9 +81,9 @@ public class AnnotationConfiguration : IRedisEntityConfiguration
             }
         }
 
-        if (property.Name != Compiler.PropRedisKeyName && 
+        if (property.Name != Compiler.PropRedisKeyName &&
             property.Name != Compiler.PropRedisKeyBitsName &&
-            (property.GetMethod?.IsPublic == true || 
+            (property.GetMethod?.IsPublic == true ||
             property.SetMethod?.IsPublic == true))
         {
             field = property.Name;

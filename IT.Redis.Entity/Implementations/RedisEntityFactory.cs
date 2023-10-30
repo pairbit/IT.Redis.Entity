@@ -9,5 +9,8 @@ public class RedisEntityFactory : IRedisEntityFactory
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
-    public IRedisEntityReaderWriter<T> NewReaderWriter<T>() => new RedisEntityReaderWriter<T>(_configuration);
+    public IRedisEntityReaderWriter<T> NewReaderWriter<T>()
+        => _configuration.HasAllFieldsNumeric(typeof(T))
+            ? new RedisEntityReaderWriterIndex<T>(_configuration)
+            : new RedisEntityReaderWriter<T>(_configuration);
 }

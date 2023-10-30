@@ -95,6 +95,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
         _readerInfos = new RedisEntityReaderWriter<T>.ReaderInfo[max];
         _writerInfos = new RedisEntityReaderWriter<T>.WriterInfo[max];
 
+        //TODO: optimize, initialize reader and writer not found
         foreach (var readerInfo in readerInfos)
         {
             _readerInfos[readerInfo.Key] = readerInfo.Value;
@@ -118,6 +119,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
             throw Ex.FieldNotInteger(field, ex, nameof(field));
         }
 
+        //TODO: optimize
         if (index < 0 || index > _readerInfos.Length) throw new ArgumentOutOfRangeException(nameof(field));
 
         var readerInfo = _readerInfos[index] ?? throw new ArgumentOutOfRangeException(nameof(field));
@@ -139,6 +141,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
             throw Ex.FieldNotInteger(field, ex, nameof(field));
         }
 
+        //TODO: optimize
         if (index < 0 || index > _writerInfos.Length) throw new ArgumentOutOfRangeException(nameof(field));
 
         var writerInfo = _writerInfos[index] ?? throw new ArgumentOutOfRangeException(nameof(field));
@@ -160,6 +163,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
             throw Ex.FieldNotInteger(field, ex, nameof(field));
         }
 
+        //TODO: optimize
         if (index < 0 || index > _readerInfos.Length) throw new ArgumentOutOfRangeException(nameof(field));
 
         var readerInfo = _readerInfos[index] ?? throw new ArgumentOutOfRangeException(nameof(field));
@@ -179,6 +183,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
             throw Ex.FieldNotInteger(field, ex, nameof(field));
         }
 
+        //TODO: optimize
         if (index < 0 || index > _writerInfos.Length) throw new ArgumentOutOfRangeException(nameof(field));
 
         var writerInfo = _writerInfos[index] ?? throw new ArgumentOutOfRangeException(nameof(field));
@@ -188,6 +193,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
 
     public RedisKey ReadKey(T entity)
     {
+        //TODO: optimize
         if (_readerKey == null) throw new InvalidOperationException("Key not found");
 
         return _readerKey(entity, _keyBuilder);

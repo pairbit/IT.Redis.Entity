@@ -4,7 +4,7 @@ namespace IT.Redis.Entity;
 
 public interface IRedisEntityConfiguration
 {
-    //bool HasAllFieldsNumeric(Type type);
+    bool HasAllFieldsNumeric(Type type);
 
     string? GetKeyPrefix(Type type);
 

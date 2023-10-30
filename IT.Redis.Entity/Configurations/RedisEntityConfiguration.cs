@@ -6,21 +6,24 @@ namespace IT.Redis.Entity.Configurations;
 public class RedisEntityConfiguration : IRedisEntityConfiguration
 {
     private readonly IRedisValueFormatter _formatter;
-    private readonly IReadOnlyDictionary<Type, string>? _keyPrefixes;
+    private readonly IReadOnlyDictionary<Type, RedisTypeInfo>? _types;
     private readonly IReadOnlyDictionary<PropertyInfo, RedisFieldInfo> _fields;
 
     public RedisEntityConfiguration(
         IRedisValueFormatter? formatter,
-        IReadOnlyDictionary<Type, string>? keyPrefixes,
+        IReadOnlyDictionary<Type, RedisTypeInfo>? types,
         IReadOnlyDictionary<PropertyInfo, RedisFieldInfo> fields)
     {
         _formatter = formatter ?? RedisValueFormatterNotRegistered.Default;
-        _keyPrefixes = keyPrefixes;
+        _types = types;
         _fields = fields;
     }
 
+    public bool HasAllFieldsNumeric(Type type)
+        => _types != null && _types.TryGetValue(type, out var typeInfo) ? typeInfo.HasAllFieldsNumeric : false;
+
     public string? GetKeyPrefix(Type type)
-        => _keyPrefixes != null && _keyPrefixes.TryGetValue(type, out var keyPrefix) ? keyPrefix : null;
+        => _types != null && _types.TryGetValue(type, out var typeInfo) ? typeInfo.KeyPrefix : null;
 
     public RedisValue GetField(PropertyInfo property, out bool hasKey)
     {
