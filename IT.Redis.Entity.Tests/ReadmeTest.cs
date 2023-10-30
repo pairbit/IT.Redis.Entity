@@ -1,5 +1,4 @@
 ﻿using IT.Redis.Entity.Configurations;
-using System.Text.Json;
 
 namespace IT.Redis.Entity.Tests;
 
@@ -15,7 +14,7 @@ public class ReadmeTest
         private byte[]? _redisKey;
 #pragma warning restore IDE0044 // Add readonly modifier
 
-        public byte[] RedisKey => _redisKey;
+        public byte[]? RedisKey => _redisKey;
 
         public Person1(int id)
         {
@@ -33,23 +32,11 @@ public class ReadmeTest
         _db = connection.GetDatabase()!;
     }
 
-
-    class JsonFormatter : IRedisValueFormatter
-    {
-        public void Deserialize<T>(in RedisValue redisValue, ref T? value)
-        {
-            var str = (string?)redisValue;
-            value = str == null ? default : JsonSerializer.Deserialize<T>(str);
-        }
-
-        public RedisValue Serialize<T>(in T? value)
-        {
-            return JsonSerializer.Serialize(value);
-        }
-    }
+#if NETCOREAPP3_1_OR_GREATER
 
     [Test]
-    public void JsonFormatterTest() => Test(new JsonFormatter());
+    public void JsonFormatterTest() => Test(IT.Redis.Entity.Formatters.JsonFormatter.Default);
+#endif
 
     public void Test(IRedisValueFormatter formatter)
     {
@@ -62,7 +49,7 @@ public class ReadmeTest
 
         RedisEntity.Factory = new RedisEntityFactory(configBuilder.Build());
 
-        var person = new Person1(12);
+        var person = new Person1(12) { Name = "John" };
 
         _db.EntitySet(person);
         _db.KeyDelete(person.RedisKey);
