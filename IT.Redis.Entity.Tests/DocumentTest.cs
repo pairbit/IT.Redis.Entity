@@ -274,10 +274,11 @@ public class DocumentTest
         configBuilder.Entity<IDocument>().ConfigureIDocument();
 
         var config = configBuilder.Build();
+        var factory = new RedisEntityFactory(config);
 
-        ReadKeyTest(new RedisEntityReaderWriter<DocumentAnnotation>(config));
+        ReadKeyTest(factory.NewReaderWriter<DocumentAnnotation>());
 
-        ReadKey_Base64Formatter(new RedisEntityReaderWriter<IDocument>(config));
+        ReadKey_Base64Formatter(factory.NewReaderWriter<IDocument>());
     }
 
     private void ReadKeyTest(IRedisEntityReaderWriter<DocumentAnnotation> readerWriter)

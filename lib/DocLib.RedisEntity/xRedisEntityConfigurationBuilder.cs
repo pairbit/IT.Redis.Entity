@@ -8,6 +8,7 @@ public static class xRedisEntityConfigurationBuilder
     public static RedisEntityConfigurationBuilder<DocumentAnnotation> ConfigureDocumentAnnotation(this RedisEntityConfigurationBuilder<DocumentAnnotation> builder)
     {
         return builder
+               .HasAllFieldsNumeric()
                .HasKeyPrefix("app")
                .HasKeyPrefix("doc")
                .HasKey(x => x.Id)

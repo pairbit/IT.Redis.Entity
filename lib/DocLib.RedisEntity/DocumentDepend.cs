@@ -5,6 +5,7 @@ using System.Numerics;
 
 namespace DocLib.RedisEntity;
 
+//[RedisFieldsAllNumeric]
 public record DocumentDepend
 {
     private static readonly Random _random

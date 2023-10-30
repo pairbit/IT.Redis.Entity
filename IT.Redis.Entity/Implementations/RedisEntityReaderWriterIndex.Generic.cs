@@ -51,7 +51,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
             }
             else if (!field.IsNull)
             {
-                if (!field.IsInteger) throw new NotSupportedException("Non-integer fields are not supported");
+                if (!field.IsInteger) throw new InvalidOperationException("Non-numeric fields are not supported");
 
                 var index = (int)field;
                 var name = property.Name;
