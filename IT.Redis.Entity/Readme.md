@@ -133,12 +133,12 @@ Assert.That(redisKey2, Is.EqualTo(redisKey));
 ## Get Document by redis key
 
 ```csharp
-var doc1 = _db.EntityGet(redisKey, rwDoc);
+var doc1 = db.EntityGet(redisKey, rwDoc);
 Assert.That(doc1, Is.Not.Null);
 Assert.That(doc1.Name, Is.EqualTo("doc1"));
 
 var redisKey3 = rwDoc.KeyBuilder.BuildKey(null, 0, guid, 3);
-var doc3 = _db.EntityGet(redisKey3, rwDoc);
+var doc3 = db.EntityGet(redisKey3, rwDoc);
 Assert.That(doc3, Is.Null);
 ```
 
