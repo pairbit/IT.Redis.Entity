@@ -154,8 +154,8 @@ internal static class Compiler
     {
         var field = entityType.GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
 
-        if (field == null || field.FieldType != fieldType)
-            throw new InvalidOperationException($"Entity type '{entityType.FullName}' does not contain non-public field '{fieldName}' with type '{fieldType.FullName}'");
+        if (field == null || field.FieldType != fieldType || field.IsInitOnly)
+            throw new InvalidOperationException($"Entity type '{entityType.FullName}' does not contain non-public and non-readonly field '{fieldName}' with type '{fieldType.FullName}'");
 
         return field;
     }
