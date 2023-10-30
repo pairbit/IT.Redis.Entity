@@ -14,7 +14,9 @@ Object mapping for Redis
 
         // Add readonly modifier
 #pragma warning disable IDE0044
+#pragma warning disable CS0649
         private byte[]? _redisKey;
+#pragma warning restore CS0649
 #pragma warning restore IDE0044
 
         private byte _redisKeyBits;

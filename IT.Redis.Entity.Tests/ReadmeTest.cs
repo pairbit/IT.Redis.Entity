@@ -13,7 +13,9 @@ public class ReadmeTest
         private int _index;
 
 #pragma warning disable IDE0044 // Add readonly modifier
+#pragma warning disable CS0649
         private byte[]? _redisKey;
+#pragma warning restore CS0649
 #pragma warning restore IDE0044 // Add readonly modifier
 
         private byte _redisKeyBits;
@@ -56,7 +58,9 @@ public class ReadmeTest
         private readonly int _id;
 
 #pragma warning disable IDE0044 // Add readonly modifier
+#pragma warning disable CS0649
         private byte[]? _redisKey;
+#pragma warning restore CS0649
 #pragma warning restore IDE0044 // Add readonly modifier
 
         public byte[]? RedisKey => _redisKey;
