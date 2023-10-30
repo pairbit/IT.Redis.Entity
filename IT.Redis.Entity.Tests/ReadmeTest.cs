@@ -47,11 +47,14 @@ public class ReadmeTest
         configBuilder.HasKeyPrefix<Person1>("app:persons")
                      .HasKey<Person1, int>(x => x.Id);
 
-        RedisEntity.Factory = new RedisEntityFactory(configBuilder.Build());
+        var factory = new RedisEntityFactory(configBuilder.Build());
+
+        var readerWriter = factory.NewReaderWriter<Person1>();
 
         var person = new Person1(12) { Name = "John" };
 
-        _db.EntitySet(person);
+        _db.EntitySet(person, readerWriter);
+
         _db.KeyDelete(person.RedisKey);
     }
 }

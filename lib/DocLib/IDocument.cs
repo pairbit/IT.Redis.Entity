@@ -5,7 +5,7 @@ namespace DocLib;
 
 public interface IDocument : IReadOnlyDocument
 {
-    byte[] RedisKey { get; set; }
+    byte[]? RedisKey { get; set; }
 
     byte RedisKeyBits { get; set; }
 
