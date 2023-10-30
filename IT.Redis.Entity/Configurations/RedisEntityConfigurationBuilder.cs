@@ -16,9 +16,16 @@ public class RedisEntityConfigurationBuilder
     }
 
     public RedisEntityConfiguration Build()
-        => new(_formatter,
-               new Dictionary<Type, string>(_keyPrefixes),
-               new Dictionary<PropertyInfo, RedisFieldInfo>(_fields));
+    {
+        var fields = new Dictionary<PropertyInfo, RedisFieldInfo>(_fields.Count);
+
+        foreach (var item in _fields)
+        {
+            fields.Add(item.Key, item.Value.Clone());
+        }
+
+        return new(_formatter, new Dictionary<Type, string>(_keyPrefixes), fields);
+    }
 
     public RedisEntityConfigurationBuilder<TEntity> Entity<TEntity>()
         => new(_formatter, _keyPrefixes, _fields);
@@ -63,18 +70,17 @@ public class RedisEntityConfigurationBuilder
         return this;
     }
 
-    public RedisEntityConfigurationBuilder HasFieldId(PropertyInfo property, int fieldId)
+    public RedisEntityConfigurationBuilder HasFieldId(PropertyInfo property, byte fieldId)
     {
         if (property == null) throw new ArgumentNullException(nameof(property));
-        if (fieldId < 0) throw new ArgumentOutOfRangeException(nameof(fieldId), fieldId, "field id is negative");
 
         if (_fields.TryGetValue(property, out var fieldInfo))
         {
-            fieldInfo.Field = fieldId;
+            fieldInfo.FieldId = fieldId;
         }
         else
         {
-            _fields.Add(property, new RedisFieldInfo { Field = fieldId });
+            _fields.Add(property, new RedisFieldInfo { FieldId = fieldId });
         }
 
         return this;
@@ -88,11 +94,11 @@ public class RedisEntityConfigurationBuilder
 
         if (_fields.TryGetValue(property, out var fieldInfo))
         {
-            fieldInfo.Field = fieldName;
+            fieldInfo.FieldName = fieldName;
         }
         else
         {
-            _fields.Add(property, new RedisFieldInfo { Field = fieldName });
+            _fields.Add(property, new RedisFieldInfo { FieldName = fieldName });
         }
 
         return this;
@@ -144,7 +150,7 @@ public class RedisEntityConfigurationBuilder
     public RedisEntityConfigurationBuilder HasKey<TEntity, T>(Expression<Func<TEntity, T>> propertySelector, IUtf8Formatter<T>? utf8Formatter = null)
         => HasKey(GetProperty(propertySelector), utf8Formatter);
 
-    public RedisEntityConfigurationBuilder HasFieldId<TEntity, T>(Expression<Func<TEntity, T>> propertySelector, int fieldId)
+    public RedisEntityConfigurationBuilder HasFieldId<TEntity, T>(Expression<Func<TEntity, T>> propertySelector, byte fieldId)
         => HasFieldId(GetProperty(propertySelector), fieldId);
 
     public RedisEntityConfigurationBuilder HasFieldName<TEntity, T>(Expression<Func<TEntity, T>> propertySelector, string fieldName)

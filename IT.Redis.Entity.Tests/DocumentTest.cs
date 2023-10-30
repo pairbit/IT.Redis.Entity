@@ -224,7 +224,7 @@ public class DocumentTest
                 RedisValueFormatterRegistry.Default)));
     }
 #endif
-    
+
     [Test]
     public void ConfigurationBuilder_ReadKeyTest()
     {
@@ -233,14 +233,14 @@ public class DocumentTest
 
         configBuilder.Entity<DocumentAnnotation>().ConfigureDocumentAnnotation();
         configBuilder.Entity<IDocument>().ConfigureIDocument();
-        
+
         var config = configBuilder.Build();
 
         ReadKeyTest(new RedisEntityReaderWriter<DocumentAnnotation>(config));
 
         ReadKey_Base64Formatter(new RedisEntityReaderWriter<IDocument>(config));
     }
-    
+
     private void ReadKeyTest(IRedisEntityReaderWriter<DocumentAnnotation> readerWriter)
     {
         IRedisEntityReader<DocumentAnnotation> reader = readerWriter;
@@ -307,8 +307,9 @@ public class DocumentTest
 
     private void ReadKey_Base64Formatter(IRedisEntityReaderWriter<IDocument> readerWriter)
     {
-        var doc = new DocumentPOCO { 
-            Id = Guid.NewGuid(), 
+        var doc = new DocumentPOCO
+        {
+            Id = Guid.NewGuid(),
             Character = 'f',
             Name = "name",
         };

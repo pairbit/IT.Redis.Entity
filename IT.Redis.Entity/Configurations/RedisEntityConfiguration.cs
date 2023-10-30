@@ -36,7 +36,8 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
                 return RedisValue.Null;
             }
 
-            return fieldInfo.Field;
+            if (fieldInfo.FieldId != null) return (int)fieldInfo.FieldId.Value;
+            if (fieldInfo.FieldName != null) return fieldInfo.FieldName;
         }
 
         if (property.Name != Compiler.PropRedisKeyName &&

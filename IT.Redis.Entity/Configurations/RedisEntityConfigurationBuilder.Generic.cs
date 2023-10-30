@@ -40,7 +40,7 @@ public class RedisEntityConfigurationBuilder<TEntity>
         {
             if (item.Key.DeclaringType == typeof(TEntity))
             {
-                fields.Add(item.Key, item.Value);
+                fields.Add(item.Key, item.Value.Clone());
             }
         }
 
@@ -83,17 +83,15 @@ public class RedisEntityConfigurationBuilder<TEntity>
 
     public RedisEntityConfigurationBuilder<TEntity> HasFieldId<T>(Expression<Func<TEntity, T>> propertySelector, byte fieldId)
     {
-        //if (fieldId < 0) throw new ArgumentOutOfRangeException(nameof(fieldId), fieldId, "field id is negative");
-
         var property = GetProperty(propertySelector);
 
         if (_fields.TryGetValue(property, out var fieldInfo))
         {
-            fieldInfo.Field = (int)fieldId;
+            fieldInfo.FieldId = fieldId;
         }
         else
         {
-            _fields.Add(property, new RedisFieldInfo { Field = (int)fieldId });
+            _fields.Add(property, new RedisFieldInfo { FieldId = fieldId });
         }
 
         return this;
@@ -108,11 +106,11 @@ public class RedisEntityConfigurationBuilder<TEntity>
 
         if (_fields.TryGetValue(property, out var fieldInfo))
         {
-            fieldInfo.Field = fieldName;
+            fieldInfo.FieldName = fieldName;
         }
         else
         {
-            _fields.Add(property, new RedisFieldInfo { Field = fieldName });
+            _fields.Add(property, new RedisFieldInfo { FieldName = fieldName });
         }
 
         return this;
