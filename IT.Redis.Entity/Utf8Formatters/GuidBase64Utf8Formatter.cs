@@ -13,10 +13,24 @@ public class GuidBase64Utf8Formatter : IUtf8Formatter<Guid>
 
     public bool TryFormat(in Guid value, Span<byte> utf8, out int written)
     {
-        Span<byte> bytes = stackalloc byte[Unsafe.SizeOf<Guid>()];
+        if (utf8.Length < 22)
+        {
+            written = 0;
+            return false;
+        }
+
+        Span<byte> bytes = stackalloc byte[24];
         
         Unsafe.WriteUnaligned(ref MemoryMarshal.GetReference(bytes), value);
 
-        return Base64.EncodeToUtf8(bytes, utf8, out var consumed, out written) == OperationStatus.Done;
+        var status = Base64.EncodeToUtf8InPlace(bytes, 16, out var bytesWritten);
+
+        written = 22;
+
+        if (status != OperationStatus.Done || bytesWritten != 24) return false;
+
+        bytes.Slice(0, written).CopyTo(utf8);
+
+        return true;
     }
 }

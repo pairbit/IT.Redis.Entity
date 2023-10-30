@@ -244,5 +244,5 @@ public class KeyBuilderTest
         Assert.That(alloc, Is.EqualTo(allocations));
     }
 
-    private byte[] U8(string str) => Encoding.UTF8.GetBytes(str);
+    private static byte[] U8(string str) => Encoding.UTF8.GetBytes(str);
 }

@@ -8,6 +8,7 @@ using IT.Redis.Entity.Formatters;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text;
 
 namespace IT.Redis.Entity.Tests;
@@ -314,6 +315,8 @@ public class DocumentTest
             Name = "name",
         };
 
+        var idbase64 = Convert.ToBase64String(doc.Id.ToByteArray()).Substring(0, 22);
+
         try
         {
             Assert.That(doc.RedisKey, Is.Null);
@@ -322,6 +325,7 @@ public class DocumentTest
             _db.EntitySet(doc, readerWriter);
 
             Assert.That(doc.RedisKey, Is.Not.Null);
+            Assert.That(doc.RedisKey.SequenceEqual(U8("app:doc:" + idbase64)), Is.True);
             Assert.That(doc.RedisKeyBits, Is.EqualTo(0));
         }
         finally
@@ -331,5 +335,5 @@ public class DocumentTest
         }
     }
 
-    private byte[] U8(string str) => Encoding.UTF8.GetBytes(str);
+    private static byte[] U8(string str) => Encoding.UTF8.GetBytes(str);
 }

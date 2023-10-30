@@ -20,7 +20,7 @@ public static class xRedisEntityConfigurationBuilder
         return builder
                .HasKeyPrefix("app")
                .HasKeyPrefix("doc")
-               .HasKey(x => x.Id)//, GuidBase64Utf8Formatter.Default
+               .HasKey(x => x.Id, GuidBase64Utf8Formatter.Default)
                .HasFieldId(x => x.Name, 1)
                .HasFieldId(x => x.Character, 2);
     }
