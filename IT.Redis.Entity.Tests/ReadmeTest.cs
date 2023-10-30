@@ -48,13 +48,25 @@ public class ReadmeTest
 
         var factory = new RedisEntityFactory(configBuilder.Build());
 
-        //RedisEntity.Factory = factory;
-
         var readerWriter = factory.NewReaderWriter<Person1>();
 
         var person = new Person1(12) { Name = "John" };
 
         _db.EntitySet(person, readerWriter);
+
+        var person2 = new Person1(12);
+
+        Assert.That(_db.EntityLoad(person2, readerWriter), Is.True);
+
+        Assert.That(person.Name, Is.EqualTo(person2.Name));
+
+        var redisKey = readerWriter.KeyBuilder.BuildKey(null, 0, 12);
+
+        Assert.That(person.RedisKey, Is.EqualTo(redisKey));
+
+        var redisKey2 = KeyBuilder.Default.BuildKey(null, 0, "app:persons", 12);
+        
+        Assert.That(redisKey2, Is.EqualTo(redisKey));
 
         _db.KeyDelete(person.RedisKey);
     }

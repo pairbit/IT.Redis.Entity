@@ -50,7 +50,7 @@ var factory = new RedisEntityFactory(configBuilder.Build());
 ## Connect to the database redis
 
 ```csharp
-var connection = ConnectionMultiplexer.Connect("localhost:6379,defaultDatabase=0,syncTimeout=5000,allowAdmin=False,connectTimeout=5000,ssl=False,abortConnect=False");
+var connection = ConnectionMultiplexer.Connect(connectionString);
 
 var db = connection.GetDatabase()!;
 ```
@@ -67,8 +67,38 @@ db.EntitySet(person, readerWriter);
 db.KeyDelete(person.RedisKey);
 ```
 
-## Set global factory
+## Load Person1 from redis
+
+```csharp
+var person2 = new Person1(12);
+
+Assert.That(_db.EntityLoad(person2, readerWriter), Is.True);
+
+Assert.That(person.Name, Is.EqualTo(person2.Name));
+```
+
+## Build redisKey from EntityKeyBuilder
+
+```csharp
+var redisKey = readerWriter.KeyBuilder.BuildKey(null, 0, 12);
+
+Assert.That(person.RedisKey, Is.EqualTo(redisKey));
+```
+
+## Build redisKey from KeyBuilder
+
+```csharp
+var redisKey2 = KeyBuilder.Default.BuildKey(null, 0, "app:persons", 12);
+
+Assert.That(redisKey2, Is.EqualTo(redisKey));
+```
+
+## Set global factories
 
 ```csharp
 RedisEntity.Factory = factory;
+
+RedisEntity<Person1>.ReaderWriterFactory = () => readerWriter;
+RedisEntity<Person1>.ReaderFactory = () => readerWriter;
+RedisEntity<Person1>.WriterFactory = () => readerWriter;
 ```
