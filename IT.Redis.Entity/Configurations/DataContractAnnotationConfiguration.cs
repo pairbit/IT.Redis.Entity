@@ -3,11 +3,11 @@ using System.Runtime.Serialization;
 
 namespace IT.Redis.Entity.Configurations;
 
-public class DataContractConfiguration : AnnotationConfiguration
+public class DataContractAnnotationConfiguration : AnnotationConfiguration
 {
-    public DataContractConfiguration(IRedisValueFormatter formatter) 
-        : base(formatter)
-    { }
+    public DataContractAnnotationConfiguration() { }
+
+    public DataContractAnnotationConfiguration(IRedisValueFormatter formatter) : base(formatter) { }
 
     //DataContractAttribute
 

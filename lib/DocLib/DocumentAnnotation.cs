@@ -16,10 +16,8 @@ public record DocumentAnnotation
 
     private byte _redisKeyBits;
 
-    [NotMapped]
     public byte[]? RedisKey => _redisKey;
 
-    [NotMapped]
     public byte RedisKeyBits => _redisKeyBits;
 
     [Key]

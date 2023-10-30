@@ -81,19 +81,19 @@ public class RedisEntityConfigurationBuilder<TEntity>
         return this;
     }
 
-    public RedisEntityConfigurationBuilder<TEntity> HasFieldId<T>(Expression<Func<TEntity, T>> propertySelector, int fieldId)
+    public RedisEntityConfigurationBuilder<TEntity> HasFieldId<T>(Expression<Func<TEntity, T>> propertySelector, byte fieldId)
     {
-        if (fieldId < 0) throw new ArgumentOutOfRangeException(nameof(fieldId), fieldId, "field id is negative");
+        //if (fieldId < 0) throw new ArgumentOutOfRangeException(nameof(fieldId), fieldId, "field id is negative");
 
         var property = GetProperty(propertySelector);
 
         if (_fields.TryGetValue(property, out var fieldInfo))
         {
-            fieldInfo.Field = fieldId;
+            fieldInfo.Field = (int)fieldId;
         }
         else
         {
-            _fields.Add(property, new RedisFieldInfo { Field = fieldId });
+            _fields.Add(property, new RedisFieldInfo { Field = (int)fieldId });
         }
 
         return this;

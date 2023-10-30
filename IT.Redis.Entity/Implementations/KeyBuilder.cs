@@ -4,7 +4,6 @@ public class KeyBuilder : IKeyBuilder
 {
     public static readonly KeyBuilder Default = new(Utf8FormatterVar.Default);
     public static readonly KeyBuilder Fixed = new(Utf8FormatterFixed.Default);
-    public static readonly int MaxKeys = 8;
 
     private readonly byte _separator;
     private readonly IUtf8Formatter _utf8Formatter;

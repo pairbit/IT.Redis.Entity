@@ -8,10 +8,7 @@ public class AnnotationConfiguration : IRedisEntityConfiguration
 {
     private readonly IRedisValueFormatter _formatter = RedisValueFormatterNotRegistered.Default;
 
-    public AnnotationConfiguration()
-    {
-
-    }
+    public AnnotationConfiguration() { }
 
     public AnnotationConfiguration(IRedisValueFormatter formatter)
     {
@@ -81,8 +78,10 @@ public class AnnotationConfiguration : IRedisEntityConfiguration
             }
         }
 
-        if (property.GetMethod?.IsPublic == true ||
-            property.SetMethod?.IsPublic == true)
+        if (property.Name != Compiler.PropRedisKeyName && 
+            property.Name != Compiler.PropRedisKeyBitsName &&
+            (property.GetMethod?.IsPublic == true || 
+            property.SetMethod?.IsPublic == true))
         {
             field = property.Name;
             return true;

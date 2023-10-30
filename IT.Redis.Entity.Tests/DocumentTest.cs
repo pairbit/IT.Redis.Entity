@@ -228,16 +228,19 @@ public class DocumentTest
     [Test]
     public void ConfigurationBuilder_ReadKeyTest()
     {
-        var configBuilder = new RedisEntityConfigurationBuilder<DocumentAnnotation>(
+        var configBuilder = new RedisEntityConfigurationBuilder(
             RedisValueFormatterRegistry.Default);
 
-        configBuilder.ConfigureDocumentAnnotation();
+        configBuilder.Entity<DocumentAnnotation>().ConfigureDocumentAnnotation();
+        configBuilder.Entity<IDocument>().ConfigureIDocument();
+        
+        var config = configBuilder.Build();
 
-        var readerWriter = new RedisEntityReaderWriter<DocumentAnnotation>(configBuilder.Build());
+        ReadKeyTest(new RedisEntityReaderWriter<DocumentAnnotation>(config));
 
-        ReadKeyTest(readerWriter);
+        ReadKey_Base64Formatter(new RedisEntityReaderWriter<IDocument>(config));
     }
-
+    
     private void ReadKeyTest(IRedisEntityReaderWriter<DocumentAnnotation> readerWriter)
     {
         IRedisEntityReader<DocumentAnnotation> reader = readerWriter;
@@ -294,6 +297,31 @@ public class DocumentTest
 
             var redisKey = reader.KeyBuilder.BuildKey(null, 0, id);
             Assert.That(redisKey.SequenceEqual(idbytes), Is.True);
+        }
+        finally
+        {
+            if (doc.RedisKey != null)
+                _db.KeyDelete(doc.RedisKey);
+        }
+    }
+
+    private void ReadKey_Base64Formatter(IRedisEntityReaderWriter<IDocument> readerWriter)
+    {
+        var doc = new DocumentPOCO { 
+            Id = Guid.NewGuid(), 
+            Character = 'f',
+            Name = "name",
+        };
+
+        try
+        {
+            Assert.That(doc.RedisKey, Is.Null);
+            doc.RedisKeyBits = 1;
+
+            _db.EntitySet(doc, readerWriter);
+
+            Assert.That(doc.RedisKey, Is.Not.Null);
+            Assert.That(doc.RedisKeyBits, Is.EqualTo(0));
         }
         finally
         {

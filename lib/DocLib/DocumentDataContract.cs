@@ -7,6 +7,12 @@ namespace DocLib;
 [DataContract]
 public class DocumentDataContract : IDocument
 {
+    [IgnoreDataMember]
+    public byte[]? RedisKey { get; set; }
+
+    [IgnoreDataMember]
+    public byte RedisKeyBits { get; set; }
+
     [DataMember(Order = 0)]
     public Guid Id { get; set; }
 

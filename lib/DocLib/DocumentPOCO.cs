@@ -6,6 +6,10 @@ namespace DocLib;
 
 public record DocumentPOCO : IDocument
 {
+    public byte[]? RedisKey { get; set; }
+
+    public byte RedisKeyBits { get; set; }
+
     public Guid Id { get; set; }
 
     public Guid ExternalId { get; set; }

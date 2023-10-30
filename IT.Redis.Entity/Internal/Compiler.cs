@@ -6,12 +6,12 @@ namespace IT.Redis.Entity.Internal;
 internal static class Compiler
 {
     private static readonly string FieldRedisKeyBitsName = "_redisKeyBits";
-    private static readonly Type FieldRedisKeyBitsType = typeof(byte);
+    internal static readonly string PropRedisKeyBitsName = "RedisKeyBits";
+    private static readonly Type RedisKeyBitsType = typeof(byte);
 
     private static readonly string FieldRedisKeyName = "_redisKey";
-    private static readonly Type FieldRedisKeyType = typeof(byte[]);
-    private static readonly BindingFlags FieldRedisKeyBinding =
-        BindingFlags.Instance | BindingFlags.NonPublic;
+    internal static readonly string PropRedisKeyName = "RedisKey";
+    private static readonly Type RedisKeyType = typeof(byte[]);
 
     private static readonly MethodInfo MethodDeserialize = typeof(RedisValueDeserializerProxy).GetMethod(nameof(RedisValueDeserializerProxy.Deserialize))!;
     private static readonly MethodInfo MethodSerialize = typeof(IRedisValueSerializer).GetMethod(nameof(IRedisValueSerializer.Serialize))!;
@@ -65,15 +65,14 @@ internal static class Compiler
 
         var eEntity = Expression.Parameter(entityType, "entity");
 
-        var eFieldRedisKey = Expression.Field(eEntity,
-            GetField(entityType, FieldRedisKeyName, FieldRedisKeyType));
+        var eRedisKey = GetRedisKey(eEntity, entityType);
 
         var propertyTypes = new Type[keys.Count];
         var eArguments = new Expression[2 + keys.Count];
 
         var hasKeySetter = false;
-        var eNullBytes = Expression.Constant(null, FieldRedisKeyType);
-        var eZeroByte = Expression.Constant((byte)0, FieldRedisKeyBitsType);
+        var eNullBytes = Expression.Constant(null, RedisKeyType);
+        var eZeroByte = Expression.Constant((byte)0, RedisKeyBitsType);
 
         for (int i = 0; i < keys.Count; i++)
         {
@@ -90,25 +89,25 @@ internal static class Compiler
 
         if (hasKeySetter)
         {
-            var eFieldBits = Expression.Field(eEntity, GetField(entityType, FieldRedisKeyBitsName, FieldRedisKeyBitsType));
+            var eRedisKeyBits = GetRedisKeyBits(eEntity, entityType);
             
             var eTest = Expression.Or(
-                Expression.GreaterThan(eFieldBits, eZeroByte),
-                Expression.Equal(eFieldRedisKey, eNullBytes));
+                Expression.GreaterThan(eRedisKeyBits, eZeroByte),
+                Expression.Equal(eRedisKey, eNullBytes));
 
-            eArguments[0] = eFieldRedisKey;
-            eArguments[1] = eFieldBits;
+            eArguments[0] = eRedisKey;
+            eArguments[1] = eRedisKeyBits;
 
             var eCall = Expression.Call(ParameterKeyBuilder, methodBuild, eArguments);
 
-            var eAssign = Expression.Assign(eFieldRedisKey, eCall);
+            var eAssign = Expression.Assign(eRedisKey, eCall);
 
             var eIfThen = Expression.IfThen(eTest, Expression.Block(
                     eAssign,
-                    Expression.Assign(eFieldBits, eZeroByte)
+                    Expression.Assign(eRedisKeyBits, eZeroByte)
                 ));
 
-            eBody = Expression.Block(eIfThen, eFieldRedisKey);
+            eBody = Expression.Block(eIfThen, eRedisKey);
         }
         else
         {
@@ -117,9 +116,9 @@ internal static class Compiler
 
             var eCall = Expression.Call(ParameterKeyBuilder, methodBuild, eArguments);
 
-            var eAssign = Expression.Assign(eFieldRedisKey, eCall);
+            var eAssign = Expression.Assign(eRedisKey, eCall);
 
-            eBody = Expression.Coalesce(eFieldRedisKey, eAssign);
+            eBody = Expression.Coalesce(eRedisKey, eAssign);
         }
 
         var lambda = Expression.Lambda<Func<T, EntityKeyBuilder, byte[]>>(eBody, eEntity, ParameterKeyBuilder);
@@ -127,12 +126,33 @@ internal static class Compiler
         return lambda.Compile();
     }
 
+    private static Expression GetRedisKeyBits(ParameterExpression eEntity, Type entityType)
+        => entityType.IsInterface
+            ? Expression.Property(eEntity, GetProperty(entityType, PropRedisKeyBitsName, RedisKeyBitsType))
+            : Expression.Field(eEntity, GetField(entityType, FieldRedisKeyBitsName, RedisKeyBitsType));
+
+
+    private static Expression GetRedisKey(ParameterExpression eEntity, Type entityType)
+        => entityType.IsInterface 
+            ? Expression.Property(eEntity, GetProperty(entityType, PropRedisKeyName, RedisKeyType))
+            : Expression.Field(eEntity, GetField(entityType, FieldRedisKeyName, RedisKeyType));
+
+    private static PropertyInfo GetProperty(Type entityType, string propName, Type propType)
+    {
+        var property = entityType.GetProperty(propName, BindingFlags.Instance | BindingFlags.Public);
+
+        if (property == null || property.PropertyType != propType || property.GetMethod == null || property.SetMethod == null)
+            throw new InvalidOperationException($"Entity type '{entityType.FullName}' does not contain public property '{propName}' with type '{propType.FullName}' and get/set methods");
+
+        return property;
+    }
+
     private static FieldInfo GetField(Type entityType, string fieldName, Type fieldType)
     {
-        var field = entityType.GetField(fieldName, FieldRedisKeyBinding);
+        var field = entityType.GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
 
         if (field == null || field.FieldType != fieldType)
-            throw new InvalidOperationException($"Entity type '{entityType.FullName}' does not contain field '{fieldName}' with type '{fieldType.FullName}'");
+            throw new InvalidOperationException($"Entity type '{entityType.FullName}' does not contain non-public field '{fieldName}' with type '{fieldType.FullName}'");
 
         return field;
     }

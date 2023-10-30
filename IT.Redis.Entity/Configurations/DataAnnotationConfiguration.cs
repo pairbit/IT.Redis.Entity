@@ -8,9 +8,9 @@ namespace IT.Redis.Entity.Configurations;
 
 public class DataAnnotationConfiguration : AnnotationConfiguration
 {
-    public DataAnnotationConfiguration(IRedisValueFormatter formatter)
-        : base(formatter)
-    { }
+    public DataAnnotationConfiguration() { }
+
+    public DataAnnotationConfiguration(IRedisValueFormatter formatter) : base(formatter) { }
 
     public override string? GetKeyPrefix(Type type)
     {

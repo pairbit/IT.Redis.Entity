@@ -24,7 +24,6 @@ public record DocumentWithReadOnlyKeys
         _key4 = key4;
     }
 
-    [RedisFieldIgnore]
     public byte[]? RedisKey => _redisKey;
 
     [RedisKey]

@@ -39,8 +39,10 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
             return fieldInfo.Field;
         }
 
-        if (property.GetMethod?.IsPublic == true ||
-            property.SetMethod?.IsPublic == true) return property.Name;
+        if (property.Name != Compiler.PropRedisKeyName &&
+            property.Name != Compiler.PropRedisKeyBitsName &&
+            (property.GetMethod?.IsPublic == true ||
+            property.SetMethod?.IsPublic == true)) return property.Name;
 
         return RedisValue.Null;
     }
