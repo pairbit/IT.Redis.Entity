@@ -1,4 +1,6 @@
-﻿namespace IT.Redis.Entity;
+﻿using IT.Redis.Entity.Utf8Formatters;
+
+namespace IT.Redis.Entity;
 
 public class KeyBuilder : IKeyBuilder
 {

@@ -1,5 +1,6 @@
 ﻿using IT.Redis.Entity.Attributes;
 using IT.Redis.Entity.Internal;
+using IT.Redis.Entity.Utf8Formatters;
 using System.Reflection;
 
 namespace IT.Redis.Entity.Configurations;

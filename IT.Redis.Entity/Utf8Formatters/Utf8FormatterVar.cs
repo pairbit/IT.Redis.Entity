@@ -1,7 +1,6 @@
 ﻿using IT.Redis.Entity.Internal;
-using IT.Redis.Entity.Utf8Formatters;
 
-namespace IT.Redis.Entity;
+namespace IT.Redis.Entity.Utf8Formatters;
 
 public class Utf8FormatterVar : IUtf8Formatter
 {
