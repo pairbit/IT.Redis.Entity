@@ -11,15 +11,14 @@ public class ReadmeTest
         private readonly int _id;
 
 #pragma warning disable IDE0044 // Add readonly modifier
+#pragma warning disable CS0649 // Field 'ReadmeTest.Person1._redisKey' is never assigned to, and will always have its default value null
         private byte[]? _redisKey;
+#pragma warning restore CS0649 // Field 'ReadmeTest.Person1._redisKey' is never assigned to, and will always have its default value null
 #pragma warning restore IDE0044 // Add readonly modifier
 
         public byte[]? RedisKey => _redisKey;
 
-        public Person1(int id)
-        {
-            _id = id;
-        }
+        public Person1(int id) => _id = id;
 
         public int Id => _id;
 
@@ -48,6 +47,8 @@ public class ReadmeTest
                      .HasKey<Person1, int>(x => x.Id);
 
         var factory = new RedisEntityFactory(configBuilder.Build());
+
+        //RedisEntity.Factory = factory;
 
         var readerWriter = factory.NewReaderWriter<Person1>();
 
