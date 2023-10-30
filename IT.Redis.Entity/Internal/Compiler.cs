@@ -13,6 +13,7 @@ internal static class Compiler
     internal static readonly string PropRedisKeyName = "RedisKey";
     private static readonly Type RedisKeyType = typeof(byte[]);
 
+    private static readonly MethodInfo MethodDeserializeNew = typeof(RedisValueDeserializerProxy).GetMethod(nameof(RedisValueDeserializerProxy.DeserializeNew))!;
     private static readonly MethodInfo MethodDeserialize = typeof(RedisValueDeserializerProxy).GetMethod(nameof(RedisValueDeserializerProxy.Deserialize))!;
     private static readonly MethodInfo MethodSerialize = typeof(IRedisValueSerializer).GetMethod(nameof(IRedisValueSerializer.Serialize))!;
 
@@ -49,7 +50,9 @@ internal static class Compiler
 
         var eProperty = Expression.Property(eEntity, property);
 
-        var eCall = Expression.Call(ParameterDeserializer, MethodDeserialize.MakeGenericMethod(property.PropertyType), ParameterRedisValue, eProperty);
+        var eCall = property.GetMethod == null 
+            ? Expression.Call(ParameterDeserializer, MethodDeserializeNew.MakeGenericMethod(property.PropertyType), ParameterRedisValue)
+            : Expression.Call(ParameterDeserializer, MethodDeserialize.MakeGenericMethod(property.PropertyType), ParameterRedisValue, eProperty);
 
         var eAssign = Expression.Assign(eProperty, eCall);
 

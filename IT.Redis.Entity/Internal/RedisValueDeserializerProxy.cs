@@ -14,4 +14,11 @@ internal class RedisValueDeserializerProxy
         _deserializer.Deserialize(in redisValue, ref value);
         return value;
     }
+
+    public T? DeserializeNew<T>(in RedisValue redisValue)
+    {
+        T? value = default;
+        _deserializer.Deserialize(in redisValue, ref value);
+        return value;
+    }
 }

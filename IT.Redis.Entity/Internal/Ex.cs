@@ -20,10 +20,10 @@ internal static class Ex
         new($"Utf8Formatter not found for type '{type.FullName}'", paramName);
 
     public static ArgumentException Utf8FormatterInvalid(Type type, PropertyInfo property, string? paramName = null) =>
-        new($"Type '{type.FullName}' is not a utf8 formatter for property '{property.Name}' declared in type '{property.DeclaringType.FullName}'", paramName);
+        new($"Type '{type.FullName}' is not a utf8 formatter for property '{property.Name}' declared in type '{property.DeclaringType?.FullName}'", paramName);
 
     public static ArgumentException FormatterInvalid(Type type, PropertyInfo property, string? paramName = null) =>
-        new($"Type '{type.FullName}' is not a formatter for property '{property.Name}' declared in type '{property.DeclaringType.FullName}'", paramName);
+        new($"Type '{type.FullName}' is not a formatter for property '{property.Name}' declared in type '{property.DeclaringType?.FullName}'", paramName);
 
     public static Exception FormatterNotRegistered(Type type) => new RedisValueFormatterException($"Formatter for type '{type.FullName}' not registered");
 

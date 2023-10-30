@@ -7,6 +7,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
 {
     private readonly RedisEntityReaderWriter<T>.ReaderInfo[] _readerInfos;
     private readonly RedisEntityReaderWriter<T>.WriterInfo[] _writerInfos;
+    private readonly IRedisEntityFields _fields;
     private readonly IRedisEntityFields _readerFields;
     private readonly IRedisEntityFields _writerFields;
     private readonly Func<T, EntityKeyBuilder, byte[]>? _readerKey;
@@ -16,6 +17,8 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
 
     IRedisEntityFields IRedisEntityWriter<T>.Fields => _writerFields;
 
+    public IRedisEntityFields Fields => _fields;
+
     public IKeyBuilder KeyBuilder => _keyBuilder;
 
     public RedisEntityReaderWriterIndex(IRedisEntityConfiguration configuration)
@@ -23,6 +26,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
         if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
         var properties = RedisEntity<T>.Properties;
+        var fields = new Dictionary<string, RedisValue>(properties.Length);
         var readerFields = new Dictionary<string, RedisValue>(properties.Length);
         var writerFields = new Dictionary<string, RedisValue>(properties.Length);
         var readerInfos = new Dictionary<int, RedisEntityReaderWriter<T>.ReaderInfo>(properties.Length);
@@ -54,6 +58,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
 
                 if (!set.Add(index)) throw new InvalidOperationException($"Propery '{name}' has duplicate '{index}'");
 
+                fields.Add(name, field);
                 var formatter = configuration.GetFormatter(property);
                 var formatterGeneric = Activator.CreateInstance(typeof(RedisValueFormatterProxy<>).MakeGenericType(property.PropertyType), formatter)!;
 
@@ -82,6 +87,7 @@ public class RedisEntityReaderWriterIndex<T> : IRedisEntityReaderWriter<T>
         }
         if (keys.Count > 0) _readerKey = Compiler.GetReaderKey<T>(keys);
         _keyBuilder = keyBuilder;
+        _fields = new RedisEntityFields(fields);
         _readerFields = new RedisEntityFields(readerFields);
         _writerFields = new RedisEntityFields(writerFields);
 
