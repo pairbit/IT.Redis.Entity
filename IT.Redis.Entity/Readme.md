@@ -1,6 +1,8 @@
 # IT.Redis.Entity
 [![NuGet version (IT.Redis.Entity)](https://img.shields.io/nuget/v/IT.Redis.Entity.svg)](https://www.nuget.org/packages/IT.Redis.Entity)
 [![NuGet pre version (IT.Redis.Entity)](https://img.shields.io/nuget/vpre/IT.Redis.Entity.svg)](https://www.nuget.org/packages/IT.Redis.Entity)
+[![GitHub Actions](https://github.com/pairbit/IT.Redis.Entity/workflows/.NET/badge.svg)](https://github.com/pairbit/IT.Redis.Entity/actions)
+[![Releases](https://img.shields.io/github/release/pairbit/IT.Redis.Entity.svg)](https://github.com/pairbit/IT.Redis.Entity/releases)
 
 Object mapping for Redis
 
