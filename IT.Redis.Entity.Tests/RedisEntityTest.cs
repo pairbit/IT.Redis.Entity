@@ -96,9 +96,9 @@ public abstract class RedisEntityTest
             reader.Fields[nameof(Document.Modified)] };
         var Field_IsDeleted = reader.Fields[nameof(Document.IsDeleted)];
 
-        Assert.IsNull(writer.GetEntity(_db.HashGetAll(Key)));
-        Assert.IsNull(writer.GetEntity(EndDate_Modified, _db.HashGet(Key, EndDate_Modified)));
-        Assert.IsNull(writer.GetEntity(writer.Fields.All, _db.HashGet(Key, writer.Fields.All)));
+        Assert.That(writer.GetEntity(_db.HashGetAll(Key)), Is.Null);
+        Assert.That(writer.GetEntity(EndDate_Modified, _db.HashGet(Key, EndDate_Modified)), Is.Null);
+        Assert.That(writer.GetEntity(writer.Fields.All, _db.HashGet(Key, writer.Fields.All)), Is.Null);
 
         var doc2 = new Document();
 
@@ -169,10 +169,10 @@ public abstract class RedisEntityTest
             reader.Fields[nameof(Document.Modified)] };
         var Field_IsDeleted = reader.Fields[nameof(Document.IsDeleted)];
 
-        Assert.IsNull(_db.EntityGetAll<Document>(Key));
-        Assert.IsNull(_db.EntityGet<Document>(Key, Field_IsDeleted));
-        Assert.IsNull(_db.EntityGet<Document>(Key, EndDate_Modified));
-        Assert.IsNull(_db.EntityGet<Document>(Key, writer));
+        Assert.That(_db.EntityGetAll<Document>(Key), Is.Null);
+        Assert.That(_db.EntityGet<Document>(Key, Field_IsDeleted), Is.Null);
+        Assert.That(_db.EntityGet<Document>(Key, EndDate_Modified), Is.Null);
+        Assert.That(_db.EntityGet<Document>(Key, writer), Is.Null);
 
         var doc2 = new Document();
 
