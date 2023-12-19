@@ -2,20 +2,24 @@
 
 public static class xIRedisEntityReader
 {
-    public static void Read<T>(this IRedisEntityReader<T> reader, HashEntry[] entries, T entity, RedisValue[] fields)
+    public static void Read<T>(this IRedisEntityReader<T> reader, HashEntry[] entries, T entity, RedisValue[] fields, int offset = 0)
     {
-        if (entries.Length != fields.Length) throw new ArgumentOutOfRangeException(nameof(entries));
+        if (entries == null) throw new ArgumentNullException(nameof(entries));
+        if (fields == null) throw new ArgumentNullException(nameof(fields));
+        if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
+        if (entries.Length < fields.Length + offset) throw new ArgumentOutOfRangeException(nameof(entries));
 
         for (int i = 0; i < fields.Length; i++)
         {
             var field = fields[i];
             var value = reader.Read(entity, in field);
 
-            entries[i] = new HashEntry(field, value);
+            entries[i + offset] = new HashEntry(field, value);
         }
     }
 
-    public static void Read<T>(this IRedisEntityReader<T> reader, HashEntry[] entries, T entity) => reader.Read(entries, entity, reader.Fields.All);
+    public static void Read<T>(this IRedisEntityReader<T> reader, HashEntry[] entries, T entity, int offset = 0)
+        => reader.Read(entries, entity, reader.Fields.All, offset);
 
     public static HashEntry[] GetEntries<T>(this IRedisEntityReader<T> reader, T entity, RedisValue[] fields)
     {
@@ -33,4 +37,10 @@ public static class xIRedisEntityReader
     }
 
     public static HashEntry[] GetEntries<T>(this IRedisEntityReader<T> reader, T entity) => reader.GetEntries(entity, reader.Fields.All);
+
+    public static RedisValue Serialize<TEntity, TField>(this IRedisEntityReader<TEntity> reader, in RedisValue field, in TField value)
+        => reader.GetSerializer<TField>(in field).Serialize(in value);
+
+    public static HashEntry SerializeToHashEntry<TEntity, TField>(this IRedisEntityReader<TEntity> reader, in RedisValue field, in TField value)
+        => new(field, reader.GetSerializer<TField>(in field).Serialize(in value));
 }
