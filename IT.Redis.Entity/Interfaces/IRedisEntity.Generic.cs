@@ -1,8 +1,10 @@
 ﻿namespace IT.Redis.Entity;
 
-public interface IRedisEntity<T>
+public interface IRedisEntity<TEntity>
 {
     IKeyBuilder KeyBuilder { get; }
 
-    RedisKey ReadKey(T entity);
+    RedisKey ReadKey(TEntity entity);
+
+    RedisEntityFields<TEntity> Fields { get; }
 }

@@ -1,6 +1,6 @@
 ﻿namespace IT.Redis.Entity;
 
-public interface IRedisEntityReader<T> : IRedisEntity<T>
+public interface IRedisEntityReader<T> : IRedisEntityOLD<T>
 {
     IRedisEntityFields Fields { get; }
 

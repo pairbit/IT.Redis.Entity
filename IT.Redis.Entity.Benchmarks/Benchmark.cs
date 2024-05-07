@@ -15,9 +15,13 @@ public class Benchmark
     private static readonly IRedisEntityReaderWriter<Document> _rw3 = new RedisDocumentArrayExpression();
     private static readonly IRedisEntityReaderWriter<Document> _rw2 = new RedisDocumentArray();
     private static readonly IRedisEntityReaderWriter<Document> _rw1 = new RedisDocument();
-    private static readonly IRedisEntityReaderWriter<Document> _rw = RedisEntity<Document>.ReaderWriter;
+    private static readonly IRedisEntityReaderWriter<Document> _rw
+        = new RedisEntityReaderWriter<Document>(new AnnotationConfiguration(RedisValueFormatterRegistry.Default));
+
     private static readonly IRedisEntityReaderWriter<Document> _rwi
-        = new RedisEntityReaderWriterIndex<Document>(new AnnotationConfiguration(RedisValueFormatterRegistry.Default));
+        = new RedisEntityReaderWriterIndex<Document>(new DataContractAnnotationConfiguration(RedisValueFormatterRegistry.Default));
+
+    private static readonly IRedisEntity<Document> _re = new RedisEntityImpl<Document>(new AnnotationConfiguration(RedisValueFormatterRegistry.Default));
 
     private static readonly Document Data = Document.Data;
     private static readonly HashEntry[] _entries = _rw.GetEntries(Data);
@@ -28,7 +32,10 @@ public class Benchmark
     }
 
     [Benchmark]
-    public HashEntry[] GetEntriesIndex() => _rwi.GetEntries(Data);
+    public HashEntry[] GetEntries_FAST() => _re.GetEntries(Data);
+
+    [Benchmark]
+    public HashEntry[] GetEntries_Index() => _rwi.GetEntries(Data);
 
     [Benchmark]
     public HashEntry[] GetEntries() => _rw.GetEntries(Data);
@@ -42,18 +49,18 @@ public class Benchmark
     [Benchmark]
     public HashEntry[] GetEntries_ArrayExpression() => _rw3.GetEntries(Data);
 
-    [Benchmark]
-    public Document? GetEntityIndex() => _rwi.GetEntity(_entries);
+    //[Benchmark]
+    public Document? GetEntity_Index() => _rwi.GetEntity(_entries);
 
-    [Benchmark]
+    //[Benchmark]
     public Document? GetEntity() => _rw.GetEntity(_entries);
 
-    [Benchmark]
+    //[Benchmark]
     public Document? GetEntity_Manual() => _rw1.GetEntity(_entries);
 
-    [Benchmark]
+    //[Benchmark]
     public Document? GetEntity_Array() => _rw2.GetEntity(_entries);
 
-    [Benchmark]
+    //[Benchmark]
     public Document? GetEntity_ArrayExpression() => _rw3.GetEntity(_entries);
 }
