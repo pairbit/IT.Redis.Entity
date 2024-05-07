@@ -20,13 +20,8 @@
 //BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(KeyBuilderBenchmark));
 
 var bench = new Benchmark();
-var e1 = bench.GetEntries();
-var e2 = bench.GetEntries_FAST();
-if (e1.Length != e2.Length) throw new System.InvalidOperationException();
-for (int i = 0; i < e1.Length; i++)
-{
-    if (!e1[i].Equals(e2[i])) throw new System.InvalidOperationException();
-}
+bench.Validate();
+
 BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(Benchmark));
 
 //using DocLib;
