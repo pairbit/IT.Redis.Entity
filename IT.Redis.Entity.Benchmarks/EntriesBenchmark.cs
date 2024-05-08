@@ -11,7 +11,7 @@ namespace IT.Redis.Entity.Benchmarks;
 [MemoryDiagnoser]
 [MinColumn, MaxColumn]
 [Orderer(SummaryOrderPolicy.FastestToSlowest, MethodOrderPolicy.Declared)]
-public class Benchmark
+public class EntriesBenchmark
 {
     private static readonly IRedisEntityReaderWriter<Document> _rw3 = new RedisDocumentArrayExpression();
     private static readonly IRedisEntityReaderWriter<Document> _rw2 = new RedisDocumentArray();
@@ -27,7 +27,7 @@ public class Benchmark
     private static readonly Document Data = Document.Data;
     private static readonly HashEntry[] _entries = _rw.GetEntries(Data);
 
-    public Benchmark()
+    public EntriesBenchmark()
     {
 
     }
