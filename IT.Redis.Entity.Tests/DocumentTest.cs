@@ -8,7 +8,6 @@ using IT.Redis.Entity.Formatters;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text;
 
 namespace IT.Redis.Entity.Tests;
@@ -27,7 +26,7 @@ public class DocumentTest
 
     public DocumentTest()
     {
-        var connection = ConnectionMultiplexer.Connect("localhost:6381,defaultDatabase=0,syncTimeout=5000,allowAdmin=False,connectTimeout=5000,ssl=False,abortConnect=False");
+        var connection = ConnectionMultiplexer.Connect(Const.Connection);
         _db = connection.GetDatabase()!;
 
         //RedisValueFormatterRegistry.RegisterEnumerableFactory(LinkedListFactory.Default, typeof(IReadOnlyCollection<>));

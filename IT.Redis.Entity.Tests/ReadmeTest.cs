@@ -74,7 +74,7 @@ public class ReadmeTest
 
     public ReadmeTest()
     {
-        var connection = ConnectionMultiplexer.Connect("localhost:6381,defaultDatabase=0,syncTimeout=5000,allowAdmin=False,connectTimeout=5000,ssl=False,abortConnect=False");
+        var connection = ConnectionMultiplexer.Connect(Const.Connection);
         _db = connection.GetDatabase()!;
     }
 
