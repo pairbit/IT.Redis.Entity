@@ -2,7 +2,7 @@
 
 namespace StackExchange.Redis;
 
-public static class xIDatabase
+public static class xIDatabase__old
 {
     public static void EntitySet<T>(this IDatabase db, T entity, IRedisEntityReader<T>? reader = null, CommandFlags flags = CommandFlags.None)
     {

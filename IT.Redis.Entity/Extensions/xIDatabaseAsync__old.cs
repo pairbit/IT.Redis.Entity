@@ -2,7 +2,7 @@
 
 namespace StackExchange.Redis;
 
-public static class xIDatabaseAsync
+public static class xIDatabaseAsync__old
 {
     public static Task EntitySetAsync<T>(this IDatabaseAsync db, T entity, IRedisEntityReader<T>? reader = null, CommandFlags flags = CommandFlags.None)
     {

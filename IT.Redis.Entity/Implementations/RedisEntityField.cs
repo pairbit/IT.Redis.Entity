@@ -7,7 +7,6 @@ public class RedisEntityField<TEntity>
 {
     private readonly PropertyInfo _propertyInfo;
     private readonly RedisValue _field;
-    //private readonly int _index;
 
     private readonly object _formatterGeneric;
 
@@ -21,8 +20,6 @@ public class RedisEntityField<TEntity>
 
     public RedisValue Field => _field;
 
-    //public int Index => _index;
-
     public bool CanRead => _reader != null;
 
     public bool CanWrite => _writer != null;
@@ -32,8 +29,6 @@ public class RedisEntityField<TEntity>
     {
         _propertyInfo = property;
         _field = field;
-        //_index = (int)field;
-
         _formatterGeneric = RedisValueFormatterProxy.GetFormatterGeneric(property.PropertyType, formatter);
 
         if (property.SetMethod != null)

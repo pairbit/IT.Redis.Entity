@@ -44,20 +44,6 @@ public class RedisEntityConfigurationBuilder<TEntity>
         return new RedisEntityConfiguration(_formatter, types, fields);
     }
 
-    public RedisEntityConfigurationBuilder<TEntity> HasAllFieldsNumeric()
-    {
-        if (_types.TryGetValue(typeof(TEntity), out var typeInfo))
-        {
-            typeInfo.HasAllFieldsNumeric = true;
-        }
-        else
-        {
-            _types.Add(typeof(TEntity), new RedisTypeInfo { HasAllFieldsNumeric = true });
-        }
-
-        return this;
-    }
-
     public RedisEntityConfigurationBuilder<TEntity> HasKeyPrefix(string keyPrefix)
     {
         if (keyPrefix == null) throw new ArgumentNullException(nameof(keyPrefix));

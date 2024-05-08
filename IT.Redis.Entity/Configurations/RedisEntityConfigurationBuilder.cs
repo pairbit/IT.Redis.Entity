@@ -35,22 +35,6 @@ public class RedisEntityConfigurationBuilder
 
     #region NonGeneric
 
-    public RedisEntityConfigurationBuilder HasAllFieldsNumeric(Type entityType)
-    {
-        if (entityType == null) throw new ArgumentNullException(nameof(entityType));
-
-        if (_types.TryGetValue(entityType, out var typeInfo))
-        {
-            typeInfo.HasAllFieldsNumeric = true;
-        }
-        else
-        {
-            _types.Add(entityType, new RedisTypeInfo { HasAllFieldsNumeric = true });
-        }
-
-        return this;
-    }
-
     public RedisEntityConfigurationBuilder HasKeyPrefix(Type entityType, string keyPrefix)
     {
         if (entityType == null) throw new ArgumentNullException(nameof(entityType));
@@ -163,9 +147,6 @@ public class RedisEntityConfigurationBuilder
     #endregion NonGeneric
 
     #region Generic
-
-    public RedisEntityConfigurationBuilder HasAllFieldsNumeric<TEntity>()
-        => HasAllFieldsNumeric(typeof(TEntity));
 
     public RedisEntityConfigurationBuilder HasKeyPrefix<TEntity>(string keyPrefix)
         => HasKeyPrefix(typeof(TEntity), keyPrefix);

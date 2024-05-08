@@ -20,9 +20,6 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
         _fields = fields;
     }
 
-    public bool HasAllFieldsNumeric(Type type)
-        => _types != null && _types.TryGetValue(type, out var typeInfo) ? typeInfo.HasAllFieldsNumeric : false;
-
     public string? GetKeyPrefix(Type type)
         => _types != null && _types.TryGetValue(type, out var typeInfo) ? typeInfo.KeyPrefix : null;
 
