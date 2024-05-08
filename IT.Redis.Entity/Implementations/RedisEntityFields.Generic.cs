@@ -16,7 +16,7 @@ public class RedisEntityFields<TEntity>
     {
         _dictionary = dictionary;
         EntityFields = dictionary.Values.ToArray();
-        RedisFields = dictionary.Values.Select(x => x.Field).ToArray();
+        RedisFields = dictionary.Values.Select(x => x.RedisField).ToArray();
     }
 
     public RedisEntityFields<TEntity> Sub(params string[] propertyNames)

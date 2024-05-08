@@ -6,7 +6,7 @@ namespace IT.Redis.Entity;
 public class RedisEntityField<TEntity>
 {
     private readonly PropertyInfo _propertyInfo;
-    private readonly RedisValue _field;
+    private readonly RedisValue _redisField;
 
     private readonly object _formatterGeneric;
 
@@ -18,29 +18,28 @@ public class RedisEntityField<TEntity>
 
     public PropertyInfo Property => _propertyInfo;
 
-    //RedisField
-    public RedisValue Field => _field;
+    public RedisValue RedisField => _redisField;
 
     public bool CanRead => _reader != null;
 
     public bool CanWrite => _writer != null;
 
-    internal RedisEntityField(PropertyInfo property, RedisValue field,
+    internal RedisEntityField(PropertyInfo propertyInfo, RedisValue redisField,
         IRedisValueFormatter formatter)
     {
-        _propertyInfo = property;
-        _field = field;
-        _formatterGeneric = RedisValueFormatterProxy.GetFormatterGeneric(property.PropertyType, formatter);
+        _propertyInfo = propertyInfo;
+        _redisField = redisField;
+        _formatterGeneric = RedisValueFormatterProxy.GetFormatterGeneric(propertyInfo.PropertyType, formatter);
 
-        if (property.SetMethod != null)
+        if (propertyInfo.SetMethod != null)
         {
-            _writer = Compiler.GetWriter<TEntity>(property);
+            _writer = Compiler.GetWriter<TEntity>(propertyInfo);
             _deserializer = new RedisValueDeserializerProxy(formatter);
         }
 
-        if (property.GetMethod != null)
+        if (propertyInfo.GetMethod != null)
         {
-            _reader = Compiler.GetReader<TEntity>(property);
+            _reader = Compiler.GetReader<TEntity>(propertyInfo);
             _serializer = formatter;
         }
     }
