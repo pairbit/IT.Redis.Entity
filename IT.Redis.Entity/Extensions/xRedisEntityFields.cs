@@ -1,4 +1,4 @@
-﻿namespace IT.Redis.Entity;
+﻿namespace IT.Redis.Entity.Extensions;
 
 public static class xRedisEntityFields
 {

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using IT.Redis.Entity.Extensions;
+using System.Reflection;
 using System.Text;
 
 namespace IT.Redis.Entity.Internal;
