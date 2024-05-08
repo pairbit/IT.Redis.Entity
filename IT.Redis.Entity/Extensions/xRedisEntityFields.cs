@@ -51,14 +51,14 @@ public static class xRedisEntityFields
         }
     }
 
-    public static void ReadOddValues<TEntity>(this RedisEntityFields<TEntity> fields, RedisValue[] values, TEntity entity, int offset = 1)
+    public static void ReadOddValues<TEntity>(this RedisEntityFields<TEntity> fields, RedisValue[] values, TEntity entity, int offset = 0)
     {
         if (fields == null) throw new ArgumentNullException(nameof(fields));
         if (values == null) throw new ArgumentNullException(nameof(values));
         if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
         var entityFields = fields.EntityFields;
         if (values.Length < entityFields.Length * 2 + offset) throw new ArgumentOutOfRangeException(nameof(values));
-
+        offset++;
         for (int i = 0; i < entityFields.Length; i++)
         {
             values[offset += 2] = entityFields[i].Read(entity);
@@ -128,6 +128,53 @@ public static class xRedisEntityFields
 
         return values;
     }
+
+    public static bool Write<TEntity>(this RedisEntityFields<TEntity> fields, TEntity entity, RedisValue[] values)
+    {
+        var entityFields = fields.EntityFields;
+        if (entityFields.Length != values.Length) throw new ArgumentOutOfRangeException(nameof(values));
+
+        var writen = false;
+        for (int i = 0; i < values.Length; i++)
+        {
+            var value = values[i];
+            if (!value.IsNull)
+            {
+                entityFields[i].Write(entity, in value);
+                writen = true;
+            }
+        }
+        return writen;
+    }
+
+    public static TEntity? GetEntity<TEntity, IEntity>(this RedisEntityFields<IEntity> fields, RedisValue[] values, Func<TEntity> newEntity) where TEntity : IEntity
+    {
+        int i = 0;
+        RedisValue value;
+
+        for (; i < values.Length; i++)
+        {
+            value = values[i];
+            if (!value.IsNull) goto write;
+        }
+        return default;
+    write:
+        var entity = newEntity();
+
+        var entityFields = fields.EntityFields;
+
+        entityFields[i++].Write(entity, in value);
+
+        for (; i < values.Length; i++)
+        {
+            value = values[i];
+            if (!value.IsNull) entityFields[i++].Write(entity, in value);
+        }
+        return entity;
+    }
+
+    public static TEntity? GetEntity<TEntity>(this RedisEntityFields<TEntity> fields, RedisValue[] values, Func<TEntity> newEntity)
+        => fields.GetEntity<TEntity, TEntity>(values, newEntity);
 
     public static TEntity? GetEntity<TEntity, IEntity>(this RedisEntityFields<IEntity> fields, RedisValue[] values) where TEntity : IEntity, new()
     {
