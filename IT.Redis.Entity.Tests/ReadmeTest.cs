@@ -101,7 +101,7 @@ public class ReadmeTest
 
         var factory = new RedisEntityFactory(configBuilder.Build());
 
-        var rwDoc = factory.NewReaderWriter<Document>();
+        var reDoc = factory.New<Document>();
 
         var guid = Guid.NewGuid();
         var doc = new Document
@@ -111,48 +111,48 @@ public class ReadmeTest
             Name = "doc1"
         };
 
-        _db.EntitySet(doc, rwDoc);
+        _db.EntitySet(doc, reDoc);
 
         doc.Index = 2;
         doc.Name = "doc2";
 
-        _db.EntitySet(doc, rwDoc);
+        _db.EntitySet(doc, reDoc);
 
         doc.Index = 3;
-        Assert.That(_db.EntityLoad(doc, rwDoc), Is.False);
+        Assert.That(_db.EntityLoad(doc, reDoc), Is.False);
         Assert.That(doc.Name, Is.EqualTo("doc2"));
 
         doc.Index = 1;
-        Assert.That(_db.EntityLoad(doc, rwDoc), Is.True);
+        Assert.That(_db.EntityLoad(doc, reDoc), Is.True);
         Assert.That(doc.Name, Is.EqualTo("doc1"));
 
-        var redisKey = rwDoc.KeyBuilder.BuildKey(null, 0, guid, 1);
+        var redisKey = reDoc.KeyBuilder.BuildKey(null, 0, guid, 1);
         Assert.That(redisKey, Is.EqualTo(doc.RedisKey));
 
         var redisKey2 = KeyBuilder.Default.BuildKey(null, 0, "app:docs", guid, 1);
         Assert.That(redisKey2, Is.EqualTo(redisKey));
 
-        var doc1 = _db.EntityGet(redisKey, rwDoc);
+        var doc1 = _db.EntityGet(redisKey, reDoc.Fields);
         Assert.That(doc1, Is.Not.Null);
         Assert.That(doc1.Name, Is.EqualTo("doc1"));
 
-        var redisKey3 = rwDoc.KeyBuilder.BuildKey(null, 0, guid, 3);
-        var doc3 = _db.EntityGet(redisKey3, rwDoc);
+        var redisKey3 = reDoc.KeyBuilder.BuildKey(null, 0, guid, 3);
+        var doc3 = _db.EntityGet(redisKey3, reDoc.Fields);
         Assert.That(doc3, Is.Null);
 
-        var readerWriter = factory.NewReaderWriter<Person1>();
+        var re = factory.New<Person1>();
 
         var person = new Person1(12) { Name = "John" };
 
-        _db.EntitySet(person, readerWriter);
+        _db.EntitySet(person, re);
 
         var person2 = new Person1(12);
 
-        Assert.That(_db.EntityLoad(person2, readerWriter), Is.True);
+        Assert.That(_db.EntityLoad(person2, re), Is.True);
 
         Assert.That(person.Name, Is.EqualTo(person2.Name));
 
-        redisKey = readerWriter.KeyBuilder.BuildKey(null, 0, 12);
+        redisKey = re.KeyBuilder.BuildKey(null, 0, 12);
 
         Assert.That(person.RedisKey, Is.EqualTo(redisKey));
 

@@ -46,14 +46,14 @@ public class RedisEntityField<TEntity>
 
     public RedisValue Read(TEntity entity)
     {
-        return (_reader ?? throw new InvalidOperationException())(entity, _serializer!);
+        return (_reader ?? throw new InvalidOperationException("WriteOnly"))(entity, _serializer!);
     }
 
     public bool Write(TEntity entity, in RedisValue value)
     {
         if (value.IsNull) return false;
 
-        (_writer ?? throw new InvalidOperationException())(entity, value, _deserializer!);
+        (_writer ?? throw new InvalidOperationException("ReadOnly"))(entity, value, _deserializer!);
 
         return true;
     }
