@@ -18,6 +18,7 @@ public class RedisEntityField<TEntity>
 
     public PropertyInfo Property => _propertyInfo;
 
+    //RedisField
     public RedisValue Field => _field;
 
     public bool CanRead => _reader != null;
