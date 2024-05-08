@@ -252,7 +252,7 @@ public class DocumentTest
         var key = "fieldClass";
         try
         {
-            _db.EntitySet(key, fieldClass, fields);
+            _db.EntitySet(key, fieldClass, readOnlyField);
         }
         finally
         {
