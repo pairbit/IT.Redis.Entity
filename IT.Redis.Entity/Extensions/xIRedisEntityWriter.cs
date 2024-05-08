@@ -87,4 +87,7 @@ public static class xIRedisEntityWriter
 
     public static T? GetEntity<T>(this IRedisEntityWriter<T> writer, in RedisValue field, in RedisValue value) where T : new()
         => writer.GetEntity<T, T>(field, value);
+
+    public static T? GetEntity<T>(this IRedisEntityWriter<T> writer, RedisValue[] values) where T : new()
+        => writer.GetEntity<T, T>(writer.Fields.All, values);
 }

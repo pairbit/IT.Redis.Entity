@@ -21,6 +21,20 @@ public static class xIRedisEntityReader
     public static void Read<T>(this IRedisEntityReader<T> reader, HashEntry[] entries, T entity, int offset = 0)
         => reader.Read(entries, entity, reader.Fields.All, offset);
 
+    public static RedisValue[] GetValues<T>(this IRedisEntityReader<T> reader, T entity, RedisValue[] fields)
+    {
+        var values = new RedisValue[fields.Length];
+
+        for (int i = 0; i < fields.Length; i++)
+        {
+            values[i] = reader.Read(entity, in fields[i]);
+        }
+
+        return values;
+    }
+
+    public static RedisValue[] GetValues<T>(this IRedisEntityReader<T> reader, T entity) => reader.GetValues(entity, reader.Fields.All);
+
     public static HashEntry[] GetEntries<T>(this IRedisEntityReader<T> reader, T entity, RedisValue[] fields)
     {
         var entries = new HashEntry[fields.Length];

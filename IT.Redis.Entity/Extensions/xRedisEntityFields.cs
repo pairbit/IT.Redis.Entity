@@ -168,7 +168,7 @@ public static class xRedisEntityFields
         for (; i < values.Length; i++)
         {
             value = values[i];
-            if (!value.IsNull) entityFields[i++].Write(entity, in value);
+            if (!value.IsNull) entityFields[i].Write(entity, in value);
         }
         return entity;
     }
@@ -197,7 +197,7 @@ public static class xRedisEntityFields
         for (; i < values.Length; i++)
         {
             value = values[i];
-            if (!value.IsNull) entityFields[i++].Write(entity, in value);
+            if (!value.IsNull) entityFields[i].Write(entity, in value);
         }
         return entity;
     }

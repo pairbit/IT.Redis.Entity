@@ -19,10 +19,10 @@
 //if (bench.Fixed_Manual() != bench.Fixed()) throw new System.Exception();
 //BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(KeyBuilderBenchmark));
 
-var bench = new EntriesBenchmark();
+var bench = new ValuesBenchmark();
 bench.Validate();
 
-BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(EntriesBenchmark));
+BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(ValuesBenchmark));
 
 //using DocLib;
 //using DocLib.RedisEntity;
