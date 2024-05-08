@@ -4,6 +4,7 @@ using DocLib;
 using DocLib.RedisEntity;
 using IT.Redis.Entity.Configurations;
 using StackExchange.Redis;
+using System;
 
 namespace IT.Redis.Entity.Benchmarks;
 
@@ -16,12 +17,12 @@ public class Benchmark
     private static readonly IRedisEntityReaderWriter<Document> _rw2 = new RedisDocumentArray();
     private static readonly IRedisEntityReaderWriter<Document> _rw1 = new RedisDocument();
     private static readonly IRedisEntityReaderWriter<Document> _rw
-        = new RedisEntityReaderWriter<Document>(new AnnotationConfiguration(RedisValueFormatterRegistry.Default));
+        = new RedisEntityReaderWriter<Document>(new DataContractAnnotationConfiguration(RedisValueFormatterRegistry.Default));
 
     private static readonly IRedisEntityReaderWriter<Document> _rwi
         = new RedisEntityReaderWriterIndex<Document>(new DataContractAnnotationConfiguration(RedisValueFormatterRegistry.Default));
 
-    private static readonly IRedisEntity<Document> _re = new RedisEntityImpl<Document>(new AnnotationConfiguration(RedisValueFormatterRegistry.Default));
+    private static readonly IRedisEntity<Document> _re = new RedisEntityImpl<Document>(new DataContractAnnotationConfiguration(RedisValueFormatterRegistry.Default));
 
     private static readonly Document Data = Document.Data;
     private static readonly HashEntry[] _entries = _rw.GetEntries(Data);
@@ -31,22 +32,22 @@ public class Benchmark
 
     }
 
-    //[Benchmark]
+    [Benchmark]
     public HashEntry[] GetEntries_FAST() => _re.Fields.GetEntries(Data);
 
-    //[Benchmark]
+    [Benchmark]
     public HashEntry[] GetEntries_Index() => _rwi.GetEntries(Data);
 
-    //[Benchmark]
+    [Benchmark]
     public HashEntry[] GetEntries() => _rw.GetEntries(Data);
 
-    //[Benchmark]
+    [Benchmark]
     public HashEntry[] GetEntries_Manual() => _rw1.GetEntries(Data);
 
-    //[Benchmark]
+    [Benchmark]
     public HashEntry[] GetEntries_Array() => _rw2.GetEntries(Data);
 
-    //[Benchmark]
+    [Benchmark]
     public HashEntry[] GetEntries_ArrayExpression() => _rw3.GetEntries(Data);
 
     //[Benchmark]
@@ -69,23 +70,33 @@ public class Benchmark
 
     public void Validate()
     {
-        var e = GetEntries();
-        Equals(e, GetEntries_FAST());
-        Equals(e, GetEntries_Index());
-        Equals(e, GetEntries_Manual());
-        Equals(e, GetEntries_Array());
-        Equals(e, GetEntries_ArrayExpression());
+        var entries = GetEntries();
+        CheckEquals(entries, GetEntries_FAST());
+        CheckEquals(entries, GetEntries_Index());
+        CheckEquals(entries, GetEntries_Manual());
+        CheckEquals(entries, GetEntries_Array());
+        CheckEquals(entries, GetEntries_ArrayExpression());
 
         var entity = GetEntity();
+        CheckEquals(entity, GetEntity_Index());
+        CheckEquals(entity, GetEntity_Manual());
+        CheckEquals(entity, GetEntity_Array());
+        CheckEquals(entity, GetEntity_ArrayExpression());
     }
 
-    private static bool Equals(HashEntry[] e1, HashEntry[] e2)
+    private static void CheckEquals(HashEntry[] e1, HashEntry[] e2)
     {
-        if (e1.Length != e2.Length) return false;
+        if (e1.Length != e2.Length) throw new InvalidOperationException();
         for (int i = 0; i < e1.Length; i++)
         {
-            if (!e1[i].Equals(e2[i])) return false;
+            if (!e1[i].Equals(e2[i])) throw new InvalidOperationException();
         }
-        return true;
+    }
+
+    private static void CheckEquals(Document? d1, Document? d2)
+    {
+        if (d1 == null || d2 == null) throw new InvalidOperationException("d1 == null || d2 == null");
+        if (ReferenceEquals(d1, d2)) throw new InvalidOperationException("ReferenceEquals(d1, d2)");
+        if (!Equals(d1, d2)) throw new InvalidOperationException("!Equals(d1, d2)");
     }
 }
