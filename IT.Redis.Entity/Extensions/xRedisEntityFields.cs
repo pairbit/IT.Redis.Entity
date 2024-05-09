@@ -7,15 +7,13 @@ public static class xRedisEntityFields
         if (fields == null) throw new ArgumentNullException(nameof(fields));
         if (entries == null) throw new ArgumentNullException(nameof(entries));
         if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
-        var entityFields = fields.Array;
-        if (entries.Length < entityFields.Length + offset) throw new ArgumentOutOfRangeException(nameof(entries));
+        var array = fields.Array;
+        if (entries.Length < array.Length + offset) throw new ArgumentOutOfRangeException(nameof(entries));
 
-        for (int i = 0; i < entityFields.Length; i++)
+        for (int i = 0; i < array.Length; i++)
         {
-            var entityField = entityFields[i];
-            var value = entityField.Read(entity);
-
-            entries[i + offset] = new HashEntry(entityField.ForRedis, value);
+            var field = array[i];
+            entries[i + offset] = new HashEntry(field.ForRedis, field.Read(entity));
         }
     }
 
@@ -24,16 +22,14 @@ public static class xRedisEntityFields
         if (fields == null) throw new ArgumentNullException(nameof(fields));
         if (values == null) throw new ArgumentNullException(nameof(values));
         if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
-        var entityFields = fields.Array;
-        if (values.Length < entityFields.Length * 2 + offset) throw new ArgumentOutOfRangeException(nameof(values));
+        var array = fields.Array;
+        if (values.Length < array.Length * 2 + offset) throw new ArgumentOutOfRangeException(nameof(values));
 
-        for (int i = 0; i < entityFields.Length; i++)
+        for (int i = 0; i < array.Length; i++)
         {
-            var entityField = entityFields[i];
-            var value = entityField.Read(entity);
-
-            values[offset++] = entityField.ForRedis;
-            values[offset++] = value;
+            var field = array[i];
+            values[offset++] = field.ForRedis;
+            values[offset++] = field.Read(entity);
         }
     }
 
@@ -42,12 +38,12 @@ public static class xRedisEntityFields
         if (fields == null) throw new ArgumentNullException(nameof(fields));
         if (values == null) throw new ArgumentNullException(nameof(values));
         if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
-        var entityFields = fields.Array;
-        if (values.Length < entityFields.Length + offset) throw new ArgumentOutOfRangeException(nameof(values));
+        var array = fields.Array;
+        if (values.Length < array.Length + offset) throw new ArgumentOutOfRangeException(nameof(values));
 
-        for (int i = 0; i < entityFields.Length; i++)
+        for (int i = 0; i < array.Length; i++)
         {
-            values[offset++] = entityFields[i].Read(entity);
+            values[offset++] = array[i].Read(entity);
         }
     }
 
@@ -56,28 +52,25 @@ public static class xRedisEntityFields
         if (fields == null) throw new ArgumentNullException(nameof(fields));
         if (values == null) throw new ArgumentNullException(nameof(values));
         if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
-        var entityFields = fields.Array;
-        if (values.Length < entityFields.Length * 2 + offset) throw new ArgumentOutOfRangeException(nameof(values));
+        var array = fields.Array;
+        if (values.Length < array.Length * 2 + offset) throw new ArgumentOutOfRangeException(nameof(values));
         offset++;
-        for (int i = 0; i < entityFields.Length; i++)
+        for (int i = 0; i < array.Length; i++)
         {
-            values[offset += 2] = entityFields[i].Read(entity);
+            values[offset += 2] = array[i].Read(entity);
         }
     }
 
     public static HashEntry[] GetEntries<TEntity>(this RedisEntityFields<TEntity> fields, TEntity entity)
     {
-        var entityFields = fields.Array;
+        var array = fields.Array;
 
-        var entries = new HashEntry[entityFields.Length];
+        var entries = new HashEntry[array.Length];
 
-        for (int i = 0; i < entityFields.Length; i++)
+        for (int i = 0; i < array.Length; i++)
         {
-            var entityField = entityFields[i];
-
-            var value = entityField.Read(entity);
-
-            entries[i] = new HashEntry(entityField.ForRedis, value);
+            var field = array[i];
+            entries[i] = new HashEntry(field.ForRedis, field.Read(entity));
         }
 
         return entries;
@@ -85,17 +78,15 @@ public static class xRedisEntityFields
 
     public static RedisValue[] GetFieldsAndValues<TEntity>(this RedisEntityFields<TEntity> fields, TEntity entity, int offset = 0)
     {
-        var entityFields = fields.Array;
+        var array = fields.Array;
 
-        var values = new RedisValue[entityFields.Length * 2 + offset];
+        var values = new RedisValue[array.Length * 2 + offset];
 
-        for (int i = 0; i < entityFields.Length; i++)
+        for (int i = 0; i < array.Length; i++)
         {
-            var entityField = entityFields[i];
-            var value = entityField.Read(entity);
-
-            values[offset++] = entityField.ForRedis;
-            values[offset++] = value;
+            var field = array[i];
+            values[offset++] = field.ForRedis;
+            values[offset++] = field.Read(entity);
         }
 
         return values;
@@ -103,13 +94,13 @@ public static class xRedisEntityFields
 
     public static RedisValue[] GetValues<TEntity>(this RedisEntityFields<TEntity> fields, TEntity entity, int offset = 0)
     {
-        var entityFields = fields.Array;
+        var array = fields.Array;
 
-        var values = new RedisValue[entityFields.Length + offset];
+        var values = new RedisValue[array.Length + offset];
 
-        for (int i = 0; i < entityFields.Length; i++)
+        for (int i = 0; i < array.Length; i++)
         {
-            values[offset++] = entityFields[i].Read(entity);
+            values[offset++] = array[i].Read(entity);
         }
 
         return values;
@@ -117,13 +108,13 @@ public static class xRedisEntityFields
 
     public static RedisValue[] GetEvenFields<TEntity>(this RedisEntityFields<TEntity> fields, int offset = 0)
     {
-        var entityFields = fields.Array;
+        var array = fields.Array;
 
-        var values = new RedisValue[entityFields.Length * 2 + offset];
+        var values = new RedisValue[array.Length * 2 + offset];
 
-        for (int i = 0; i < entityFields.Length; i++)
+        for (int i = 0; i < array.Length; i++)
         {
-            values[offset += 2] = entityFields[i].ForRedis;
+            values[offset += 2] = array[i].ForRedis;
         }
 
         return values;
@@ -131,8 +122,8 @@ public static class xRedisEntityFields
 
     public static bool Write<TEntity>(this RedisEntityFields<TEntity> fields, TEntity entity, RedisValue[] values)
     {
-        var entityFields = fields.Array;
-        if (entityFields.Length != values.Length) throw new ArgumentOutOfRangeException(nameof(values));
+        var array = fields.Array;
+        if (array.Length != values.Length) throw new ArgumentOutOfRangeException(nameof(values));
 
         var writen = false;
         for (int i = 0; i < values.Length; i++)
@@ -140,7 +131,7 @@ public static class xRedisEntityFields
             var value = values[i];
             if (!value.IsNull)
             {
-                entityFields[i].Write(entity, in value);
+                array[i].Write(entity, in value);
                 writen = true;
             }
         }
@@ -161,14 +152,14 @@ public static class xRedisEntityFields
     write:
         var entity = newEntity();
 
-        var entityFields = fields.Array;
+        var array = fields.Array;
 
-        entityFields[i++].Write(entity, in value);
+        array[i++].Write(entity, in value);
 
         for (; i < values.Length; i++)
         {
             value = values[i];
-            if (!value.IsNull) entityFields[i].Write(entity, in value);
+            if (!value.IsNull) array[i].Write(entity, in value);
         }
         return entity;
     }
@@ -190,14 +181,14 @@ public static class xRedisEntityFields
     write:
         var entity = new TEntity();
 
-        var entityFields = fields.Array;
+        var array = fields.Array;
 
-        entityFields[i++].Write(entity, in value);
+        array[i++].Write(entity, in value);
 
         for (; i < values.Length; i++)
         {
             value = values[i];
-            if (!value.IsNull) entityFields[i].Write(entity, in value);
+            if (!value.IsNull) array[i].Write(entity, in value);
         }
         return entity;
     }

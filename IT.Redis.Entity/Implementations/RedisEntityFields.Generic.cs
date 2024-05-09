@@ -35,10 +35,10 @@ public class RedisEntityFields<TEntity>
         }
 
         ForRead = array.Length == read ? this :
-                     read == 0 ? Empty : Sub(array.Where(x => x.CanRead), read);
+                  read == 0 ? Empty : Sub(array.Where(x => x.CanRead), read);
 
         ForWrite = array.Length == write ? this :
-                      write == 0 ? Empty : Sub(array.Where(x => x.CanWrite), write);
+                   write == 0 ? Empty : Sub(array.Where(x => x.CanWrite), write);
     }
 
     private RedisEntityFields()
