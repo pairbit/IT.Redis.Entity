@@ -18,7 +18,7 @@ public class RedisEntityImpl<TEntity> : IRedisEntity<TEntity>
         if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
         var properties = RedisEntity<TEntity>.Properties;
-        var fields = new Dictionary<string, IRedisEntityField<TEntity>>(properties.Length);
+        var fields = new Dictionary<string, RedisEntityField<TEntity>>(properties.Length);
 
 #if NETSTANDARD2_0 || NET461
         var set = new HashSet<RedisValue>();

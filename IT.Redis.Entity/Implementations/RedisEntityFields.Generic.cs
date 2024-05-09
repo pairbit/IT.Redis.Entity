@@ -3,21 +3,21 @@
 public class RedisEntityFields<TEntity>
 {
     public static readonly RedisEntityFields<TEntity> Empty = new();
-    private readonly IReadOnlyDictionary<string, IRedisEntityField<TEntity>> _dictionary;
+    private readonly IReadOnlyDictionary<string, RedisEntityField<TEntity>> _dictionary;
 
     public RedisEntityFields<TEntity> ForRead { get; }
 
     public RedisEntityFields<TEntity> ForWrite { get; }
 
-    public IRedisEntityField<TEntity>[] Array { get; }
+    public RedisEntityField<TEntity>[] Array { get; }
 
     public RedisValue[] ForRedis { get; }
 
     public int Count => _dictionary.Count;
 
-    public IRedisEntityField<TEntity> this[string propertyName] => _dictionary[propertyName];
+    public RedisEntityField<TEntity> this[string propertyName] => _dictionary[propertyName];
 
-    internal RedisEntityFields(IReadOnlyDictionary<string, IRedisEntityField<TEntity>> dictionary)
+    internal RedisEntityFields(IReadOnlyDictionary<string, RedisEntityField<TEntity>> dictionary)
     {
         if (dictionary.Count == 0) throw new ArgumentException("Empty", nameof(dictionary));
         _dictionary = dictionary;
@@ -43,7 +43,7 @@ public class RedisEntityFields<TEntity>
 
     private RedisEntityFields()
     {
-        _dictionary = new Dictionary<string, IRedisEntityField<TEntity>>(0);
+        _dictionary = new Dictionary<string, RedisEntityField<TEntity>>(0);
         ForRead = this;
         ForWrite = this;
         Array = [];
@@ -55,7 +55,7 @@ public class RedisEntityFields<TEntity>
         if (propertyNames == null) throw new ArgumentNullException(nameof(propertyNames));
         if (propertyNames.Length == 0) throw new ArgumentException("is empty", nameof(propertyNames));
 
-        var sub = new Dictionary<string, IRedisEntityField<TEntity>>(propertyNames.Length);
+        var sub = new Dictionary<string, RedisEntityField<TEntity>>(propertyNames.Length);
         var dic = _dictionary;
 
         for (int i = 0; i < propertyNames.Length; i++)
@@ -78,11 +78,11 @@ public class RedisEntityFields<TEntity>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
         [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)]
 #endif
-        out IRedisEntityField<TEntity> value) => _dictionary.TryGetValue(propertyName, out value);
+        out RedisEntityField<TEntity> value) => _dictionary.TryGetValue(propertyName, out value);
 
-    private static RedisEntityFields<TEntity> Sub(IEnumerable<IRedisEntityField<TEntity>> fields, int capacity)
+    private static RedisEntityFields<TEntity> Sub(IEnumerable<RedisEntityField<TEntity>> fields, int capacity)
     {
-        var sub = new Dictionary<string, IRedisEntityField<TEntity>>(capacity);
+        var sub = new Dictionary<string, RedisEntityField<TEntity>>(capacity);
 
         foreach (var field in fields)
         {
