@@ -5,13 +5,13 @@ public class RedisEntityFields<TEntity>
     public static readonly RedisEntityFields<TEntity> Empty = new();
     private readonly IReadOnlyDictionary<string, RedisEntityField<TEntity>> _dictionary;
 
-    public RedisEntityFields<TEntity> ReadFields { get; }
+    public RedisEntityFields<TEntity> ForRead { get; }
 
-    public RedisEntityFields<TEntity> WriteFields { get; }
+    public RedisEntityFields<TEntity> ForWrite { get; }
 
-    public RedisEntityField<TEntity>[] EntityFields { get; }
+    public RedisEntityField<TEntity>[] Array { get; }
 
-    public RedisValue[] RedisFields { get; }
+    public RedisValue[] ForRedis { get; }
 
     public int Count => _dictionary.Count;
 
@@ -23,8 +23,8 @@ public class RedisEntityFields<TEntity>
         _dictionary = dictionary;
         var array = dictionary.Values.ToArray();
 
-        EntityFields = array;
-        RedisFields = array.Select(x => x.RedisField).ToArray();
+        Array = array;
+        ForRedis = array.Select(x => x.ForRedis).ToArray();
 
         var read = 0;
         var write = 0;
@@ -34,20 +34,20 @@ public class RedisEntityFields<TEntity>
             if (field.CanWrite) write++;
         }
 
-        ReadFields = array.Length == read ? this :
+        ForRead = array.Length == read ? this :
                      read == 0 ? Empty : Sub(array.Where(x => x.CanRead), read);
 
-        WriteFields = array.Length == write ? this :
+        ForWrite = array.Length == write ? this :
                       write == 0 ? Empty : Sub(array.Where(x => x.CanWrite), write);
     }
 
     private RedisEntityFields()
     {
         _dictionary = new Dictionary<string, RedisEntityField<TEntity>>(0);
-        ReadFields = this;
-        WriteFields = this;
-        EntityFields = [];
-        RedisFields = [];
+        ForRead = this;
+        ForWrite = this;
+        Array = [];
+        ForRedis = [];
     }
 
     public RedisEntityFields<TEntity> Sub(params string[] propertyNames)
