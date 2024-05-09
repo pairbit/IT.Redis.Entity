@@ -2,6 +2,7 @@
 
 public class RedisEntityFields<TEntity>
 {
+    public static readonly RedisEntityFields<TEntity> Empty = new();
     private readonly IReadOnlyDictionary<string, RedisEntityField<TEntity>> _dictionary;
 
     public RedisEntityFields<TEntity> ReadFields { get; }
@@ -18,13 +19,35 @@ public class RedisEntityFields<TEntity>
 
     internal RedisEntityFields(IReadOnlyDictionary<string, RedisEntityField<TEntity>> dictionary)
     {
+        if (dictionary.Count == 0) throw new ArgumentException("Empty", nameof(dictionary));
         _dictionary = dictionary;
         var array = dictionary.Values.ToArray();
 
         EntityFields = array;
         RedisFields = array.Select(x => x.RedisField).ToArray();
+
+        var read = 0;
+        var write = 0;
+        foreach (var field in array)
+        {
+            if (field.CanRead) read++;
+            if (field.CanWrite) write++;
+        }
+
+        ReadFields = array.Length == read ? this :
+                     read == 0 ? Empty : Sub(array.Where(x => x.CanRead), read);
+
+        WriteFields = array.Length == write ? this :
+                      write == 0 ? Empty : Sub(array.Where(x => x.CanWrite), write);
+    }
+
+    private RedisEntityFields()
+    {
+        _dictionary = new Dictionary<string, RedisEntityField<TEntity>>(0);
         ReadFields = this;
         WriteFields = this;
+        EntityFields = [];
+        RedisFields = [];
     }
 
     public RedisEntityFields<TEntity> Sub(params string[] propertyNames)
@@ -56,4 +79,16 @@ public class RedisEntityFields<TEntity>
         [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)]
 #endif
         out RedisEntityField<TEntity> value) => _dictionary.TryGetValue(propertyName, out value);
+
+    private static RedisEntityFields<TEntity> Sub(IEnumerable<RedisEntityField<TEntity>> fields, int capacity)
+    {
+        var sub = new Dictionary<string, RedisEntityField<TEntity>>(capacity);
+
+        foreach (var field in fields)
+        {
+            sub.Add(field.Property.Name, field);
+        }
+
+        return new RedisEntityFields<TEntity>(sub);
+    }
 }
