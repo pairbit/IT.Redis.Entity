@@ -4,6 +4,10 @@ public class RedisEntityFields<TEntity>
 {
     private readonly IReadOnlyDictionary<string, RedisEntityField<TEntity>> _dictionary;
 
+    public RedisEntityFields<TEntity> ReadFields { get; }
+
+    public RedisEntityFields<TEntity> WriteFields { get; }
+
     public RedisEntityField<TEntity>[] EntityFields { get; }
 
     public RedisValue[] RedisFields { get; }
@@ -15,8 +19,12 @@ public class RedisEntityFields<TEntity>
     internal RedisEntityFields(IReadOnlyDictionary<string, RedisEntityField<TEntity>> dictionary)
     {
         _dictionary = dictionary;
-        EntityFields = dictionary.Values.ToArray();
-        RedisFields = dictionary.Values.Select(x => x.RedisField).ToArray();
+        var array = dictionary.Values.ToArray();
+
+        EntityFields = array;
+        RedisFields = array.Select(x => x.RedisField).ToArray();
+        ReadFields = this;
+        WriteFields = this;
     }
 
     public RedisEntityFields<TEntity> Sub(params string[] propertyNames)
