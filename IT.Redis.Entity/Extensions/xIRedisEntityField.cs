@@ -1,6 +1,6 @@
 ﻿namespace IT.Redis.Entity.Extensions;
 
-public static class xRedisEntityField
+public static class xIRedisEntityField
 {
     public static TEntity? GetEntity<TEntity, IEntity>(this IRedisEntityField<IEntity> field, in RedisValue value) where TEntity : IEntity, new()
     {
