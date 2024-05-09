@@ -60,4 +60,19 @@ public class RedisEntityField<TEntity>
 
     public IRedisValueFormatter<TField> GetFormatter<TField>()
         => (IRedisValueFormatter<TField>)_formatterGeneric;
+
+    public override string ToString()
+    {
+        var canRead = _reader != null;
+        var canWrite = _writer != null;
+
+        var prefix = string.Empty;
+        if (canRead && !canWrite) prefix = "[R] ";
+        if (!canRead && canWrite) prefix = "[W] ";
+
+        var prop = _propertyInfo.Name;
+        var redis = (string)_redisField!;
+
+        return prop.Equals(redis) ? $"{prefix}{prop}" : $"{prefix}{prop} -> {redis}";
+    }
 }

@@ -91,4 +91,6 @@ public class RedisEntityFields<TEntity>
 
         return new RedisEntityFields<TEntity>(sub);
     }
+
+    public override string ToString() => Count.ToString();
 }
