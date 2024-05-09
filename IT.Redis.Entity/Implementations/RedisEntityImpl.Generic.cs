@@ -44,8 +44,11 @@ public class RedisEntityImpl<TEntity> : IRedisEntity<TEntity>
                 if (!set.Add(redisField)) throw new InvalidOperationException($"Propery '{name}' has duplicate '{redisField}'");
 
                 var formatter = configuration.GetFormatter(property);
-
-                var field = new RedisEntityField<TEntity>(property, redisField, formatter);
+                var writer = configuration.GetWriter<TEntity>(property);
+                var reader = configuration.GetReader<TEntity>(property);
+                
+                var field = new RedisEntityField<TEntity>(property, redisField,
+                    writer, reader, formatter);
 
                 fields.Add(name, field);
             }

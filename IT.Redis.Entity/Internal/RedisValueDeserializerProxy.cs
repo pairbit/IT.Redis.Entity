@@ -1,6 +1,6 @@
 ﻿namespace IT.Redis.Entity.Internal;
 
-internal class RedisValueDeserializerProxy
+public class RedisValueDeserializerProxy
 {
     private readonly IRedisValueDeserializer _deserializer;
 

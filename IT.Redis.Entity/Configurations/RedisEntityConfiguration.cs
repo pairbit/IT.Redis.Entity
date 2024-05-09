@@ -68,4 +68,10 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
         }
         return Utf8FormatterVar.GetFormatter(property.PropertyType) ?? throw Ex.Utf8FormatterNotFound(property.PropertyType);
     }
+
+    public RedisValueWriter<TEntity>? GetWriter<TEntity>(PropertyInfo property)
+        => Compiler.GetWriter<TEntity>(property);
+
+    public RedisValueReader<TEntity>? GetReader<TEntity>(PropertyInfo property)
+        => Compiler.GetReader<TEntity>(property);
 }

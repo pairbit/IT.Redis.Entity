@@ -26,8 +26,10 @@ internal static class Compiler
      Expression<Func<Document, IRedisValueSerializer, RedisValue>> exp =
             (Document entity, IRedisValueSerializer serializer) => serializer.Serialize(entity.Name);
      */
-    internal static RedisValueReader<T> GetReader<T>(PropertyInfo property)
+    internal static RedisValueReader<T>? GetReader<T>(PropertyInfo property)
     {
+        if (property.GetMethod == null) return null;
+
         var eEntity = Expression.Parameter(typeof(T), "entity");
 
         var eProperty = Expression.Property(eEntity, property);
@@ -44,8 +46,10 @@ internal static class Compiler
             (Document entity, RedisValue redisValue, RedisValueDeserializerProxy deserializer)
             => deserializer.Deserialize(in redisValue, entity.Name);
      */
-    internal static RedisValueWriter<T> GetWriter<T>(PropertyInfo property)
+    internal static RedisValueWriter<T>? GetWriter<T>(PropertyInfo property)
     {
+        if (property.SetMethod == null) return null;
+
         var eEntity = Expression.Parameter(typeof(T), "entity");
 
         var eProperty = Expression.Property(eEntity, property);

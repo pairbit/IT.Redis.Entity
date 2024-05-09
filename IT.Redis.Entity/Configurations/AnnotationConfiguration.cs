@@ -58,6 +58,12 @@ public class AnnotationConfiguration : IRedisEntityConfiguration
     public virtual object GetUtf8Formatter(PropertyInfo property)
         => Utf8FormatterVar.GetFormatter(property.PropertyType) ?? throw Ex.Utf8FormatterNotFound(property.PropertyType);
 
+    public RedisValueWriter<TEntity>? GetWriter<TEntity>(PropertyInfo property)
+        => Compiler.GetWriter<TEntity>(property);
+
+    public RedisValueReader<TEntity>? GetReader<TEntity>(PropertyInfo property)
+        => Compiler.GetReader<TEntity>(property);
+
     protected virtual bool HasKey(PropertyInfo property) => property.GetCustomAttribute<RedisKeyAttribute>() != null;
 
     protected virtual bool IsIgnore(PropertyInfo property) => property.GetCustomAttribute<RedisFieldIgnoreAttribute>() != null;

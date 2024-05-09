@@ -25,21 +25,23 @@ public class RedisEntityField<TEntity>
     public bool CanWrite => _writer != null;
 
     internal RedisEntityField(PropertyInfo propertyInfo, RedisValue redisField,
+        RedisValueWriter<TEntity>? writer,
+        RedisValueReader<TEntity>? reader,
         IRedisValueFormatter formatter)
     {
         _propertyInfo = propertyInfo;
         _redisField = redisField;
         _formatterGeneric = RedisValueFormatterProxy.GetFormatterGeneric(propertyInfo.PropertyType, formatter);
 
-        if (propertyInfo.SetMethod != null)
+        if (writer != null)
         {
-            _writer = Compiler.GetWriter<TEntity>(propertyInfo);
+            _writer = writer;
             _deserializer = new RedisValueDeserializerProxy(formatter);
         }
 
-        if (propertyInfo.GetMethod != null)
+        if (reader != null)
         {
-            _reader = Compiler.GetReader<TEntity>(propertyInfo);
+            _reader = reader;
             _serializer = formatter;
         }
     }
