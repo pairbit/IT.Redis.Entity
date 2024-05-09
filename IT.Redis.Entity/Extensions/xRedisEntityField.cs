@@ -2,7 +2,7 @@
 
 public static class xRedisEntityField
 {
-    public static TEntity? GetEntity<TEntity, IEntity>(this RedisEntityField<IEntity> field, in RedisValue value) where TEntity : IEntity, new()
+    public static TEntity? GetEntity<TEntity, IEntity>(this IRedisEntityField<IEntity> field, in RedisValue value) where TEntity : IEntity, new()
     {
         if (value.IsNull) return default;
 
@@ -13,6 +13,6 @@ public static class xRedisEntityField
         return entity;
     }
 
-    public static TEntity? GetEntity<TEntity>(this RedisEntityField<TEntity> field, in RedisValue value) where TEntity : new()
+    public static TEntity? GetEntity<TEntity>(this IRedisEntityField<TEntity> field, in RedisValue value) where TEntity : new()
         => field.GetEntity<TEntity, TEntity>(in value);
 }

@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace IT.Redis.Entity;
 
-public class RedisEntityField<TEntity>
+public class RedisEntityField<TEntity> : IRedisEntityField<TEntity>
 {
     private readonly PropertyInfo _propertyInfo;
     private readonly RedisValue _redisField;
