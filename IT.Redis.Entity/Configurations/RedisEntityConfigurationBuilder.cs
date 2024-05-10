@@ -41,15 +41,10 @@ public class RedisEntityConfigurationBuilder
         if (keyPrefix == null) throw new ArgumentNullException(nameof(keyPrefix));
         if (keyPrefix.Length == 0) throw new ArgumentException("Key prefix is empty", nameof(keyPrefix));
 
-        if (_types.TryGetValue(entityType, out var typeInfo))
-        {
-            typeInfo.KeyPrefix = typeInfo.KeyPrefix == null
-                ? keyPrefix : $"{typeInfo.KeyPrefix}:{keyPrefix}";
-        }
-        else
-        {
-            _types.Add(entityType, new RedisTypeInfo { KeyPrefix = keyPrefix });
-        }
+        var typeInfo = _types.GetOrAdd(entityType, out var isExists);
+
+        typeInfo.KeyPrefix = isExists && typeInfo.KeyPrefix != null
+            ? $"{typeInfo.KeyPrefix}:{keyPrefix}" : keyPrefix;
 
         return this;
     }
