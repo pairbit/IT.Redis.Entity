@@ -35,7 +35,7 @@ Object mapping for Redis
                 if (_guid != value)
                 {
                     _guid = value;
-                    _redisKeyBits = 1;
+                    _redisKeyBits |= 1;
                 }
             }
         }
@@ -48,7 +48,7 @@ Object mapping for Redis
                 if (_index != value)
                 {
                     _index = value;
-                    _redisKeyBits = 2;
+                    _redisKeyBits |= 2;
                 }
             }
         }
