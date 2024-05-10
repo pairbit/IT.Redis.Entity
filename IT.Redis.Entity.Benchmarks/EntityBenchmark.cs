@@ -162,7 +162,7 @@ public class EntityBenchmark
         .HasFieldId(x => x.Id, 8)
 
         .HasReader(x => x.Name, (x, s) => s.Serialize(x.Name))
-        .HasWriter(x => x.Name, (x, v, d) => x.Name = d.Deserialize(in v, x.Name))
+        .HasWriter(x => x.Name, (x, v, d) => x.Name = d.Deserialize(in v, x.Name)!)
 
         .HasReader(x => x.Price, (x, s) => s.Serialize(x.Price))
         .HasWriter(x => x.Price, (x, v, d) => x.Price = d.Deserialize(in v, x.Price))
