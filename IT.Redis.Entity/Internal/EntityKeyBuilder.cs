@@ -8,7 +8,7 @@ internal readonly record struct KeyInfo(PropertyInfo Property, object Utf8Format
 
 internal class EntityKeyBuilder : IKeyBuilder
 {
-    public static readonly int MaxKeys = 8;
+    public const int MaxKeys = 8;
     private static readonly char _separatorChar = ':';
     private static readonly byte _separator = (byte)_separatorChar;
 
