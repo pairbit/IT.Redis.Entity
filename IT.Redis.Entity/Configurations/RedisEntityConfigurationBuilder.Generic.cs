@@ -148,6 +148,35 @@ public class RedisEntityConfigurationBuilder<TEntity>
         return this;
     }
 
+    public RedisEntityConfigurationBuilder<TEntity> HasWriter<T>(Expression<Func<TEntity, T>> propertySelector, RedisValueWriter<TEntity> writer)
+    {
+        if (writer == null) throw new ArgumentNullException(nameof(writer));
+
+        GetFieldInfo(GetProperty(propertySelector)).Writer = writer;
+
+        return this;
+    }
+
+    public RedisEntityConfigurationBuilder<TEntity> HasReader<T>(Expression<Func<TEntity, T>> propertySelector, RedisValueReader<TEntity> reader)
+    {
+        if (reader == null) throw new ArgumentNullException(nameof(reader));
+
+        GetFieldInfo(GetProperty(propertySelector)).Reader = reader;
+
+        return this;
+    }
+
+    private RedisFieldInfo GetFieldInfo(PropertyInfo property)
+    {
+        if (!_fields.TryGetValue(property, out var fieldInfo))
+        {
+            fieldInfo = new RedisFieldInfo();
+            _fields.Add(property, fieldInfo);
+        }
+
+        return fieldInfo;
+    }
+
     private static PropertyInfo GetProperty(LambdaExpression propertySelector)
     {
         if (propertySelector == null) throw new ArgumentNullException(nameof(propertySelector));

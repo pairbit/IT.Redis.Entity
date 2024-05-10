@@ -70,8 +70,22 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
     }
 
     public RedisValueWriter<TEntity>? GetWriter<TEntity>(PropertyInfo property)
-        => Compiler.GetWriter<TEntity>(property);
+    {
+        if (_fields.TryGetValue(property, out var fieldInfo))
+        {
+            var writer = fieldInfo.Writer;
+            if (writer != null) return (RedisValueWriter<TEntity>?)writer;
+        }
+        return Compiler.GetWriter<TEntity>(property);
+    }
 
     public RedisValueReader<TEntity>? GetReader<TEntity>(PropertyInfo property)
-        => Compiler.GetReader<TEntity>(property);
+    {
+        if (_fields.TryGetValue(property, out var fieldInfo))
+        {
+            var reader = fieldInfo.Reader;
+            if (reader != null) return (RedisValueReader<TEntity>?)reader;
+        }
+        return Compiler.GetReader<TEntity>(property);
+    }
 }

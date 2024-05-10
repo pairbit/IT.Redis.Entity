@@ -1,4 +1,4 @@
-﻿namespace IT.Redis.Entity.Internal;
+﻿namespace IT.Redis.Entity;
 
 public class RedisValueDeserializerProxy
 {
