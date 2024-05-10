@@ -44,7 +44,7 @@ internal static class Compiler
     /*
      Expression<Func<Document, RedisValue, RedisValueDeserializerProxy, string?>> exp =
             (Document entity, RedisValue redisValue, RedisValueDeserializerProxy deserializer)
-            => deserializer.Deserialize(in redisValue, entity.Name);
+            => entity.Name = deserializer.Deserialize(in redisValue, entity.Name);
      */
     internal static RedisValueWriter<T>? GetWriter<T>(PropertyInfo property)
     {

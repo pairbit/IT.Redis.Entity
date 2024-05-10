@@ -13,6 +13,8 @@ namespace IT.Redis.Entity.Benchmarks;
 [Orderer(SummaryOrderPolicy.FastestToSlowest, MethodOrderPolicy.Declared)]
 public class EntityBenchmark
 {
+    private static readonly IRedisValueFormatter _formatter = RedisValueFormatterRegistry.Default;
+    private static readonly RedisValueDeserializerProxy _dp = new(_formatter);
     private static readonly IRedisEntity<Document> _re = new RedisEntityImpl<Document>(new DataContractAnnotationConfiguration(RedisValueFormatterRegistry.Default));
     private static readonly IRedisEntity<Document> _re_manual = new RedisEntityImpl<Document>(GetConfig());
 
@@ -26,10 +28,50 @@ public class EntityBenchmark
     public HashEntry[] GetEntries_Manual() => _re_manual.Fields.GetEntries(Data);
 
     [Benchmark]
+    public HashEntry[] GetEntries_Etalon()
+    {
+        var d = Data;
+        var f = _formatter;
+        return [
+            new(0, f.Serialize(d.Name)),
+#if NET6_0_OR_GREATER
+            new(1, f.Serialize(d.StartDate)),
+            new(2, f.Serialize(d.EndDate)),
+#endif
+            new(3, f.Serialize(d.Price)),
+            new(4, f.Serialize(d.IsDeleted)),
+            new(5, f.Serialize(d.Size)),
+            new(6, f.Serialize(d.Created)),
+            new(7, f.Serialize(d.Modified)),
+            new(8, f.Serialize(d.Id)),
+        ];
+    }
+
+    [Benchmark]
     public RedisValue[] GetValues() => _re.Fields.GetValues(Data);
 
     [Benchmark]
     public RedisValue[] GetValues_Manual() => _re_manual.Fields.GetValues(Data);
+
+    [Benchmark]
+    public RedisValue[] GetValues_Etalon()
+    {
+        var d = Data;
+        var f = _formatter;
+        return [
+            f.Serialize(d.Name),
+#if NET6_0_OR_GREATER
+            f.Serialize(d.StartDate),
+            f.Serialize(d.EndDate),
+#endif
+            f.Serialize(d.Price),
+            f.Serialize(d.IsDeleted),
+            f.Serialize(d.Size),
+            f.Serialize(d.Created),
+            f.Serialize(d.Modified),
+            f.Serialize(d.Id),
+        ];
+    }
 
     [Benchmark]
     public Document? GetEntity() => _re.Fields.GetEntity(Values);
@@ -37,15 +79,40 @@ public class EntityBenchmark
     [Benchmark]
     public Document? GetEntity_Manual() => _re_manual.Fields.GetEntity(Values);
 
+    [Benchmark]
+    public Document? GetEntity_Etalon()
+    {
+        var v = Values;
+        var d = _dp;
+        return new()
+        {
+            Name = d.DeserializeNew<string>(v[0])!,
+#if NET6_0_OR_GREATER
+            StartDate = d.DeserializeNew<DateOnly>(v[1]),
+            EndDate = d.DeserializeNew<DateOnly?>(v[2]),
+#endif
+            Price = d.DeserializeNew<long>(v[3]),
+            IsDeleted = d.DeserializeNew<bool>(v[4]),
+            Size = d.DeserializeNew<DocumentSize>(v[5]),
+            Created = d.DeserializeNew<DateTime>(v[6]),
+            Modified = d.DeserializeNew<DateTime?>(v[7]),
+            Id = d.DeserializeNew<Guid>(v[8]),
+        };
+    }
+
     public void Validate()
     {
-        CheckEquals(GetEntries(), GetEntries_Manual());
+        var entries = GetEntries();
+        CheckEquals(entries, GetEntries_Manual());
+        CheckEquals(entries, GetEntries_Etalon());
 
         CheckEquals(Values, GetValues());
         CheckEquals(Values, GetValues_Manual());
+        CheckEquals(Values, GetValues_Etalon());
 
         CheckEquals(Data, GetEntity());
         CheckEquals(Data, GetEntity_Manual());
+        CheckEquals(Data, GetEntity_Etalon());
     }
 
     private static void CheckEquals(HashEntry[] e1, HashEntry[] e2)
