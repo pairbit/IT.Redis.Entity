@@ -149,5 +149,7 @@ Assert.That(doc3, Is.Null);
 ## Set global factories
 
 ```csharp
+RedisEntity<Document>.Factory = () => reDoc;
+
 RedisEntity.Factory = factory;
 ```
