@@ -1,6 +1,6 @@
 ﻿namespace IT.Redis.Entity.Internal;
 
-public class Utf8FormatterProxy : IUtf8Formatter
+internal class Utf8FormatterProxy : IUtf8Formatter
 {
     private readonly object _formatter;
 

@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using IT.Redis.Entity.Internal;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace IT.Redis.Entity.Configurations;
@@ -64,7 +65,7 @@ public class RedisEntityConfigurationBuilder<TEntity>
 
     public RedisEntityConfigurationBuilder<TEntity> HasKey<T>(Expression<Func<TEntity, T>> propertySelector, IUtf8Formatter<T>? utf8Formatter = null)
     {
-        var fieldInfo = GetFieldInfo(GetProperty(propertySelector));
+        var fieldInfo = _fields.GetOrAdd(GetProperty(propertySelector));
         fieldInfo.HasKey = true;
         fieldInfo.Utf8Formatter = utf8Formatter;
 
@@ -73,7 +74,7 @@ public class RedisEntityConfigurationBuilder<TEntity>
 
     public RedisEntityConfigurationBuilder<TEntity> HasFieldId<T>(Expression<Func<TEntity, T>> propertySelector, byte fieldId)
     {
-        GetFieldInfo(GetProperty(propertySelector)).FieldId = fieldId;
+        _fields.GetOrAdd(GetProperty(propertySelector)).FieldId = fieldId;
 
         return this;
     }
@@ -83,7 +84,7 @@ public class RedisEntityConfigurationBuilder<TEntity>
         if (fieldName == null) throw new ArgumentNullException(nameof(fieldName));
         if (fieldName.Length == 0) throw new ArgumentException("Field name is empty", nameof(fieldName));
 
-        GetFieldInfo(GetProperty(propertySelector)).FieldName = fieldName;
+        _fields.GetOrAdd(GetProperty(propertySelector)).FieldName = fieldName;
 
         return this;
     }
@@ -92,14 +93,14 @@ public class RedisEntityConfigurationBuilder<TEntity>
     {
         if (formatter == null) throw new ArgumentNullException(nameof(formatter));
 
-        GetFieldInfo(GetProperty(propertySelector)).Formatter = formatter;
+        _fields.GetOrAdd(GetProperty(propertySelector)).Formatter = formatter;
 
         return this;
     }
 
     public RedisEntityConfigurationBuilder<TEntity> Ignore<T>(Expression<Func<TEntity, T>> propertySelector)
     {
-        GetFieldInfo(GetProperty(propertySelector)).Ignored = true;
+        _fields.GetOrAdd(GetProperty(propertySelector)).Ignored = true;
 
         return this;
     }
@@ -108,7 +109,7 @@ public class RedisEntityConfigurationBuilder<TEntity>
     {
         if (writer == null) throw new ArgumentNullException(nameof(writer));
 
-        GetFieldInfo(GetProperty(propertySelector)).Writer = writer;
+        _fields.GetOrAdd(GetProperty(propertySelector)).Writer = writer;
 
         return this;
     }
@@ -117,20 +118,9 @@ public class RedisEntityConfigurationBuilder<TEntity>
     {
         if (reader == null) throw new ArgumentNullException(nameof(reader));
 
-        GetFieldInfo(GetProperty(propertySelector)).Reader = reader;
+        _fields.GetOrAdd(GetProperty(propertySelector)).Reader = reader;
 
         return this;
-    }
-
-    private RedisFieldInfo GetFieldInfo(PropertyInfo property)
-    {
-        if (!_fields.TryGetValue(property, out var fieldInfo))
-        {
-            fieldInfo = new RedisFieldInfo();
-            _fields.Add(property, fieldInfo);
-        }
-
-        return fieldInfo;
     }
 
     private static PropertyInfo GetProperty(LambdaExpression propertySelector)

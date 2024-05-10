@@ -61,15 +61,9 @@ public class RedisEntityConfigurationBuilder
         if (utf8Formatter != null && !typeof(IUtf8Formatter<>).MakeGenericType(property.PropertyType).IsAssignableFrom(utf8Formatter.GetType()))
             throw Ex.Utf8FormatterInvalid(utf8Formatter.GetType(), property, nameof(utf8Formatter));
 
-        if (_fields.TryGetValue(property, out var fieldInfo))
-        {
-            fieldInfo.HasKey = true;
-            fieldInfo.Utf8Formatter = utf8Formatter;
-        }
-        else
-        {
-            _fields.Add(property, new RedisFieldInfo { HasKey = true, Utf8Formatter = utf8Formatter });
-        }
+        var fieldInfo = _fields.GetOrAdd(property);
+        fieldInfo.HasKey = true;
+        fieldInfo.Utf8Formatter = utf8Formatter;
 
         return this;
     }
@@ -78,14 +72,7 @@ public class RedisEntityConfigurationBuilder
     {
         if (property == null) throw new ArgumentNullException(nameof(property));
 
-        if (_fields.TryGetValue(property, out var fieldInfo))
-        {
-            fieldInfo.FieldId = fieldId;
-        }
-        else
-        {
-            _fields.Add(property, new RedisFieldInfo { FieldId = fieldId });
-        }
+        _fields.GetOrAdd(property).FieldId = fieldId;
 
         return this;
     }
@@ -96,15 +83,8 @@ public class RedisEntityConfigurationBuilder
         if (fieldName == null) throw new ArgumentNullException(nameof(fieldName));
         if (fieldName.Length == 0) throw new ArgumentException("Field name is empty", nameof(fieldName));
 
-        if (_fields.TryGetValue(property, out var fieldInfo))
-        {
-            fieldInfo.FieldName = fieldName;
-        }
-        else
-        {
-            _fields.Add(property, new RedisFieldInfo { FieldName = fieldName });
-        }
-
+        _fields.GetOrAdd(property).FieldName = fieldName;
+        
         return this;
     }
 
@@ -116,14 +96,7 @@ public class RedisEntityConfigurationBuilder
         if (!typeof(IRedisValueFormatter<>).MakeGenericType(property.PropertyType).IsAssignableFrom(formatter.GetType()))
             throw Ex.FormatterInvalid(formatter.GetType(), property, nameof(formatter));
 
-        if (_fields.TryGetValue(property, out var fieldInfo))
-        {
-            fieldInfo.Formatter = formatter;
-        }
-        else
-        {
-            _fields.Add(property, new RedisFieldInfo { Formatter = formatter });
-        }
+        _fields.GetOrAdd(property).Formatter = formatter;
 
         return this;
     }
@@ -132,14 +105,7 @@ public class RedisEntityConfigurationBuilder
     {
         if (property == null) throw new ArgumentNullException(nameof(property));
 
-        if (_fields.TryGetValue(property, out var fieldInfo))
-        {
-            fieldInfo.Ignored = true;
-        }
-        else
-        {
-            _fields.Add(property, new RedisFieldInfo { Ignored = true });
-        }
+        _fields.GetOrAdd(property).Ignored = true;
 
         return this;
     }
