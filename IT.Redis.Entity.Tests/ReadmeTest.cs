@@ -53,7 +53,7 @@ public class ReadmeTest
         public string? Name { get; set; }
     }
 
-    class Person1
+    class Person
     {
         private readonly int _id;
 
@@ -65,9 +65,22 @@ public class ReadmeTest
 
         public byte[]? RedisKey => _redisKey;
 
-        public Person1(int id) => _id = id;
+        public Person(int id) => _id = id;
 
         public int Id => _id;
+
+        public string? Name { get; set; }
+    }
+
+    class Manual
+    {
+        private byte[]? _redisKey;
+
+        public byte[]? RedisKey
+        {
+            get => _redisKey;
+            set => _redisKey = value;
+        }
 
         public string? Name { get; set; }
     }
@@ -95,9 +108,12 @@ public class ReadmeTest
                      .HasKey(x => x.Guid)
                      .HasKey(x => x.Index);
 
-        configBuilder.Entity<Person1>()
+        configBuilder.Entity<Person>()
                      .HasKeyPrefix("app:persons")
                      .HasKey(x => x.Id);
+
+        configBuilder.Entity<Manual>()
+                     .HasKeyPrefix("app:manuals");
 
         var factory = new RedisEntityFactory(configBuilder.Build());
 
@@ -117,6 +133,7 @@ public class ReadmeTest
         doc.Name = "doc2";
 
         _db.EntitySet(doc, reDoc);
+        Assert.That(_db.KeyDelete(doc.RedisKey), Is.True);
 
         doc.Index = 3;
         Assert.That(_db.EntityLoad(doc, reDoc), Is.False);
@@ -131,28 +148,30 @@ public class ReadmeTest
 
         var redisKey2 = KeyBuilder.Default.BuildKey(null, 0, "app:docs", guid, 1);
         Assert.That(redisKey2, Is.EqualTo(redisKey));
-
+        
         var doc1 = _db.EntityGet(redisKey, reDoc.Fields);
         Assert.That(doc1, Is.Not.Null);
+        Assert.That(doc1.Guid, Is.Default);
         Assert.That(doc1.Name, Is.EqualTo("doc1"));
+        Assert.That(_db.KeyDelete(doc.RedisKey), Is.True);
 
         var redisKey3 = reDoc.KeyBuilder.BuildKey(null, 0, guid, 3);
         var doc3 = _db.EntityGet(redisKey3, reDoc.Fields);
         Assert.That(doc3, Is.Null);
 
-        var re = factory.New<Person1>();
+        var rep = factory.New<Person>();
 
-        var person = new Person1(12) { Name = "John" };
+        var person = new Person(12) { Name = "John" };
 
-        _db.EntitySet(person, re);
+        _db.EntitySet(person, rep);
 
-        var person2 = new Person1(12);
+        var person2 = new Person(12);
 
-        Assert.That(_db.EntityLoad(person2, re), Is.True);
+        Assert.That(_db.EntityLoad(person2, rep), Is.True);
 
         Assert.That(person.Name, Is.EqualTo(person2.Name));
 
-        redisKey = re.KeyBuilder.BuildKey(null, 0, 12);
+        redisKey = rep.KeyBuilder.BuildKey(null, 0, 12);
 
         Assert.That(person.RedisKey, Is.EqualTo(redisKey));
 
@@ -160,7 +179,16 @@ public class ReadmeTest
         
         Assert.That(redisKey2, Is.EqualTo(redisKey));
 
-        _db.KeyDelete(person.RedisKey);
+        Assert.That(_db.KeyDelete(person.RedisKey), Is.True);
+
+        var rem = factory.New<Manual>();
+
+        //var manual = new Manual { Name = "m1" };
+
+        //manual.RedisKey = rem.KeyBuilder.BuildKey(null, 0, 1);
+
+        //_db.EntitySet(manual, rem);
+
+        //Assert.That(_db.KeyDelete(manual.RedisKey), Is.True);
     }
 }
-
