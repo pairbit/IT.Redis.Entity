@@ -15,7 +15,7 @@ public class RedisEntityConfigurationBuilder
         _formatter = formatter;
     }
 
-    public RedisEntityConfiguration Build()
+    public RedisEntityConfiguration Build(bool autoReaderWriter = true)
     {
         var types = new Dictionary<Type, RedisTypeInfo>(_types.Count);
         var fields = new Dictionary<PropertyInfo, RedisFieldInfo>(_fields.Count);
@@ -27,7 +27,7 @@ public class RedisEntityConfigurationBuilder
         {
             fields.Add(item.Key, item.Value.Clone());
         }
-        return new(_formatter, types, fields);
+        return new(_formatter, types, fields, autoReaderWriter);
     }
 
     public RedisEntityConfigurationBuilder<TEntity> Entity<TEntity>()

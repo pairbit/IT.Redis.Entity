@@ -26,7 +26,7 @@ public class RedisEntityConfigurationBuilder<TEntity>
         _formatter = formatter;
     }
 
-    public RedisEntityConfiguration Build()
+    public RedisEntityConfiguration Build(bool autoReaderWriter = true)
     {
         var types = _types.TryGetValue(typeof(TEntity), out var typeInfo)
             ? new Dictionary<Type, RedisTypeInfo>(1) { { typeof(TEntity), typeInfo.Clone() } }
@@ -41,7 +41,7 @@ public class RedisEntityConfigurationBuilder<TEntity>
                 fields.Add(item.Key, item.Value.Clone());
             }
         }
-        return new RedisEntityConfiguration(_formatter, types, fields);
+        return new RedisEntityConfiguration(_formatter, types, fields, autoReaderWriter);
     }
 
     public RedisEntityConfigurationBuilder<TEntity> HasKeyPrefix(string keyPrefix)
@@ -64,33 +64,16 @@ public class RedisEntityConfigurationBuilder<TEntity>
 
     public RedisEntityConfigurationBuilder<TEntity> HasKey<T>(Expression<Func<TEntity, T>> propertySelector, IUtf8Formatter<T>? utf8Formatter = null)
     {
-        var property = GetProperty(propertySelector);
-
-        if (_fields.TryGetValue(property, out var fieldInfo))
-        {
-            fieldInfo.HasKey = true;
-            fieldInfo.Utf8Formatter = utf8Formatter;
-        }
-        else
-        {
-            _fields.Add(property, new RedisFieldInfo { HasKey = true, Utf8Formatter = utf8Formatter });
-        }
+        var fieldInfo = GetFieldInfo(GetProperty(propertySelector));
+        fieldInfo.HasKey = true;
+        fieldInfo.Utf8Formatter = utf8Formatter;
 
         return this;
     }
 
     public RedisEntityConfigurationBuilder<TEntity> HasFieldId<T>(Expression<Func<TEntity, T>> propertySelector, byte fieldId)
     {
-        var property = GetProperty(propertySelector);
-
-        if (_fields.TryGetValue(property, out var fieldInfo))
-        {
-            fieldInfo.FieldId = fieldId;
-        }
-        else
-        {
-            _fields.Add(property, new RedisFieldInfo { FieldId = fieldId });
-        }
+        GetFieldInfo(GetProperty(propertySelector)).FieldId = fieldId;
 
         return this;
     }
@@ -100,16 +83,7 @@ public class RedisEntityConfigurationBuilder<TEntity>
         if (fieldName == null) throw new ArgumentNullException(nameof(fieldName));
         if (fieldName.Length == 0) throw new ArgumentException("Field name is empty", nameof(fieldName));
 
-        var property = GetProperty(propertySelector);
-
-        if (_fields.TryGetValue(property, out var fieldInfo))
-        {
-            fieldInfo.FieldName = fieldName;
-        }
-        else
-        {
-            _fields.Add(property, new RedisFieldInfo { FieldName = fieldName });
-        }
+        GetFieldInfo(GetProperty(propertySelector)).FieldName = fieldName;
 
         return this;
     }
@@ -118,32 +92,14 @@ public class RedisEntityConfigurationBuilder<TEntity>
     {
         if (formatter == null) throw new ArgumentNullException(nameof(formatter));
 
-        var property = GetProperty(propertySelector);
-
-        if (_fields.TryGetValue(property, out var fieldInfo))
-        {
-            fieldInfo.Formatter = formatter;
-        }
-        else
-        {
-            _fields.Add(property, new RedisFieldInfo { Formatter = formatter });
-        }
+        GetFieldInfo(GetProperty(propertySelector)).Formatter = formatter;
 
         return this;
     }
 
     public RedisEntityConfigurationBuilder<TEntity> Ignore<T>(Expression<Func<TEntity, T>> propertySelector)
     {
-        var property = GetProperty(propertySelector);
-
-        if (_fields.TryGetValue(property, out var fieldInfo))
-        {
-            fieldInfo.Ignored = true;
-        }
-        else
-        {
-            _fields.Add(property, new RedisFieldInfo { Ignored = true });
-        }
+        GetFieldInfo(GetProperty(propertySelector)).Ignored = true;
 
         return this;
     }

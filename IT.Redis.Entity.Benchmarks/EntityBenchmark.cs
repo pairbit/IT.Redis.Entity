@@ -81,6 +81,11 @@ public class EntityBenchmark
 #if NET6_0_OR_GREATER
         .HasFieldId(x => x.StartDate, 1)
         .HasFieldId(x => x.EndDate, 2)
+
+        .HasReader(x => x.StartDate, (x, s) => s.Serialize(x.StartDate))
+        .HasWriter(x => x.StartDate, (x, v, d) => x.StartDate = d.Deserialize(in v, x.StartDate))
+        .HasReader(x => x.EndDate, (x, s) => s.Serialize(x.EndDate))
+        .HasWriter(x => x.EndDate, (x, v, d) => x.EndDate = d.Deserialize(in v, x.EndDate))
 #endif
         .HasFieldId(x => x.Price, 3)
         .HasFieldId(x => x.IsDeleted, 4)
@@ -88,5 +93,27 @@ public class EntityBenchmark
         .HasFieldId(x => x.Created, 6)
         .HasFieldId(x => x.Modified, 7)
         .HasFieldId(x => x.Id, 8)
-        .Build();
+
+        .HasReader(x => x.Name, (x, s) => s.Serialize(x.Name))
+        .HasWriter(x => x.Name, (x, v, d) => x.Name = d.Deserialize(in v, x.Name))
+
+        .HasReader(x => x.Price, (x, s) => s.Serialize(x.Price))
+        .HasWriter(x => x.Price, (x, v, d) => x.Price = d.Deserialize(in v, x.Price))
+
+        .HasReader(x => x.IsDeleted, (x, s) => s.Serialize(x.IsDeleted))
+        .HasWriter(x => x.IsDeleted, (x, v, d) => x.IsDeleted = d.Deserialize(in v, x.IsDeleted))
+
+        .HasReader(x => x.Size, (x, s) => s.Serialize(x.Size))
+        .HasWriter(x => x.Size, (x, v, d) => x.Size = d.Deserialize(in v, x.Size))
+
+        .HasReader(x => x.Created, (x, s) => s.Serialize(x.Created))
+        .HasWriter(x => x.Created, (x, v, d) => x.Created = d.Deserialize(in v, x.Created))
+
+        .HasReader(x => x.Modified, (x, s) => s.Serialize(x.Modified))
+        .HasWriter(x => x.Modified, (x, v, d) => x.Modified = d.Deserialize(in v, x.Modified))
+
+        .HasReader(x => x.Id, (x, s) => s.Serialize(x.Id))
+        .HasWriter(x => x.Id, (x, v, d) => x.Id = d.Deserialize(in v, x.Id))
+
+        .Build(false);
 }

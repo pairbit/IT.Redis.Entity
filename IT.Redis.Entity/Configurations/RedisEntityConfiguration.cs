@@ -6,6 +6,7 @@ namespace IT.Redis.Entity.Configurations;
 
 public class RedisEntityConfiguration : IRedisEntityConfiguration
 {
+    private readonly bool _autoReaderWriter = true;
     private readonly IRedisValueFormatter _formatter;
     private readonly IReadOnlyDictionary<Type, RedisTypeInfo>? _types;
     private readonly IReadOnlyDictionary<PropertyInfo, RedisFieldInfo> _fields;
@@ -13,11 +14,13 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
     public RedisEntityConfiguration(
         IRedisValueFormatter? formatter,
         IReadOnlyDictionary<Type, RedisTypeInfo>? types,
-        IReadOnlyDictionary<PropertyInfo, RedisFieldInfo> fields)
+        IReadOnlyDictionary<PropertyInfo, RedisFieldInfo> fields,
+        bool autoReaderWriter)
     {
         _formatter = formatter ?? RedisValueFormatterNotRegistered.Default;
         _types = types;
         _fields = fields;
+        _autoReaderWriter = autoReaderWriter;   
     }
 
     public string? GetKeyPrefix(Type type)
@@ -76,7 +79,7 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
             var writer = fieldInfo.Writer;
             if (writer != null) return (RedisValueWriter<TEntity>?)writer;
         }
-        return Compiler.GetWriter<TEntity>(property);
+        return _autoReaderWriter ? Compiler.GetWriter<TEntity>(property) : null;
     }
 
     public RedisValueReader<TEntity>? GetReader<TEntity>(PropertyInfo property)
@@ -86,6 +89,6 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
             var reader = fieldInfo.Reader;
             if (reader != null) return (RedisValueReader<TEntity>?)reader;
         }
-        return Compiler.GetReader<TEntity>(property);
+        return _autoReaderWriter ? Compiler.GetReader<TEntity>(property) : null;
     }
 }
