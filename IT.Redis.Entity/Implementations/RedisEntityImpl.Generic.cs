@@ -6,7 +6,7 @@ namespace IT.Redis.Entity;
 public class RedisEntityImpl<TEntity> : IRedisEntity<TEntity>
 {
     private readonly RedisEntityFields<TEntity> _fields;
-    private readonly Func<TEntity, EntityKeyBuilder, byte[]>? _readerKey;
+    private readonly Func<TEntity, IKeyBuilder, byte[]>? _readerKey;
     private readonly EntityKeyBuilder _keyBuilder;
 
     public IKeyBuilder KeyBuilder => _keyBuilder;
