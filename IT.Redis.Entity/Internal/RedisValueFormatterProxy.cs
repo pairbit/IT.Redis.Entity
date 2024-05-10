@@ -16,4 +16,13 @@ internal class RedisValueFormatterProxy : IRedisValueFormatter
         => GetFormatter<T>().Serialize(in value);
 
     private IRedisValueFormatter<T> GetFormatter<T>() => (IRedisValueFormatter<T>)_formatter;
+
+    public static object GetFormatterGeneric(Type propertyType, IRedisValueFormatter formatter)
+    {
+        if (formatter is RedisValueFormatterProxy formatterProxy)
+            return formatterProxy._formatter;
+
+        return Activator.CreateInstance(typeof(RedisValueFormatterProxy<>)
+                        .MakeGenericType(propertyType), formatter)!;
+    }
 }

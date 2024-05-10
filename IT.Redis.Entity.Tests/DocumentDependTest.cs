@@ -18,7 +18,7 @@ public class DocumentDependTest
 
     public DocumentDependTest()
     {
-        var connection = ConnectionMultiplexer.Connect("localhost:6381,defaultDatabase=0,syncTimeout=5000,allowAdmin=False,connectTimeout=5000,ssl=False,abortConnect=False");
+        var connection = ConnectionMultiplexer.Connect(Const.Connection);
         _db = connection.GetDatabase()!;
     }
 
@@ -120,13 +120,13 @@ public class DocumentDependTest
             Data1 = "data-test1"
         };
 
-        var reader = RedisEntity<DocumentWithReadOnlyKeys>.Reader;
+        var re = RedisEntity<DocumentWithReadOnlyKeys>.Default;
 
         Assert.That(doc.RedisKey, Is.Null);
 
         try
         {
-            _db.EntitySet(doc, reader.Fields[nameof(DocumentWithReadOnlyKeys.Data1)]);
+            _db.EntitySet(doc, re.Fields[nameof(DocumentWithReadOnlyKeys.Data1)]);
 
             Assert.That(doc.RedisKey, Is.Not.Null);
             Assert.That(doc.RedisKey.Length, Is.EqualTo(length));
@@ -134,7 +134,7 @@ public class DocumentDependTest
 
             doc.Data2 = "test-data2";
 
-            _db.EntitySet(doc, reader.Fields[nameof(DocumentWithReadOnlyKeys.Data2)]);
+            _db.EntitySet(doc, re.Fields[nameof(DocumentWithReadOnlyKeys.Data2)]);
         }
         finally
         {

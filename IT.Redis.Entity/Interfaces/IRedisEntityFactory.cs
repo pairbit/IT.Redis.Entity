@@ -2,5 +2,5 @@
 
 public interface IRedisEntityFactory
 {
-    IRedisEntityReaderWriter<T> NewReaderWriter<T>();
+    IRedisEntity<TEntity> New<TEntity>();
 }

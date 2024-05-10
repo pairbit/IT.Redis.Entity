@@ -16,9 +16,6 @@ public class AnnotationConfiguration : IRedisEntityConfiguration
         _formatter = formatter ?? throw new ArgumentNullException(nameof(formatter));
     }
 
-    public bool HasAllFieldsNumeric(Type type) 
-        => type.GetCustomAttribute<RedisFieldsAllNumericAttribute>() != null;
-
     public virtual IRedisValueFormatter GetFormatter(PropertyInfo property)
     {
         var attr = property.GetCustomAttribute<RedisValueFormatterAttribute>(true);
@@ -60,6 +57,12 @@ public class AnnotationConfiguration : IRedisEntityConfiguration
 
     public virtual object GetUtf8Formatter(PropertyInfo property)
         => Utf8FormatterVar.GetFormatter(property.PropertyType) ?? throw Ex.Utf8FormatterNotFound(property.PropertyType);
+
+    public RedisValueWriter<TEntity>? GetWriter<TEntity>(PropertyInfo property)
+        => Compiler.GetWriter<TEntity>(property);
+
+    public RedisValueReader<TEntity>? GetReader<TEntity>(PropertyInfo property)
+        => Compiler.GetReader<TEntity>(property);
 
     protected virtual bool HasKey(PropertyInfo property) => property.GetCustomAttribute<RedisKeyAttribute>() != null;
 

@@ -15,7 +15,7 @@ public class RedisEntityConfigurationBuilder
         _formatter = formatter;
     }
 
-    public RedisEntityConfiguration Build()
+    public RedisEntityConfiguration Build(bool autoReaderWriter = true)
     {
         var types = new Dictionary<Type, RedisTypeInfo>(_types.Count);
         var fields = new Dictionary<PropertyInfo, RedisFieldInfo>(_fields.Count);
@@ -27,7 +27,7 @@ public class RedisEntityConfigurationBuilder
         {
             fields.Add(item.Key, item.Value.Clone());
         }
-        return new(_formatter, types, fields);
+        return new(_formatter, types, fields, autoReaderWriter);
     }
 
     public RedisEntityConfigurationBuilder<TEntity> Entity<TEntity>()
@@ -35,37 +35,16 @@ public class RedisEntityConfigurationBuilder
 
     #region NonGeneric
 
-    public RedisEntityConfigurationBuilder HasAllFieldsNumeric(Type entityType)
-    {
-        if (entityType == null) throw new ArgumentNullException(nameof(entityType));
-
-        if (_types.TryGetValue(entityType, out var typeInfo))
-        {
-            typeInfo.HasAllFieldsNumeric = true;
-        }
-        else
-        {
-            _types.Add(entityType, new RedisTypeInfo { HasAllFieldsNumeric = true });
-        }
-
-        return this;
-    }
-
     public RedisEntityConfigurationBuilder HasKeyPrefix(Type entityType, string keyPrefix)
     {
         if (entityType == null) throw new ArgumentNullException(nameof(entityType));
         if (keyPrefix == null) throw new ArgumentNullException(nameof(keyPrefix));
         if (keyPrefix.Length == 0) throw new ArgumentException("Key prefix is empty", nameof(keyPrefix));
 
-        if (_types.TryGetValue(entityType, out var typeInfo))
-        {
-            typeInfo.KeyPrefix = typeInfo.KeyPrefix == null
-                ? keyPrefix : $"{typeInfo.KeyPrefix}:{keyPrefix}";
-        }
-        else
-        {
-            _types.Add(entityType, new RedisTypeInfo { KeyPrefix = keyPrefix });
-        }
+        var typeInfo = _types.GetOrAdd(entityType, out var isExists);
+
+        typeInfo.KeyPrefix = isExists && typeInfo.KeyPrefix != null
+            ? $"{typeInfo.KeyPrefix}:{keyPrefix}" : keyPrefix;
 
         return this;
     }
@@ -77,15 +56,9 @@ public class RedisEntityConfigurationBuilder
         if (utf8Formatter != null && !typeof(IUtf8Formatter<>).MakeGenericType(property.PropertyType).IsAssignableFrom(utf8Formatter.GetType()))
             throw Ex.Utf8FormatterInvalid(utf8Formatter.GetType(), property, nameof(utf8Formatter));
 
-        if (_fields.TryGetValue(property, out var fieldInfo))
-        {
-            fieldInfo.HasKey = true;
-            fieldInfo.Utf8Formatter = utf8Formatter;
-        }
-        else
-        {
-            _fields.Add(property, new RedisFieldInfo { HasKey = true, Utf8Formatter = utf8Formatter });
-        }
+        var fieldInfo = _fields.GetOrAdd(property);
+        fieldInfo.HasKey = true;
+        fieldInfo.Utf8Formatter = utf8Formatter;
 
         return this;
     }
@@ -94,14 +67,7 @@ public class RedisEntityConfigurationBuilder
     {
         if (property == null) throw new ArgumentNullException(nameof(property));
 
-        if (_fields.TryGetValue(property, out var fieldInfo))
-        {
-            fieldInfo.FieldId = fieldId;
-        }
-        else
-        {
-            _fields.Add(property, new RedisFieldInfo { FieldId = fieldId });
-        }
+        _fields.GetOrAdd(property).FieldId = fieldId;
 
         return this;
     }
@@ -112,15 +78,8 @@ public class RedisEntityConfigurationBuilder
         if (fieldName == null) throw new ArgumentNullException(nameof(fieldName));
         if (fieldName.Length == 0) throw new ArgumentException("Field name is empty", nameof(fieldName));
 
-        if (_fields.TryGetValue(property, out var fieldInfo))
-        {
-            fieldInfo.FieldName = fieldName;
-        }
-        else
-        {
-            _fields.Add(property, new RedisFieldInfo { FieldName = fieldName });
-        }
-
+        _fields.GetOrAdd(property).FieldName = fieldName;
+        
         return this;
     }
 
@@ -132,14 +91,7 @@ public class RedisEntityConfigurationBuilder
         if (!typeof(IRedisValueFormatter<>).MakeGenericType(property.PropertyType).IsAssignableFrom(formatter.GetType()))
             throw Ex.FormatterInvalid(formatter.GetType(), property, nameof(formatter));
 
-        if (_fields.TryGetValue(property, out var fieldInfo))
-        {
-            fieldInfo.Formatter = formatter;
-        }
-        else
-        {
-            _fields.Add(property, new RedisFieldInfo { Formatter = formatter });
-        }
+        _fields.GetOrAdd(property).Formatter = formatter;
 
         return this;
     }
@@ -148,14 +100,7 @@ public class RedisEntityConfigurationBuilder
     {
         if (property == null) throw new ArgumentNullException(nameof(property));
 
-        if (_fields.TryGetValue(property, out var fieldInfo))
-        {
-            fieldInfo.Ignored = true;
-        }
-        else
-        {
-            _fields.Add(property, new RedisFieldInfo { Ignored = true });
-        }
+        _fields.GetOrAdd(property).Ignored = true;
 
         return this;
     }
@@ -163,9 +108,6 @@ public class RedisEntityConfigurationBuilder
     #endregion NonGeneric
 
     #region Generic
-
-    public RedisEntityConfigurationBuilder HasAllFieldsNumeric<TEntity>()
-        => HasAllFieldsNumeric(typeof(TEntity));
 
     public RedisEntityConfigurationBuilder HasKeyPrefix<TEntity>(string keyPrefix)
         => HasKeyPrefix(typeof(TEntity), keyPrefix);
