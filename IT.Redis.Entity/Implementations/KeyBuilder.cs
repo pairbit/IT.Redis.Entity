@@ -1,4 +1,5 @@
-﻿using IT.Redis.Entity.Utf8Formatters;
+﻿using IT.Redis.Entity.Extensions;
+using IT.Redis.Entity.Utf8Formatters;
 
 namespace IT.Redis.Entity;
 

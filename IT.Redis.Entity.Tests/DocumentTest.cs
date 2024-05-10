@@ -8,7 +8,6 @@ using IT.Redis.Entity.Formatters;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text;
 
 namespace IT.Redis.Entity.Tests;
@@ -27,7 +26,7 @@ public class DocumentTest
 
     public DocumentTest()
     {
-        var connection = ConnectionMultiplexer.Connect("localhost:6381,defaultDatabase=0,syncTimeout=5000,allowAdmin=False,connectTimeout=5000,ssl=False,abortConnect=False");
+        var connection = ConnectionMultiplexer.Connect(Const.Connection);
         _db = connection.GetDatabase()!;
 
         //RedisValueFormatterRegistry.RegisterEnumerableFactory(LinkedListFactory.Default, typeof(IReadOnlyCollection<>));
@@ -220,7 +219,7 @@ public class DocumentTest
     [Test]
     public void DataAnnotationConfiguration_ReadKeyTest()
     {
-        ReadKeyTest(new RedisEntityReaderWriter<DocumentAnnotation>(
+        ReadKeyTest(new RedisEntityImpl<DocumentAnnotation>(
             new DataAnnotationConfiguration(
                 RedisValueFormatterRegistry.Default)));
     }
@@ -240,18 +239,15 @@ public class DocumentTest
     {
         var fieldClass = new ClassFieldsTest { WriteOnlyField = 42 };
 
-        var rw = RedisEntity<ClassFieldsTest>.ReaderWriter;
-        IRedisEntityReader<ClassFieldsTest> r = rw;
-        IRedisEntityWriter<ClassFieldsTest> w = rw;
+        var fields = RedisEntity<ClassFieldsTest>.Default.Fields;
 
-        Assert.That(rw.Fields.ContainsKey(nameof(ClassFieldsTest.WriteOnlyField)), Is.True);
-        Assert.That(rw.Fields.ContainsKey(nameof(ClassFieldsTest.ReadOnlyField)), Is.True);
+        var writeOnlyField = fields[nameof(ClassFieldsTest.WriteOnlyField)];
+        Assert.That(writeOnlyField.CanWrite, Is.True);
+        Assert.That(writeOnlyField.CanRead, Is.False);
 
-        Assert.That(r.Fields.ContainsKey(nameof(ClassFieldsTest.WriteOnlyField)), Is.False);
-        Assert.That(r.Fields.ContainsKey(nameof(ClassFieldsTest.ReadOnlyField)), Is.True);
-
-        Assert.That(w.Fields.ContainsKey(nameof(ClassFieldsTest.WriteOnlyField)), Is.True);
-        Assert.That(w.Fields.ContainsKey(nameof(ClassFieldsTest.ReadOnlyField)), Is.False);
+        var readOnlyField = fields[nameof(ClassFieldsTest.ReadOnlyField)];
+        Assert.That(readOnlyField.CanWrite, Is.False);
+        Assert.That(readOnlyField.CanRead, Is.True);
 
         var key = "fieldClass";
         try
@@ -276,13 +272,14 @@ public class DocumentTest
         var config = configBuilder.Build();
         var factory = new RedisEntityFactory(config);
 
-        ReadKeyTest(factory.NewReaderWriter<DocumentAnnotation>());
+        ReadKeyTest(factory.New<DocumentAnnotation>());
 
-        ReadKey_Base64Formatter(factory.NewReaderWriter<IDocument>());
+        ReadKey_Base64Formatter(factory.New<IDocument>());
     }
 
-    private void ReadKeyTest(IRedisEntityReaderWriter<DocumentAnnotation> readerWriter)
+    private void ReadKeyTest(IRedisEntity<DocumentAnnotation> re)
     {
+        var fields = re.Fields;
         var id = Guid.NewGuid();
         var doc = new DocumentAnnotation
         {
@@ -298,7 +295,7 @@ public class DocumentTest
             Assert.That(doc.RedisKeyBits, Is.EqualTo(1));
             Assert.That(doc.RedisKey, Is.Null);
 
-            Assert.That(_db.EntitySet(doc, readerWriter.Fields[nameof(DocumentAnnotation.AttachmentIds)], readerWriter), Is.True);
+            Assert.That(_db.EntitySet(doc, fields[nameof(DocumentAnnotation.AttachmentIds)], re), Is.True);
 
             Assert.That(doc.RedisKeyBits, Is.EqualTo(0));
             Assert.That(doc.RedisKey, Is.Not.Null);
@@ -308,7 +305,7 @@ public class DocumentTest
             Assert.That(doc2.RedisKey, Is.Null);
             Assert.That(doc2.RedisKeyBits, Is.EqualTo(0));
 
-            Assert.That(_db.EntityLoad(doc2, readerWriter), Is.False);
+            Assert.That(_db.EntityLoad(doc2, re), Is.False);
 
             Assert.That(doc2.RedisKeyBits, Is.EqualTo(0));
             Assert.That(doc2.RedisKey, Is.Not.Null);
@@ -317,16 +314,16 @@ public class DocumentTest
             Assert.That(doc2.RedisKeyBits, Is.EqualTo(1));
             Assert.That(doc2.RedisKey.SequenceEqual(idempty), Is.True);
 
-            Assert.That(_db.EntityLoad(doc2, readerWriter), Is.True);
+            Assert.That(_db.EntityLoad(doc2, re), Is.True);
 
             Assert.That(doc2.RedisKeyBits, Is.EqualTo(0));
             Assert.That(doc2.RedisKey.SequenceEqual(idbytes), Is.True);
             Assert.That(doc2.AttachmentIds, Is.EqualTo(doc.AttachmentIds));
             Assert.That(doc2.Name, Is.Null);
 
-            Assert.That(_db.EntitySet(doc, readerWriter.Fields[nameof(DocumentAnnotation.Name)], readerWriter), Is.True);
+            Assert.That(_db.EntitySet(doc, re.Fields[nameof(DocumentAnnotation.Name)], re), Is.True);
 
-            var doc3 = _db.EntityGet<DocumentAnnotation>(doc2.RedisKey, readerWriter);
+            var doc3 = _db.EntityGet<DocumentAnnotation>(doc2.RedisKey, fields);
 
             Assert.That(doc3, Is.Not.Null);
             Assert.That(doc3.Id, Is.EqualTo(Guid.Empty));
@@ -334,7 +331,7 @@ public class DocumentTest
             Assert.That(doc3.Name, Is.EqualTo(doc.Name));
             Assert.That(doc3.AttachmentIds, Is.EqualTo(doc.AttachmentIds));
 
-            var redisKey = readerWriter.KeyBuilder.BuildKey(null, 0, id);
+            var redisKey = re.KeyBuilder.BuildKey(null, 0, id);
             Assert.That(redisKey.SequenceEqual(idbytes), Is.True);
         }
         finally
@@ -344,7 +341,7 @@ public class DocumentTest
         }
     }
 
-    private void ReadKey_Base64Formatter(IRedisEntityReaderWriter<IDocument> readerWriter)
+    private void ReadKey_Base64Formatter(IRedisEntity<IDocument> readerWriter)
     {
         var doc = new DocumentPOCO
         {

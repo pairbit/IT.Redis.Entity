@@ -26,9 +26,6 @@ public record Document
         Created = DateTime.UtcNow
     };
 
-    [DataMember(Order = 8)]
-    public Guid Id { get; set; }
-
     [DataMember(Order = 0)]
     public string Name { get; set; } = null!;
 
@@ -56,6 +53,9 @@ public record Document
 
     [DataMember(Order = 7)]
     public DateTime? Modified { get; set; }
+
+    [DataMember(Order = 8)]
+    public Guid Id { get; set; }
 
     public static void New(Document doc, int i)
     {

@@ -14,6 +14,10 @@ public class RedisFieldInfo : ICloneable
 
     public bool HasKey { get; set; }
 
+    public Delegate? Writer { get; set; }
+
+    public Delegate? Reader { get; set; }
+
     public RedisFieldInfo Clone() => (RedisFieldInfo)MemberwiseClone();
 
     object ICloneable.Clone() => MemberwiseClone();
