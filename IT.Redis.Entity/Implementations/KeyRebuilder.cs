@@ -50,7 +50,6 @@ public class KeyRebuilder : KeyBuilder, IKeyRebuilder
     public byte[] RebuildKey<TKey1, TKey2, TKey3>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3)
     {
         var f = _utf8Formatter;
-        var sep = _separator;
         var lenKey1 = f.GetLength(in key1);
         var lenKey2 = f.GetLength(in key2);
         var length = 2 + lenKey1 + lenKey2 + f.GetLength(in key3);
@@ -58,6 +57,7 @@ public class KeyRebuilder : KeyBuilder, IKeyRebuilder
         if (key == null || key.Length != length)
         {
             key = new byte[length];
+            var sep = _separator;
             offset += f.Format(in key1, key); key[offset++] = sep;
             offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
             f.Format(in key3, key.AsSpan(offset));
@@ -75,7 +75,6 @@ public class KeyRebuilder : KeyBuilder, IKeyRebuilder
     public byte[] RebuildKey<TKey1, TKey2, TKey3, TKey4>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4)
     {
         var f = _utf8Formatter;
-        var sep = _separator;
         var lenKey1 = f.GetLength(in key1);
         var lenKey2 = f.GetLength(in key2);
         var lenKey3 = f.GetLength(in key3);
@@ -85,6 +84,7 @@ public class KeyRebuilder : KeyBuilder, IKeyRebuilder
         if (key == null || key.Length != length)
         {
             key = new byte[length];
+            var sep = _separator;
             offset += f.Format(in key1, key); key[offset++] = sep;
             offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
             offset += f.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
@@ -105,7 +105,6 @@ public class KeyRebuilder : KeyBuilder, IKeyRebuilder
     public byte[] RebuildKey<TKey1, TKey2, TKey3, TKey4, TKey5>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5)
     {
         var f = _utf8Formatter;
-        var sep = _separator;
         var lenKey1 = f.GetLength(in key1);
         var lenKey2 = f.GetLength(in key2);
         var lenKey3 = f.GetLength(in key3);
@@ -116,6 +115,7 @@ public class KeyRebuilder : KeyBuilder, IKeyRebuilder
         if (key == null || key.Length != length)
         {
             key = new byte[length];
+            var sep = _separator;
             offset += f.Format(in key1, key); key[offset++] = sep;
             offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
             offset += f.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
@@ -139,7 +139,6 @@ public class KeyRebuilder : KeyBuilder, IKeyRebuilder
     public byte[] RebuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6)
     {
         var f = _utf8Formatter;
-        var sep = _separator;
         var lenKey1 = f.GetLength(in key1);
         var lenKey2 = f.GetLength(in key2);
         var lenKey3 = f.GetLength(in key3);
@@ -151,6 +150,7 @@ public class KeyRebuilder : KeyBuilder, IKeyRebuilder
         if (key == null || key.Length != length)
         {
             key = new byte[length];
+            var sep = _separator;
             offset += f.Format(in key1, key); key[offset++] = sep;
             offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
             offset += f.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
@@ -177,7 +177,6 @@ public class KeyRebuilder : KeyBuilder, IKeyRebuilder
     public byte[] RebuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6, TKey7>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6, in TKey7 key7)
     {
         var f = _utf8Formatter;
-        var sep = _separator;
         var lenKey1 = f.GetLength(in key1);
         var lenKey2 = f.GetLength(in key2);
         var lenKey3 = f.GetLength(in key3);
@@ -190,6 +189,7 @@ public class KeyRebuilder : KeyBuilder, IKeyRebuilder
         if (key == null || key.Length != length)
         {
             key = new byte[length];
+            var sep = _separator;
             offset += f.Format(in key1, key); key[offset++] = sep;
             offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
             offset += f.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
@@ -219,7 +219,6 @@ public class KeyRebuilder : KeyBuilder, IKeyRebuilder
     public byte[] RebuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6, TKey7, TKey8>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6, in TKey7 key7, in TKey8 key8)
     {
         var f = _utf8Formatter;
-        var sep = _separator;
         var lenKey1 = f.GetLength(in key1);
         var lenKey2 = f.GetLength(in key2);
         var lenKey3 = f.GetLength(in key3);
@@ -233,6 +232,7 @@ public class KeyRebuilder : KeyBuilder, IKeyRebuilder
         if (key == null || key.Length != length)
         {
             key = new byte[length];
+            var sep = _separator;
             offset += f.Format(in key1, key); key[offset++] = sep;
             offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
             offset += f.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
