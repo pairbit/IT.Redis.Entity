@@ -82,7 +82,6 @@ internal class EntityKeyRebuilder : IKeyRebuilder
         var f3 = GetFormatter<TKey3>(2);
         var prefix = _prefix;
         var offset = prefix.Length;
-        var sep = _separator;
         var lenKey1 = f1.GetLength(in key1);
         var lenKey2 = f2.GetLength(in key2);
         var length = 2 + offset + lenKey1 + lenKey2 + f3.GetLength(in key3);
@@ -90,6 +89,7 @@ internal class EntityKeyRebuilder : IKeyRebuilder
         {
             key = new byte[length];
             if (offset > 0) prefix.CopyTo(key.AsSpan());
+            var sep = _separator;
             offset += f1.Format(in key1, key.AsSpan(offset)); key[offset++] = sep;
             offset += f2.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
             f3.Format(in key3, key.AsSpan(offset));
@@ -112,7 +112,6 @@ internal class EntityKeyRebuilder : IKeyRebuilder
         var f4 = GetFormatter<TKey4>(3);
         var prefix = _prefix;
         var offset = prefix.Length;
-        var sep = _separator;
         var lenKey1 = f1.GetLength(in key1);
         var lenKey2 = f2.GetLength(in key2);
         var lenKey3 = f3.GetLength(in key3);
@@ -122,6 +121,7 @@ internal class EntityKeyRebuilder : IKeyRebuilder
         {
             key = new byte[length];
             if (offset > 0) prefix.CopyTo(key.AsSpan());
+            var sep = _separator;
             offset += f1.Format(in key1, key.AsSpan(offset)); key[offset++] = sep;
             offset += f2.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
             offset += f3.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
@@ -148,7 +148,6 @@ internal class EntityKeyRebuilder : IKeyRebuilder
         var f5 = GetFormatter<TKey5>(4);
         var prefix = _prefix;
         var offset = prefix.Length;
-        var sep = _separator;
         var lenKey1 = f1.GetLength(in key1);
         var lenKey2 = f2.GetLength(in key2);
         var lenKey3 = f3.GetLength(in key3);
@@ -159,6 +158,7 @@ internal class EntityKeyRebuilder : IKeyRebuilder
         {
             key = new byte[length];
             if (offset > 0) prefix.CopyTo(key.AsSpan());
+            var sep = _separator;
             offset += f1.Format(in key1, key.AsSpan(offset)); key[offset++] = sep;
             offset += f2.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
             offset += f3.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
@@ -189,7 +189,6 @@ internal class EntityKeyRebuilder : IKeyRebuilder
         var f6 = GetFormatter<TKey6>(5);
         var prefix = _prefix;
         var offset = prefix.Length;
-        var sep = _separator;
         var lenKey1 = f1.GetLength(in key1);
         var lenKey2 = f2.GetLength(in key2);
         var lenKey3 = f3.GetLength(in key3);
@@ -201,6 +200,7 @@ internal class EntityKeyRebuilder : IKeyRebuilder
         {
             key = new byte[length];
             if (offset > 0) prefix.CopyTo(key.AsSpan());
+            var sep = _separator;
             offset += f1.Format(in key1, key.AsSpan(offset)); key[offset++] = sep;
             offset += f2.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
             offset += f3.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
@@ -235,7 +235,6 @@ internal class EntityKeyRebuilder : IKeyRebuilder
         var f7 = GetFormatter<TKey7>(6);
         var prefix = _prefix;
         var offset = prefix.Length;
-        var sep = _separator;
         var lenKey1 = f1.GetLength(in key1);
         var lenKey2 = f2.GetLength(in key2);
         var lenKey3 = f3.GetLength(in key3);
@@ -248,6 +247,7 @@ internal class EntityKeyRebuilder : IKeyRebuilder
         {
             key = new byte[length];
             if (offset > 0) prefix.CopyTo(key.AsSpan());
+            var sep = _separator;
             offset += f1.Format(in key1, key.AsSpan(offset)); key[offset++] = sep;
             offset += f2.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
             offset += f3.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
@@ -286,7 +286,6 @@ internal class EntityKeyRebuilder : IKeyRebuilder
         var f8 = GetFormatter<TKey8>(7);
         var prefix = _prefix;
         var offset = prefix.Length;
-        var sep = _separator;
         var lenKey1 = f1.GetLength(in key1);
         var lenKey2 = f2.GetLength(in key2);
         var lenKey3 = f3.GetLength(in key3);
@@ -300,6 +299,7 @@ internal class EntityKeyRebuilder : IKeyRebuilder
         {
             key = new byte[length];
             if (offset > 0) prefix.CopyTo(key.AsSpan());
+            var sep = _separator;
             offset += f1.Format(in key1, key.AsSpan(offset)); key[offset++] = sep;
             offset += f2.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
             offset += f3.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
