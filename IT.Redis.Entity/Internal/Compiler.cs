@@ -7,7 +7,7 @@ internal static class Compiler
 {
     private static readonly string FieldNameRedisKey = "_redisKey";
     private static readonly string FieldNameRedisKeyBits = "_redisKeyBits";
-    
+
     internal static readonly string PropNameRedisKey = "RedisKey";
     internal static readonly string PropNameRedisKeyBits = "RedisKeyBits";
 
@@ -69,7 +69,7 @@ internal static class Compiler
     {
         var entityType = typeof(TEntity);
         var eEntity = Expression.Parameter(entityType, "entity");
-        var eRedisKey = GetRedisKey(eEntity, entityType);
+        var eRedisKey = GetPropOrField(eEntity, entityType, TypeRedisKey, PropNameRedisKey, FieldNameRedisKey);
         var propertyTypes = new Type[keys.Count];
         var eArguments = new Expression[2 + keys.Count];
         var hasKeySetter = false;
@@ -88,7 +88,7 @@ internal static class Compiler
 
         if (hasKeySetter)
         {
-            var eRedisKeyBits = GetRedisKeyBits(eEntity, entityType);
+            var eRedisKeyBits = GetPropOrField(eEntity, entityType, TypeRedisKeyBits, PropNameRedisKeyBits, FieldNameRedisKeyBits);
             eArguments[0] = eRedisKey;
             eArguments[1] = eRedisKeyBits;
             eBody = Expression.Block(
@@ -119,35 +119,27 @@ internal static class Compiler
             eBody, eEntity, ParameterKeyBuilder).Compile();
     }
 
-    private static Expression GetRedisKeyBits(ParameterExpression eEntity, Type entityType)
-        => entityType.IsInterface
-            ? Expression.Property(eEntity, GetProperty(entityType, PropNameRedisKeyBits, TypeRedisKeyBits))
-            : Expression.Field(eEntity, GetField(entityType, FieldNameRedisKeyBits, TypeRedisKeyBits));
-
-
-    private static Expression GetRedisKey(ParameterExpression eEntity, Type entityType)
-        => entityType.IsInterface
-            ? Expression.Property(eEntity, GetProperty(entityType, PropNameRedisKey, TypeRedisKey))
-            : Expression.Field(eEntity, GetField(entityType, FieldNameRedisKey, TypeRedisKey));
-
-    private static PropertyInfo GetProperty(Type entityType, string propName, Type propType)
+    private static Expression GetPropOrField(ParameterExpression eEntity, Type entityType,
+        Type memberType, string propName, string fieldName)
     {
-        var property = entityType.GetProperty(propName, BindingFlags.Instance | BindingFlags.Public);
+        if (entityType.IsInterface)
+        {
+            var property = entityType.GetProperty(propName, BindingFlags.Instance | BindingFlags.Public);
 
-        if (property == null || property.PropertyType != propType || property.GetMethod == null || property.SetMethod == null)
-            throw new InvalidOperationException($"Entity type '{entityType.FullName}' does not contain public property '{propName}' with type '{propType.FullName}' and get/set methods");
+            if (property == null || property.PropertyType != memberType || property.GetMethod == null || property.SetMethod == null)
+                throw new InvalidOperationException($"Entity type '{entityType.FullName}' does not contain public property '{propName}' with type '{memberType.FullName}' and get/set methods");
 
-        return property;
-    }
+            return Expression.Property(eEntity, property);
+        }
+        else
+        {
+            var field = entityType.GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
 
-    private static FieldInfo GetField(Type entityType, string fieldName, Type fieldType)
-    {
-        var field = entityType.GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+            if (field == null || field.FieldType != memberType || field.IsInitOnly)
+                throw new InvalidOperationException($"Entity type '{entityType.FullName}' does not contain non-public and non-readonly field '{fieldName}' with type '{memberType.FullName}'");
 
-        if (field == null || field.FieldType != fieldType || field.IsInitOnly)
-            throw new InvalidOperationException($"Entity type '{entityType.FullName}' does not contain non-public and non-readonly field '{fieldName}' with type '{fieldType.FullName}'");
-
-        return field;
+            return Expression.Field(eEntity, field);
+        }
     }
 
     private static MethodInfo GetMethodBuild(int count)
