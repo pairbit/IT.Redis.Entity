@@ -32,7 +32,7 @@ public static class xIDatabase
     #endregion ReadKey
 
     public static void EntitySet<TEntity>(this IDatabase db, in RedisKey key, TEntity entity, RedisEntityFields<TEntity>? fields = null, CommandFlags flags = CommandFlags.None)
-        => db.HashSet(key, (fields ?? RedisEntity<TEntity>.Default.Fields).ForRead.GetEntries(entity), flags);
+        => db.HashSet(key, (fields ?? RedisEntity<TEntity>.Default.Fields).GetEntries(entity), flags);
 
     public static bool EntitySet<TEntity>(this IDatabase db, in RedisKey key, TEntity entity, RedisEntityField<TEntity> field, When when = When.Always, CommandFlags flags = CommandFlags.None)
         => db.HashSet(key, field.ForRedis, field.Read(entity), when, flags);

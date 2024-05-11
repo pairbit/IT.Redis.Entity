@@ -11,6 +11,10 @@ public class RedisEntityImpl<TEntity> : IRedisEntity<TEntity>
 
     public IKeyBuilder KeyBuilder => _keyBuilder;
 
+    //public RedisEntityFields<TEntity> ReadFields { get; }
+
+    //public RedisEntityFields<TEntity> WriteFields { get; }
+
     public RedisEntityFields<TEntity> Fields => _fields;
 
     public RedisEntityImpl(IRedisEntityConfiguration configuration)
@@ -60,6 +64,20 @@ public class RedisEntityImpl<TEntity> : IRedisEntity<TEntity>
         if (keys.Count > 0) _readerKey = Compiler.GetReaderKey<TEntity>(keys);
         _keyBuilder = keyBuilder;
         _fields = new RedisEntityFields<TEntity>(fields);
+
+        //var read = 0;
+        //var write = 0;
+        //foreach (var field in array)
+        //{
+        //    if (field.CanRead) read++;
+        //    if (field.CanWrite) write++;
+        //}
+
+        //ForRead = array.Length == read ? this :
+        //          read == 0 ? Empty : Sub(array.Where(x => x.CanRead), read);
+
+        //ForWrite = array.Length == write ? this :
+        //           write == 0 ? Empty : Sub(array.Where(x => x.CanWrite), write);
     }
 
     public RedisKey ReadKey(TEntity entity)

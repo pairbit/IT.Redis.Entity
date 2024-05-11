@@ -5,10 +5,6 @@ public class RedisEntityFields<TEntity>
     public static readonly RedisEntityFields<TEntity> Empty = new();
     private readonly IReadOnlyDictionary<string, RedisEntityField<TEntity>> _dictionary;
 
-    public RedisEntityFields<TEntity> ForRead { get; }
-
-    public RedisEntityFields<TEntity> ForWrite { get; }
-
     public RedisEntityField<TEntity>[] Array { get; }
 
     public RedisValue[] ForRedis { get; }
@@ -25,27 +21,11 @@ public class RedisEntityFields<TEntity>
 
         Array = array;
         ForRedis = array.Select(x => x.ForRedis).ToArray();
-
-        var read = 0;
-        var write = 0;
-        foreach (var field in array)
-        {
-            if (field.CanRead) read++;
-            if (field.CanWrite) write++;
-        }
-
-        ForRead = array.Length == read ? this :
-                  read == 0 ? Empty : Sub(array.Where(x => x.CanRead), read);
-
-        ForWrite = array.Length == write ? this :
-                   write == 0 ? Empty : Sub(array.Where(x => x.CanWrite), write);
     }
 
     private RedisEntityFields()
     {
         _dictionary = new Dictionary<string, RedisEntityField<TEntity>>(0);
-        ForRead = this;
-        ForWrite = this;
         Array = [];
         ForRedis = [];
     }
