@@ -5,14 +5,18 @@ namespace IT.Redis.Entity.Internal;
 
 internal static class Compiler
 {
-    private static readonly string FieldRedisKeyBitsName = "_redisKeyBits";
-    internal static readonly string PropRedisKeyBitsName = "RedisKeyBits";
-    private static readonly Type TypeRedisKeyBits = typeof(byte);
+    private static readonly string FieldNameRedisKey = "_redisKey";
+    private static readonly string FieldNameRedisKeyBits = "_redisKeyBits";
+    
+    internal static readonly string PropNameRedisKey = "RedisKey";
+    internal static readonly string PropNameRedisKeyBits = "RedisKeyBits";
 
-    private static readonly string FieldRedisKeyName = "_redisKey";
-    internal static readonly string PropRedisKeyName = "RedisKey";
     private static readonly Type TypeRedisKey = typeof(byte[]);
+    private static readonly Type TypeRedisKeyBits = typeof(byte);
     private static readonly Type TypeKeyBuilder = typeof(IKeyBuilder);
+
+    private static readonly ConstantExpression NullRedisKey = Expression.Constant(null, TypeRedisKey);
+    private static readonly ConstantExpression ZeroRedisKeyBits = Expression.Constant((byte)0, TypeRedisKeyBits);
 
     private static readonly MethodInfo MethodDeserializeNew = typeof(RedisValueDeserializerProxy).GetMethod(nameof(RedisValueDeserializerProxy.DeserializeNew))!;
     private static readonly MethodInfo MethodDeserialize = typeof(RedisValueDeserializerProxy).GetMethod(nameof(RedisValueDeserializerProxy.Deserialize))!;
@@ -22,9 +26,6 @@ internal static class Compiler
     private static readonly ParameterExpression ParameterDeserializer = Expression.Parameter(typeof(RedisValueDeserializerProxy), "deserializer");
     private static readonly ParameterExpression ParameterSerializer = Expression.Parameter(typeof(IRedisValueSerializer), "serializer");
     private static readonly ParameterExpression ParameterKeyBuilder = Expression.Parameter(TypeKeyBuilder, "keyBuilder");
-
-    private static readonly ConstantExpression NullRedisKey = Expression.Constant(null, TypeRedisKey);
-    private static readonly ConstantExpression ZeroRedisKeyBits = Expression.Constant((byte)0, TypeRedisKeyBits);
 
     /*
      Expression<Func<Document, IRedisValueSerializer, RedisValue>> exp =
@@ -120,14 +121,14 @@ internal static class Compiler
 
     private static Expression GetRedisKeyBits(ParameterExpression eEntity, Type entityType)
         => entityType.IsInterface
-            ? Expression.Property(eEntity, GetProperty(entityType, PropRedisKeyBitsName, TypeRedisKeyBits))
-            : Expression.Field(eEntity, GetField(entityType, FieldRedisKeyBitsName, TypeRedisKeyBits));
+            ? Expression.Property(eEntity, GetProperty(entityType, PropNameRedisKeyBits, TypeRedisKeyBits))
+            : Expression.Field(eEntity, GetField(entityType, FieldNameRedisKeyBits, TypeRedisKeyBits));
 
 
     private static Expression GetRedisKey(ParameterExpression eEntity, Type entityType)
         => entityType.IsInterface
-            ? Expression.Property(eEntity, GetProperty(entityType, PropRedisKeyName, TypeRedisKey))
-            : Expression.Field(eEntity, GetField(entityType, FieldRedisKeyName, TypeRedisKey));
+            ? Expression.Property(eEntity, GetProperty(entityType, PropNameRedisKey, TypeRedisKey))
+            : Expression.Field(eEntity, GetField(entityType, FieldNameRedisKey, TypeRedisKey));
 
     private static PropertyInfo GetProperty(Type entityType, string propName, Type propType)
     {

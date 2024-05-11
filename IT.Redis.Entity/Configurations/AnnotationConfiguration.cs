@@ -85,8 +85,8 @@ public class AnnotationConfiguration : IRedisEntityConfiguration
             }
         }
 
-        if (property.Name != Compiler.PropRedisKeyName &&
-            property.Name != Compiler.PropRedisKeyBitsName &&
+        if (property.Name != Compiler.PropNameRedisKey &&
+            property.Name != Compiler.PropNameRedisKeyBits &&
             (property.GetMethod?.IsPublic == true ||
             property.SetMethod?.IsPublic == true))
         {

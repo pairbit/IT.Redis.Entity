@@ -44,8 +44,8 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
             if (fieldInfo.FieldName != null) return fieldInfo.FieldName;
         }
 
-        if (property.Name != Compiler.PropRedisKeyName &&
-            property.Name != Compiler.PropRedisKeyBitsName &&
+        if (property.Name != Compiler.PropNameRedisKey &&
+            property.Name != Compiler.PropNameRedisKeyBits &&
             (property.GetMethod?.IsPublic == true ||
             property.SetMethod?.IsPublic == true)) return property.Name;
 
