@@ -51,6 +51,18 @@ public class RedisEntityFields<TEntity>
         return new RedisEntityFields<TEntity>(sub);
     }
 
+    public RedisEntityFields<TEntity> Sub(Func<RedisEntityField<TEntity>, bool> filter, int capacity)
+    {
+        var sub = new Dictionary<string, RedisEntityField<TEntity>>(capacity);
+
+        foreach (var field in Array.Where(filter))
+        {
+            sub.Add(field.Property.Name, field);
+        }
+
+        return new RedisEntityFields<TEntity>(sub);
+    }
+
     public bool ContainsKey(string propertyName) => _dictionary.ContainsKey(propertyName);
 
     public bool TryGetValue(
@@ -59,18 +71,6 @@ public class RedisEntityFields<TEntity>
         [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)]
 #endif
         out RedisEntityField<TEntity> value) => _dictionary.TryGetValue(propertyName, out value);
-
-    private static RedisEntityFields<TEntity> Sub(IEnumerable<RedisEntityField<TEntity>> fields, int capacity)
-    {
-        var sub = new Dictionary<string, RedisEntityField<TEntity>>(capacity);
-
-        foreach (var field in fields)
-        {
-            sub.Add(field.Property.Name, field);
-        }
-
-        return new RedisEntityFields<TEntity>(sub);
-    }
 
     public override string ToString() => Count.ToString();
 }

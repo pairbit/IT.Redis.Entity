@@ -7,7 +7,7 @@ public static class xIDatabaseAsync
     public static Task EntitySetAsync<TEntity>(this IDatabaseAsync db, TEntity entity, IRedisEntity<TEntity>? re = null, CommandFlags flags = CommandFlags.None)
     {
         re ??= RedisEntity<TEntity>.Default;
-        return db.HashSetAsync(re.ReadKey(entity), re.Fields.GetEntries(entity), flags);
+        return db.HashSetAsync(re.ReadKey(entity), re.ReadFields.GetEntries(entity), flags);
     }
 
     public static Task EntitySetAsync<TEntity>(this IDatabaseAsync db, TEntity entity, RedisEntityFields<TEntity> fields, IRedisEntity<TEntity>? re = null, CommandFlags flags = CommandFlags.None)
@@ -25,14 +25,14 @@ public static class xIDatabaseAsync
     public static async Task<bool> EntityLoadAsync<TEntity>(this IDatabaseAsync db, TEntity entity, IRedisEntity<TEntity>? re = null, CommandFlags flags = CommandFlags.None)
     {
         re ??= RedisEntity<TEntity>.Default;
-        var fields = re.Fields;
+        var fields = re.WriteFields;
         return fields.Write(entity, await db.HashGetAsync(re.ReadKey(entity), fields.ForRedis, flags).ConfigureAwait(false));
     }
 
     #endregion ReadKey
 
     public static Task EntitySetAsync<TEntity>(this IDatabaseAsync db, in RedisKey key, TEntity entity, RedisEntityFields<TEntity>? fields = null, CommandFlags flags = CommandFlags.None)
-        => db.HashSetAsync(key, (fields ?? RedisEntity<TEntity>.Default.Fields).GetEntries(entity), flags);
+        => db.HashSetAsync(key, (fields ?? RedisEntity<TEntity>.Default.ReadFields).GetEntries(entity), flags);
 
     public static Task<bool> EntitySetAsync<TEntity>(this IDatabaseAsync db, in RedisKey key, TEntity entity, RedisEntityField<TEntity> field, When when = When.Always, CommandFlags flags = CommandFlags.None)
         => db.HashSetAsync(key, field.ForRedis, field.Read(entity), when, flags);
@@ -45,7 +45,7 @@ public static class xIDatabaseAsync
 
     public static async Task<bool> EntityLoadAsync<TEntity>(this IDatabaseAsync db, RedisKey key, TEntity entity, RedisEntityFields<TEntity>? fields = null, CommandFlags flags = CommandFlags.None)
     {
-        fields ??= RedisEntity<TEntity>.Default.Fields;
+        fields ??= RedisEntity<TEntity>.Default.WriteFields;
         return fields.Write(entity, await db.HashGetAsync(key, fields.ForRedis, flags).ConfigureAwait(false));
     }
 
@@ -66,7 +66,7 @@ public static class xIDatabaseAsync
 
     public static async Task<TEntity?> EntityGetAsync<TEntity, IEntity>(this IDatabaseAsync db, RedisKey key, RedisEntityFields<IEntity>? fields = null, CommandFlags flags = CommandFlags.None) where TEntity : IEntity, new()
     {
-        fields ??= RedisEntity<IEntity>.Default.Fields;
+        fields ??= RedisEntity<IEntity>.Default.WriteFields;
         return fields.GetEntity<TEntity, IEntity>(await db.HashGetAsync(key, fields.ForRedis, flags).ConfigureAwait(false));
     }
 
@@ -75,7 +75,7 @@ public static class xIDatabaseAsync
 
     public static async Task<TEntity?> EntityGetAsync<TEntity>(this IDatabaseAsync db, RedisKey key, RedisEntityFields<TEntity>? fields = null, CommandFlags flags = CommandFlags.None) where TEntity : new()
     {
-        fields ??= RedisEntity<TEntity>.Default.Fields;
+        fields ??= RedisEntity<TEntity>.Default.WriteFields;
         return fields.GetEntity<TEntity, TEntity>(await db.HashGetAsync(key, fields.ForRedis, flags).ConfigureAwait(false));
     }
 

@@ -7,7 +7,7 @@ public static class xIDatabase
     public static void EntitySet<TEntity>(this IDatabase db, TEntity entity, IRedisEntity<TEntity>? re = null, CommandFlags flags = CommandFlags.None)
     {
         re ??= RedisEntity<TEntity>.Default;
-        db.HashSet(re.ReadKey(entity), re.Fields.GetEntries(entity), flags);
+        db.HashSet(re.ReadKey(entity), re.ReadFields.GetEntries(entity), flags);
     }
 
     public static void EntitySet<TEntity>(this IDatabase db, TEntity entity, RedisEntityFields<TEntity> fields, IRedisEntity<TEntity>? re = null, CommandFlags flags = CommandFlags.None)
@@ -25,14 +25,14 @@ public static class xIDatabase
     public static bool EntityLoad<TEntity>(this IDatabase db, TEntity entity, IRedisEntity<TEntity>? re = null, CommandFlags flags = CommandFlags.None)
     {
         re ??= RedisEntity<TEntity>.Default;
-        var fields = re.Fields;
+        var fields = re.WriteFields;
         return fields.Write(entity, db.HashGet(re.ReadKey(entity), fields.ForRedis, flags));
     }
 
     #endregion ReadKey
 
     public static void EntitySet<TEntity>(this IDatabase db, in RedisKey key, TEntity entity, RedisEntityFields<TEntity>? fields = null, CommandFlags flags = CommandFlags.None)
-        => db.HashSet(key, (fields ?? RedisEntity<TEntity>.Default.Fields).GetEntries(entity), flags);
+        => db.HashSet(key, (fields ?? RedisEntity<TEntity>.Default.ReadFields).GetEntries(entity), flags);
 
     public static bool EntitySet<TEntity>(this IDatabase db, in RedisKey key, TEntity entity, RedisEntityField<TEntity> field, When when = When.Always, CommandFlags flags = CommandFlags.None)
         => db.HashSet(key, field.ForRedis, field.Read(entity), when, flags);
@@ -45,7 +45,7 @@ public static class xIDatabase
 
     public static bool EntityLoad<TEntity>(this IDatabase db, in RedisKey key, TEntity entity, RedisEntityFields<TEntity>? fields = null, CommandFlags flags = CommandFlags.None)
     {
-        fields ??= RedisEntity<TEntity>.Default.Fields;
+        fields ??= RedisEntity<TEntity>.Default.WriteFields;
         return fields.Write(entity, db.HashGet(key, fields.ForRedis, flags));
     }
 
@@ -65,7 +65,7 @@ public static class xIDatabase
 
     public static TEntity? EntityGet<TEntity, IEntity>(this IDatabase db, in RedisKey key, RedisEntityFields<IEntity>? fields = null, CommandFlags flags = CommandFlags.None) where TEntity : IEntity, new()
     {
-        fields ??= RedisEntity<IEntity>.Default.Fields;
+        fields ??= RedisEntity<IEntity>.Default.WriteFields;
         return fields.GetEntity<TEntity, IEntity>(db.HashGet(key, fields.ForRedis, flags));
     }
 
@@ -74,7 +74,7 @@ public static class xIDatabase
 
     public static TEntity? EntityGet<TEntity>(this IDatabase db, in RedisKey key, RedisEntityFields<TEntity>? fields = null, CommandFlags flags = CommandFlags.None) where TEntity : new()
     {
-        fields ??= RedisEntity<TEntity>.Default.Fields;
+        fields ??= RedisEntity<TEntity>.Default.WriteFields;
         return fields.GetEntity<TEntity, TEntity>(db.HashGet(key, fields.ForRedis, flags));
     }
 

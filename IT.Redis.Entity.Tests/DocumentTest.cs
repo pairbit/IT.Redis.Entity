@@ -203,6 +203,11 @@ public class DocumentTest
     {
         var doc = new MyRecInt { MyInt = int.MinValue };
 
+        var re = RedisEntity<MyRecInt>.Default;
+        Assert.That(ReferenceEquals(re.Fields, re.AllFields));
+        Assert.That(ReferenceEquals(re.ReadFields, re.AllFields));
+        Assert.That(ReferenceEquals(re.WriteFields, re.AllFields));
+        Assert.That(re.Fields.Count, Is.EqualTo(1));
         try
         {
             _db.EntitySet(Key, doc);
@@ -239,20 +244,28 @@ public class DocumentTest
     {
         var fieldClass = new ClassFieldsTest { WriteOnlyField = 42 };
 
-        var fields = RedisEntity<ClassFieldsTest>.Default.Fields;
+        var re = RedisEntity<ClassFieldsTest>.Default;
 
-        var writeOnlyField = fields[nameof(ClassFieldsTest.WriteOnlyField)];
+        Assert.That(re.Fields, Is.EqualTo(RedisEntityFields<ClassFieldsTest>.Empty));
+        Assert.That(re.ReadFields.Count, Is.EqualTo(1));
+        Assert.That(re.WriteFields.Count, Is.EqualTo(1));
+        Assert.That(re.AllFields.Count, Is.EqualTo(2));
+
+        Assert.That(re.ReadFields.ContainsKey(nameof(ClassFieldsTest.ReadOnlyField)), Is.True);
+        Assert.That(re.WriteFields.ContainsKey(nameof(ClassFieldsTest.WriteOnlyField)), Is.True);
+
+        var writeOnlyField = re.AllFields[nameof(ClassFieldsTest.WriteOnlyField)];
         Assert.That(writeOnlyField.CanWrite, Is.True);
         Assert.That(writeOnlyField.CanRead, Is.False);
 
-        var readOnlyField = fields[nameof(ClassFieldsTest.ReadOnlyField)];
+        var readOnlyField = re.AllFields[nameof(ClassFieldsTest.ReadOnlyField)];
         Assert.That(readOnlyField.CanWrite, Is.False);
         Assert.That(readOnlyField.CanRead, Is.True);
 
         var key = "fieldClass";
         try
         {
-            _db.EntitySet(key, fieldClass, readOnlyField);
+            _db.EntitySet(key, fieldClass);
         }
         finally
         {

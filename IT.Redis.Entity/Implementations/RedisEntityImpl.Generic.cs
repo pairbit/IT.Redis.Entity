@@ -5,24 +5,31 @@ namespace IT.Redis.Entity;
 
 public class RedisEntityImpl<TEntity> : IRedisEntity<TEntity>
 {
-    private readonly RedisEntityFields<TEntity> _fields;
     private readonly Func<TEntity, IKeyBuilder, byte[]>? _readerKey;
     private readonly EntityKeyBuilder _keyBuilder;
 
     public IKeyBuilder KeyBuilder => _keyBuilder;
 
-    //public RedisEntityFields<TEntity> ReadFields { get; }
+    public RedisEntityFields<TEntity> AllFields { get; }
 
-    //public RedisEntityFields<TEntity> WriteFields { get; }
+    public RedisEntityFields<TEntity> ReadFields { get; }
 
-    public RedisEntityFields<TEntity> Fields => _fields;
+    public RedisEntityFields<TEntity> WriteFields { get; }
+
+    /// <summary>
+    /// Read and Write
+    /// </summary>
+    public RedisEntityFields<TEntity> Fields { get; }
 
     public RedisEntityImpl(IRedisEntityConfiguration configuration)
     {
         if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
         var properties = RedisEntity<TEntity>.Properties;
-        var fields = new Dictionary<string, RedisEntityField<TEntity>>(properties.Length);
+        var dic = new Dictionary<string, RedisEntityField<TEntity>>(properties.Length);
+        var countReadFields = 0;
+        var countWriteFields = 0;
+        var countReadWriteFields = 0;
 
 #if NETSTANDARD2_0 || NET461
         var set = new HashSet<RedisValue>();
@@ -57,27 +64,32 @@ public class RedisEntityImpl<TEntity> : IRedisEntity<TEntity>
                 var field = new RedisEntityField<TEntity>(property, redisField,
                     writer, reader, formatter);
 
-                fields.Add(name, field);
+                dic.Add(name, field);
+
+                if (field.CanRead && field.CanWrite) countReadWriteFields++;
+                if (field.CanRead) countReadFields++;
+                if (field.CanWrite) countWriteFields++;
             }
         }
 
         if (keys.Count > 0) _readerKey = Compiler.GetReaderKey<TEntity>(keys);
         _keyBuilder = keyBuilder;
-        _fields = new RedisEntityFields<TEntity>(fields);
+        var allFields = new RedisEntityFields<TEntity>(dic);
+        var countAllFields = dic.Count;
 
-        //var read = 0;
-        //var write = 0;
-        //foreach (var field in array)
-        //{
-        //    if (field.CanRead) read++;
-        //    if (field.CanWrite) write++;
-        //}
+        ReadFields = countAllFields == countReadFields ? allFields :
+                     countReadFields == 0 ? RedisEntityFields<TEntity>.Empty :
+                     allFields.Sub(x => x.CanRead, countReadFields);
 
-        //ForRead = array.Length == read ? this :
-        //          read == 0 ? Empty : Sub(array.Where(x => x.CanRead), read);
+        WriteFields = countAllFields == countWriteFields ? allFields :
+                      countWriteFields == 0 ? RedisEntityFields<TEntity>.Empty :
+                      allFields.Sub(x => x.CanWrite, countWriteFields);
 
-        //ForWrite = array.Length == write ? this :
-        //           write == 0 ? Empty : Sub(array.Where(x => x.CanWrite), write);
+        Fields = countAllFields == countReadWriteFields ? allFields :
+                 countReadWriteFields == 0 ? RedisEntityFields<TEntity>.Empty :
+                 allFields.Sub(x => x.CanRead && x.CanWrite, countReadWriteFields);
+
+        AllFields = allFields;
     }
 
     public RedisKey ReadKey(TEntity entity)
