@@ -27,19 +27,17 @@ internal static class Compiler
      Expression<Func<Document, IRedisValueSerializer, RedisValue>> exp =
             (Document entity, IRedisValueSerializer serializer) => serializer.Serialize(entity.Name);
      */
-    internal static RedisValueReader<T>? GetReader<T>(PropertyInfo property)
+    internal static RedisValueReader<TEntity>? GetReader<TEntity>(PropertyInfo property)
     {
         if (property.GetMethod == null) return null;
 
-        var eEntity = Expression.Parameter(typeof(T), "entity");
+        var eEntity = Expression.Parameter(typeof(TEntity), "entity");
 
-        var eProperty = Expression.Property(eEntity, property);
-
-        var eCall = Expression.Call(ParameterSerializer, MethodSerialize.MakeGenericMethod(property.PropertyType), eProperty);
-
-        var lambda = Expression.Lambda<RedisValueReader<T>>(eCall, eEntity, ParameterSerializer);
-
-        return lambda.Compile();
+        return Expression.Lambda<RedisValueReader<TEntity>>(
+            Expression.Call(ParameterSerializer,
+                MethodSerialize.MakeGenericMethod(property.PropertyType),
+                Expression.Property(eEntity, property)),
+            eEntity, ParameterSerializer).Compile();
     }
 
     /*
@@ -47,37 +45,29 @@ internal static class Compiler
             (Document entity, RedisValue redisValue, RedisValueDeserializerProxy deserializer)
             => entity.Name = deserializer.Deserialize(in redisValue, entity.Name);
      */
-    internal static RedisValueWriter<T>? GetWriter<T>(PropertyInfo property)
+    internal static RedisValueWriter<TEntity>? GetWriter<TEntity>(PropertyInfo property)
     {
         if (property.SetMethod == null) return null;
 
-        var eEntity = Expression.Parameter(typeof(T), "entity");
-
+        var eEntity = Expression.Parameter(typeof(TEntity), "entity");
         var eProperty = Expression.Property(eEntity, property);
 
-        var eCall = property.GetMethod == null
-            ? Expression.Call(ParameterDeserializer, MethodDeserializeNew.MakeGenericMethod(property.PropertyType), ParameterRedisValue)
-            : Expression.Call(ParameterDeserializer, MethodDeserialize.MakeGenericMethod(property.PropertyType), ParameterRedisValue, eProperty);
-
-        var eAssign = Expression.Assign(eProperty, eCall);
-
-        var lambda = Expression.Lambda<RedisValueWriter<T>>(eAssign, eEntity, ParameterRedisValue, ParameterDeserializer);
-
-        return lambda.Compile();
+        return Expression.Lambda<RedisValueWriter<TEntity>>(
+            Expression.Assign(eProperty,
+                property.GetMethod == null
+                ? Expression.Call(ParameterDeserializer, MethodDeserializeNew.MakeGenericMethod(property.PropertyType), ParameterRedisValue)
+                : Expression.Call(ParameterDeserializer, MethodDeserialize.MakeGenericMethod(property.PropertyType), ParameterRedisValue, eProperty)),
+            eEntity, ParameterRedisValue, ParameterDeserializer).Compile();
     }
 
     //keyBuilder.Build(entity.Key1, entity.Key2)
-    internal static Func<T, IKeyBuilder, byte[]> GetReaderKey<T>(IReadOnlyList<PropertyInfo> keys)
+    internal static Func<TEntity, IKeyBuilder, byte[]> GetReaderKey<TEntity>(IReadOnlyList<PropertyInfo> keys)
     {
-        var entityType = typeof(T);
-
+        var entityType = typeof(TEntity);
         var eEntity = Expression.Parameter(entityType, "entity");
-
         var eRedisKey = GetRedisKey(eEntity, entityType);
-
         var propertyTypes = new Type[keys.Count];
         var eArguments = new Expression[2 + keys.Count];
-
         var hasKeySetter = false;
         var eNullBytes = Expression.Constant(null, RedisKeyType);
         var eZeroByte = Expression.Constant((byte)0, RedisKeyBitsType);
@@ -92,46 +82,39 @@ internal static class Compiler
         }
 
         var methodBuild = GetMethodBuild(keys.Count).MakeGenericMethod(propertyTypes);
-
         Expression eBody;
 
         if (hasKeySetter)
         {
             var eRedisKeyBits = GetRedisKeyBits(eEntity, entityType);
-
-            var eTest = Expression.Or(
-                Expression.GreaterThan(eRedisKeyBits, eZeroByte),
-                Expression.Equal(eRedisKey, eNullBytes));
-
             eArguments[0] = eRedisKey;
             eArguments[1] = eRedisKeyBits;
-
-            var eCall = Expression.Call(ParameterKeyBuilder, methodBuild, eArguments);
-
-            var eAssign = Expression.Assign(eRedisKey, eCall);
-
-            var eIfThen = Expression.IfThen(eTest, Expression.Block(
-                    eAssign,
-                    Expression.Assign(eRedisKeyBits, eZeroByte)
-                ));
-
-            eBody = Expression.Block(eIfThen, eRedisKey);
+            eBody = Expression.Block(
+                        Expression.IfThen(
+                            Expression.Or(
+                                Expression.GreaterThan(eRedisKeyBits, eZeroByte),
+                                Expression.Equal(eRedisKey, eNullBytes)
+                            ),
+                            Expression.Block(
+                                Expression.Assign(eRedisKey, Expression.Call(ParameterKeyBuilder, methodBuild, eArguments)),
+                                Expression.Assign(eRedisKeyBits, eZeroByte)
+                            )
+                        ),
+                        eRedisKey
+                    );
         }
         else
         {
             eArguments[0] = eNullBytes;
             eArguments[1] = eZeroByte;
-
-            var eCall = Expression.Call(ParameterKeyBuilder, methodBuild, eArguments);
-
-            var eAssign = Expression.Assign(eRedisKey, eCall);
-
-            eBody = Expression.Coalesce(eRedisKey, eAssign);
+            eBody = Expression.Coalesce(
+                eRedisKey,
+                Expression.Assign(eRedisKey, Expression.Call(ParameterKeyBuilder, methodBuild, eArguments))
+            );
         }
 
-        var lambda = Expression.Lambda<Func<T, IKeyBuilder, byte[]>>(eBody, eEntity, ParameterKeyBuilder);
-
-        return lambda.Compile();
+        return Expression.Lambda<Func<TEntity, IKeyBuilder, byte[]>>(
+            eBody, eEntity, ParameterKeyBuilder).Compile();
     }
 
     private static Expression GetRedisKeyBits(ParameterExpression eEntity, Type entityType)

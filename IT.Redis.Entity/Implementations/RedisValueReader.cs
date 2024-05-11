@@ -1,3 +1,3 @@
 ﻿namespace IT.Redis.Entity;
 
-public delegate RedisValue RedisValueReader<T>(T entity, IRedisValueSerializer serializer);
+public delegate RedisValue RedisValueReader<TEntity>(TEntity entity, IRedisValueSerializer serializer);
