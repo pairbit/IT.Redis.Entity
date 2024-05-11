@@ -7,12 +7,12 @@ internal static class Compiler
 {
     private static readonly string FieldRedisKeyBitsName = "_redisKeyBits";
     internal static readonly string PropRedisKeyBitsName = "RedisKeyBits";
-    private static readonly Type RedisKeyBitsType = typeof(byte);
+    private static readonly Type TypeRedisKeyBits = typeof(byte);
 
     private static readonly string FieldRedisKeyName = "_redisKey";
     internal static readonly string PropRedisKeyName = "RedisKey";
-    private static readonly Type RedisKeyType = typeof(byte[]);
-    private static readonly Type KeyBuilderType = typeof(IKeyBuilder);
+    private static readonly Type TypeRedisKey = typeof(byte[]);
+    private static readonly Type TypeKeyBuilder = typeof(IKeyBuilder);
 
     private static readonly MethodInfo MethodDeserializeNew = typeof(RedisValueDeserializerProxy).GetMethod(nameof(RedisValueDeserializerProxy.DeserializeNew))!;
     private static readonly MethodInfo MethodDeserialize = typeof(RedisValueDeserializerProxy).GetMethod(nameof(RedisValueDeserializerProxy.Deserialize))!;
@@ -21,7 +21,10 @@ internal static class Compiler
     private static readonly ParameterExpression ParameterRedisValue = Expression.Parameter(typeof(RedisValue), "redisValue");
     private static readonly ParameterExpression ParameterDeserializer = Expression.Parameter(typeof(RedisValueDeserializerProxy), "deserializer");
     private static readonly ParameterExpression ParameterSerializer = Expression.Parameter(typeof(IRedisValueSerializer), "serializer");
-    private static readonly ParameterExpression ParameterKeyBuilder = Expression.Parameter(KeyBuilderType, "keyBuilder");
+    private static readonly ParameterExpression ParameterKeyBuilder = Expression.Parameter(TypeKeyBuilder, "keyBuilder");
+
+    private static readonly ConstantExpression NullRedisKey = Expression.Constant(null, TypeRedisKey);
+    private static readonly ConstantExpression ZeroRedisKeyBits = Expression.Constant((byte)0, TypeRedisKeyBits);
 
     /*
      Expression<Func<Document, IRedisValueSerializer, RedisValue>> exp =
@@ -69,8 +72,6 @@ internal static class Compiler
         var propertyTypes = new Type[keys.Count];
         var eArguments = new Expression[2 + keys.Count];
         var hasKeySetter = false;
-        var eNullBytes = Expression.Constant(null, RedisKeyType);
-        var eZeroByte = Expression.Constant((byte)0, RedisKeyBitsType);
 
         for (int i = 0; i < keys.Count; i++)
         {
@@ -92,12 +93,12 @@ internal static class Compiler
             eBody = Expression.Block(
                         Expression.IfThen(
                             Expression.Or(
-                                Expression.GreaterThan(eRedisKeyBits, eZeroByte),
-                                Expression.Equal(eRedisKey, eNullBytes)
+                                Expression.GreaterThan(eRedisKeyBits, ZeroRedisKeyBits),
+                                Expression.Equal(eRedisKey, NullRedisKey)
                             ),
                             Expression.Block(
                                 Expression.Assign(eRedisKey, Expression.Call(ParameterKeyBuilder, methodBuild, eArguments)),
-                                Expression.Assign(eRedisKeyBits, eZeroByte)
+                                Expression.Assign(eRedisKeyBits, ZeroRedisKeyBits)
                             )
                         ),
                         eRedisKey
@@ -105,8 +106,8 @@ internal static class Compiler
         }
         else
         {
-            eArguments[0] = eNullBytes;
-            eArguments[1] = eZeroByte;
+            eArguments[0] = NullRedisKey;
+            eArguments[1] = ZeroRedisKeyBits;
             eBody = Expression.Coalesce(
                 eRedisKey,
                 Expression.Assign(eRedisKey, Expression.Call(ParameterKeyBuilder, methodBuild, eArguments))
@@ -119,14 +120,14 @@ internal static class Compiler
 
     private static Expression GetRedisKeyBits(ParameterExpression eEntity, Type entityType)
         => entityType.IsInterface
-            ? Expression.Property(eEntity, GetProperty(entityType, PropRedisKeyBitsName, RedisKeyBitsType))
-            : Expression.Field(eEntity, GetField(entityType, FieldRedisKeyBitsName, RedisKeyBitsType));
+            ? Expression.Property(eEntity, GetProperty(entityType, PropRedisKeyBitsName, TypeRedisKeyBits))
+            : Expression.Field(eEntity, GetField(entityType, FieldRedisKeyBitsName, TypeRedisKeyBits));
 
 
     private static Expression GetRedisKey(ParameterExpression eEntity, Type entityType)
         => entityType.IsInterface
-            ? Expression.Property(eEntity, GetProperty(entityType, PropRedisKeyName, RedisKeyType))
-            : Expression.Field(eEntity, GetField(entityType, FieldRedisKeyName, RedisKeyType));
+            ? Expression.Property(eEntity, GetProperty(entityType, PropRedisKeyName, TypeRedisKey))
+            : Expression.Field(eEntity, GetField(entityType, FieldRedisKeyName, TypeRedisKey));
 
     private static PropertyInfo GetProperty(Type entityType, string propName, Type propType)
     {
@@ -150,7 +151,7 @@ internal static class Compiler
 
     private static MethodInfo GetMethodBuild(int count)
     {
-        var methods = KeyBuilderType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
+        var methods = TypeKeyBuilder.GetMethods(BindingFlags.Instance | BindingFlags.Public);
         for (int i = 0; i < methods.Length; i++)
         {
             var method = methods[i];
