@@ -5,10 +5,10 @@ namespace IT.Redis.Entity;
 
 public class RedisEntityImpl<TEntity> : IRedisEntity<TEntity>
 {
-    private readonly Func<TEntity, IKeyBuilder, byte[]>? _readerKey;
-    private readonly EntityKeyBuilder _keyBuilder;
+    private readonly Func<TEntity, IKeyRebuilder, byte[]>? _readerKey;
+    private readonly EntityKeyRebuilder _keyBuilder;
 
-    public IKeyBuilder KeyBuilder => _keyBuilder;
+    public IKeyRebuilder KeyBuilder => _keyBuilder;
 
     public RedisEntityFields<TEntity> AllFields { get; }
 
@@ -36,8 +36,8 @@ public class RedisEntityImpl<TEntity> : IRedisEntity<TEntity>
 #else
         var set = new HashSet<RedisValue>(properties.Length);
 #endif
-        var keys = new List<PropertyInfo>(EntityKeyBuilder.MaxKeys);
-        var keyBuilder = new EntityKeyBuilder(typeof(TEntity), configuration.GetKeyPrefix(typeof(TEntity)));
+        var keys = new List<PropertyInfo>(EntityKeyRebuilder.MaxKeys);
+        var keyBuilder = new EntityKeyRebuilder(typeof(TEntity), configuration.GetKeyPrefix(typeof(TEntity)));
 
         foreach (var property in properties)
         {

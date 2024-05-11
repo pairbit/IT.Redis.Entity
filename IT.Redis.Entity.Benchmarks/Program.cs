@@ -15,14 +15,13 @@
 //bench.KE_Default();
 //bench.KE_Fixed();
 
-//var bench = new KeyBuilderBenchmark { Max = 3 };
-//if (bench.Fixed_Manual() != bench.Fixed()) throw new System.Exception();
-//BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(KeyBuilderBenchmark));
+var bench = new KeyBuilderBenchmark { Max = 3 };
+if (bench.Builder_Var() != bench.Rebuilder_Var()) throw new System.Exception();
+BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(KeyBuilderBenchmark));
 
-var bench = new EntityBenchmark();
-bench.Validate();
-
-BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(EntityBenchmark));
+//var bench = new EntityBenchmark();
+//bench.Validate();
+//BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(EntityBenchmark));
 
 //using DocLib;
 //using DocLib.RedisEntity;

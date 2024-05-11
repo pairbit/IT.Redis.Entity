@@ -17,254 +17,109 @@ public class KeyBuilder : IKeyBuilder
         _separator = separator;
     }
 
-    public byte[] BuildKey<TKey1>(byte[]? key, byte bits, in TKey1 key1)
+    public byte[] BuildKey<TKey1>(in TKey1 key1)
     {
         var f = _utf8Formatter;
-        var length = f.GetLength(in key1);
-        if (key == null || key.Length != length)
-        {
-            key = new byte[length];
-            f.Format(in key1, key);
-        }
-        else if ((bits & 1) == 1)
-        {
-            f.Format(in key1, key);
-        }
+        var key = new byte[f.GetLength(in key1)];
+        f.Format(in key1, key);
         return key;
     }
 
-    public byte[] BuildKey<TKey1, TKey2>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2)
+    public byte[] BuildKey<TKey1, TKey2>(in TKey1 key1, in TKey2 key2)
     {
         var f = _utf8Formatter;
-        var lenKey1 = f.GetLength(in key1);
-        var length = 1 + lenKey1 + f.GetLength(in key2);
-        if (key == null || key.Length != length)
-        {
-            key = new byte[length];
-            var offset = f.Format(in key1, key);
-            key[offset++] = _separator;
-            f.Format(in key2, key.AsSpan(offset));
-        }
-        else
-        {
-            if ((bits & 1) == 1) f.Format(in key1, key);
-            if ((bits & 2) == 2) f.Format(in key2, key.AsSpan(lenKey1 + 1));
-        }
+        var key = new byte[1 + f.GetLength(in key1) + f.GetLength(in key2)];
+        var offset = f.Format(in key1, key);
+        key[offset++] = _separator;
+        f.Format(in key2, key.AsSpan(offset));
         return key;
     }
 
-    public byte[] BuildKey<TKey1, TKey2, TKey3>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3)
+    public byte[] BuildKey<TKey1, TKey2, TKey3>(in TKey1 key1, in TKey2 key2, in TKey3 key3)
     {
         var f = _utf8Formatter;
         var sep = _separator;
-        var lenKey1 = f.GetLength(in key1);
-        var lenKey2 = f.GetLength(in key2);
-        var length = 2 + lenKey1 + lenKey2 + f.GetLength(in key3);
-        var offset = 0;
-        if (key == null || key.Length != length)
-        {
-            key = new byte[length];
-            offset += f.Format(in key1, key); key[offset++] = sep;
-            offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
-            f.Format(in key3, key.AsSpan(offset));
-        }
-        else
-        {
-            if ((bits & 1) == 1) f.Format(in key1, key);
-            offset += lenKey1 + 1;
-            if ((bits & 2) == 2) f.Format(in key2, key.AsSpan(offset));
-            if ((bits & 4) == 4) f.Format(in key3, key.AsSpan(offset + lenKey2 + 1));
-        }
+        var key = new byte[2 + f.GetLength(in key1) + f.GetLength(in key2) + f.GetLength(in key3)];
+        var offset = f.Format(in key1, key); key[offset++] = sep;
+        offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
+        f.Format(in key3, key.AsSpan(offset));
         return key;
     }
 
-    public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4)
+    public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4>(in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4)
     {
         var f = _utf8Formatter;
         var sep = _separator;
-        var lenKey1 = f.GetLength(in key1);
-        var lenKey2 = f.GetLength(in key2);
-        var lenKey3 = f.GetLength(in key3);
-        var length = 3 + lenKey1 + lenKey2 + lenKey3
-                       + f.GetLength(in key4);
-        var offset = 0;
-        if (key == null || key.Length != length)
-        {
-            key = new byte[length];
-            offset += f.Format(in key1, key); key[offset++] = sep;
-            offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
-            offset += f.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
-            f.Format(in key4, key.AsSpan(offset));
-        }
-        else
-        {
-            if ((bits & 1) == 1) f.Format(in key1, key);
-            offset += lenKey1 + 1;
-            if ((bits & 2) == 2) f.Format(in key2, key.AsSpan(offset));
-            offset += lenKey2 + 1;
-            if ((bits & 4) == 4) f.Format(in key3, key.AsSpan(offset));
-            if ((bits & 8) == 8) f.Format(in key4, key.AsSpan(offset + lenKey3 + 1));
-        }
+        var key = new byte[3 + f.GetLength(in key1) + f.GetLength(in key2)
+                             + f.GetLength(in key3) + f.GetLength(in key4)];
+        var offset = f.Format(in key1, key); key[offset++] = sep;
+        offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
+        f.Format(in key4, key.AsSpan(offset));
         return key;
     }
 
-    public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4, TKey5>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5)
+    public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4, TKey5>(in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5)
     {
         var f = _utf8Formatter;
         var sep = _separator;
-        var lenKey1 = f.GetLength(in key1);
-        var lenKey2 = f.GetLength(in key2);
-        var lenKey3 = f.GetLength(in key3);
-        var lenKey4 = f.GetLength(in key4);
-        var length = 4 + lenKey1 + lenKey2 + lenKey3 + lenKey4
-                       + f.GetLength(in key5);
-        var offset = 0;
-        if (key == null || key.Length != length)
-        {
-            key = new byte[length];
-            offset += f.Format(in key1, key); key[offset++] = sep;
-            offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
-            offset += f.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
-            offset += f.Format(in key4, key.AsSpan(offset)); key[offset++] = sep;
-            f.Format(in key5, key.AsSpan(offset));
-        }
-        else
-        {
-            if ((bits & 1) == 1) f.Format(in key1, key);
-            offset += lenKey1 + 1;
-            if ((bits & 2) == 2) f.Format(in key2, key.AsSpan(offset));
-            offset += lenKey2 + 1;
-            if ((bits & 4) == 4) f.Format(in key3, key.AsSpan(offset));
-            offset += lenKey3 + 1;
-            if ((bits & 8) == 8) f.Format(in key4, key.AsSpan(offset));
-            if ((bits & 16) == 16) f.Format(in key5, key.AsSpan(offset + lenKey4 + 1));
-        }
+        var key = new byte[4 + f.GetLength(in key1) + f.GetLength(in key2) + f.GetLength(in key3)
+                             + f.GetLength(in key4) + f.GetLength(in key5)];
+        var offset = f.Format(in key1, key); key[offset++] = sep;
+        offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f.Format(in key4, key.AsSpan(offset)); key[offset++] = sep;
+        f.Format(in key5, key.AsSpan(offset));
         return key;
     }
 
-    public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6)
+    public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6>(in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6)
     {
         var f = _utf8Formatter;
         var sep = _separator;
-        var lenKey1 = f.GetLength(in key1);
-        var lenKey2 = f.GetLength(in key2);
-        var lenKey3 = f.GetLength(in key3);
-        var lenKey4 = f.GetLength(in key4);
-        var lenKey5 = f.GetLength(in key5);
-        var length = 5 + lenKey1 + lenKey2 + lenKey3 + lenKey4
-                       + lenKey5 + f.GetLength(in key6);
-        var offset = 0;
-        if (key == null || key.Length != length)
-        {
-            key = new byte[length];
-            offset += f.Format(in key1, key); key[offset++] = sep;
-            offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
-            offset += f.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
-            offset += f.Format(in key4, key.AsSpan(offset)); key[offset++] = sep;
-            offset += f.Format(in key5, key.AsSpan(offset)); key[offset++] = sep;
-            f.Format(in key6, key.AsSpan(offset));
-        }
-        else
-        {
-            if ((bits & 1) == 1) f.Format(in key1, key);
-            offset += lenKey1 + 1;
-            if ((bits & 2) == 2) f.Format(in key2, key.AsSpan(offset));
-            offset += lenKey2 + 1;
-            if ((bits & 4) == 4) f.Format(in key3, key.AsSpan(offset));
-            offset += lenKey3 + 1;
-            if ((bits & 8) == 8) f.Format(in key4, key.AsSpan(offset));
-            offset += lenKey4 + 1;
-            if ((bits & 16) == 16) f.Format(in key5, key.AsSpan(offset));
-            if ((bits & 32) == 32) f.Format(in key6, key.AsSpan(offset + lenKey5 + 1));
-        }
+        var key = new byte[5 + f.GetLength(in key1) + f.GetLength(in key2) + f.GetLength(in key3)
+                             + f.GetLength(in key4) + f.GetLength(in key5) + f.GetLength(in key6)];
+        var offset = f.Format(in key1, key); key[offset++] = sep;
+        offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f.Format(in key4, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f.Format(in key5, key.AsSpan(offset)); key[offset++] = sep;
+        f.Format(in key6, key.AsSpan(offset));
         return key;
     }
 
-    public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6, TKey7>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6, in TKey7 key7)
+    public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6, TKey7>(in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6, in TKey7 key7)
     {
         var f = _utf8Formatter;
         var sep = _separator;
-        var lenKey1 = f.GetLength(in key1);
-        var lenKey2 = f.GetLength(in key2);
-        var lenKey3 = f.GetLength(in key3);
-        var lenKey4 = f.GetLength(in key4);
-        var lenKey5 = f.GetLength(in key5);
-        var lenKey6 = f.GetLength(in key6);
-        var length = 6 + lenKey1 + lenKey2 + lenKey3 + lenKey4
-                       + lenKey5 + lenKey6 + f.GetLength(in key7);
-        var offset = 0;
-        if (key == null || key.Length != length)
-        {
-            key = new byte[length];
-            offset += f.Format(in key1, key); key[offset++] = sep;
-            offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
-            offset += f.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
-            offset += f.Format(in key4, key.AsSpan(offset)); key[offset++] = sep;
-            offset += f.Format(in key5, key.AsSpan(offset)); key[offset++] = sep;
-            offset += f.Format(in key6, key.AsSpan(offset)); key[offset++] = sep;
-            f.Format(in key7, key.AsSpan(offset));
-        }
-        else
-        {
-            if ((bits & 1) == 1) f.Format(in key1, key);
-            offset += lenKey1 + 1;
-            if ((bits & 2) == 2) f.Format(in key2, key.AsSpan(offset));
-            offset += lenKey2 + 1;
-            if ((bits & 4) == 4) f.Format(in key3, key.AsSpan(offset));
-            offset += lenKey3 + 1;
-            if ((bits & 8) == 8) f.Format(in key4, key.AsSpan(offset));
-            offset += lenKey4 + 1;
-            if ((bits & 16) == 16) f.Format(in key5, key.AsSpan(offset));
-            offset += lenKey5 + 1;
-            if ((bits & 32) == 32) f.Format(in key6, key.AsSpan(offset));
-            if ((bits & 64) == 64) f.Format(in key7, key.AsSpan(offset + lenKey6 + 1));
-        }
+        var key = new byte[6 + f.GetLength(in key1) + f.GetLength(in key2) + f.GetLength(in key3)
+                             + f.GetLength(in key4) + f.GetLength(in key5) + f.GetLength(in key6)
+                             + f.GetLength(in key7)];
+        var offset = f.Format(in key1, key); key[offset++] = sep;
+        offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f.Format(in key4, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f.Format(in key5, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f.Format(in key6, key.AsSpan(offset)); key[offset++] = sep;
+        f.Format(in key7, key.AsSpan(offset));
         return key;
     }
 
-    public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6, TKey7, TKey8>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6, in TKey7 key7, in TKey8 key8)
+    public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6, TKey7, TKey8>(in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6, in TKey7 key7, in TKey8 key8)
     {
         var f = _utf8Formatter;
         var sep = _separator;
-        var lenKey1 = f.GetLength(in key1);
-        var lenKey2 = f.GetLength(in key2);
-        var lenKey3 = f.GetLength(in key3);
-        var lenKey4 = f.GetLength(in key4);
-        var lenKey5 = f.GetLength(in key5);
-        var lenKey6 = f.GetLength(in key6);
-        var lenKey7 = f.GetLength(in key7);
-        var length = 7 + lenKey1 + lenKey2 + lenKey3 + lenKey4
-                       + lenKey5 + lenKey6 + lenKey7 + f.GetLength(in key8);
-        var offset = 0;
-        if (key == null || key.Length != length)
-        {
-            key = new byte[length];
-            offset += f.Format(in key1, key); key[offset++] = sep;
-            offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
-            offset += f.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
-            offset += f.Format(in key4, key.AsSpan(offset)); key[offset++] = sep;
-            offset += f.Format(in key5, key.AsSpan(offset)); key[offset++] = sep;
-            offset += f.Format(in key6, key.AsSpan(offset)); key[offset++] = sep;
-            offset += f.Format(in key7, key.AsSpan(offset)); key[offset++] = sep;
-            f.Format(in key8, key.AsSpan(offset));
-        }
-        else
-        {
-            if ((bits & 1) == 1) f.Format(in key1, key);
-            offset += lenKey1 + 1;
-            if ((bits & 2) == 2) f.Format(in key2, key.AsSpan(offset));
-            offset += lenKey2 + 1;
-            if ((bits & 4) == 4) f.Format(in key3, key.AsSpan(offset));
-            offset += lenKey3 + 1;
-            if ((bits & 8) == 8) f.Format(in key4, key.AsSpan(offset));
-            offset += lenKey4 + 1;
-            if ((bits & 16) == 16) f.Format(in key5, key.AsSpan(offset));
-            offset += lenKey5 + 1;
-            if ((bits & 32) == 32) f.Format(in key6, key.AsSpan(offset));
-            offset += lenKey6 + 1;
-            if ((bits & 64) == 64) f.Format(in key7, key.AsSpan(offset));
-            if ((bits & 128) == 128) f.Format(in key8, key.AsSpan(offset + lenKey7 + 1));
-        }
+        var key = new byte[7 + f.GetLength(in key1) + f.GetLength(in key2) + f.GetLength(in key3)
+                             + f.GetLength(in key4) + f.GetLength(in key5) + f.GetLength(in key6)
+                             + f.GetLength(in key7) + f.GetLength(in key8)];
+        var offset = f.Format(in key1, key); key[offset++] = sep;
+        offset += f.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f.Format(in key4, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f.Format(in key5, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f.Format(in key6, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f.Format(in key7, key.AsSpan(offset)); key[offset++] = sep;
+        f.Format(in key8, key.AsSpan(offset));
         return key;
     }
 }

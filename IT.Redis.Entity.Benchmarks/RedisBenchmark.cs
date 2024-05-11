@@ -48,13 +48,13 @@ public class RedisBenchmark
     //[Benchmark]
     public void KE_Default()
     {
-        var builder = KeyBuilder.Default;
+        var builder = KeyRebuilder.Default;
         byte[]? key = null;
         var prefix = _prefix;
 
         for (byte i = 0; i < Max; i++)
         {
-            key = builder.BuildKey(key, 2, prefix, i);
+            key = builder.RebuildKey(key, 2, prefix, i);
 
             if (_db.KeyExists(key))
                 throw new InvalidOperationException();
@@ -64,13 +64,13 @@ public class RedisBenchmark
     //[Benchmark]
     public void KE_Fixed()
     {
-        var builder = KeyBuilder.Fixed;
+        var builder = KeyRebuilder.Fixed;
         byte[]? key = null;
         var prefix = _prefix;
 
         for (byte i = 0; i < Max; i++)
         {
-            key = builder.BuildKey(key, 2, prefix, i);
+            key = builder.RebuildKey(key, 2, prefix, i);
 
             if (_db.KeyExists(key))
                 throw new InvalidOperationException();

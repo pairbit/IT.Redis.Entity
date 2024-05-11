@@ -16,10 +16,40 @@ public class KeyBuilderBenchmark
     private static readonly byte[] _prefix = Encoding.UTF8.GetBytes(_prefixString);
     private static readonly byte[] _zeroD10 = Encoding.UTF8.GetBytes($"{_prefixString}:{0:D10}");
 
-    [Params(101)]//, 1_001, 10_001, 100_001)]
+    [Params(1_001)]//, 1_001, 10_001, 100_001)]
     public int Max { get; set; }
 
     [Benchmark]
+    public RedisKey Builder_Var()
+    {
+        var builder = KeyBuilder.Default;
+        byte[]? key = null;
+        var prefix = _prefix;
+
+        for (int i = 1; i < Max; i++)
+        {
+            key = builder.BuildKey(in prefix, in i);
+        }
+
+        return key;
+    }
+
+    [Benchmark]
+    public RedisKey Rebuilder_Var()
+    {
+        var builder = KeyRebuilder.Default;
+        byte[]? key = null;
+        var prefix = _prefix;
+
+        for (int i = 1; i < Max; i++)
+        {
+            key = builder.RebuildKey(null, 0, in prefix, in i);
+        }
+
+        return key;
+    }
+
+    //[Benchmark]
     public RedisKey String()
     {
         var prefix = _prefixString;
@@ -33,36 +63,36 @@ public class KeyBuilderBenchmark
         return key;
     }
 
-    [Benchmark]
+    //[Benchmark]
     public RedisKey Var()
     {
-        var builder = KeyBuilder.Default;
+        var builder = KeyRebuilder.Default;
         byte[]? key = null;
         var prefix = _prefix;
 
         for (int i = 1; i < Max; i++)
         {
-            key = builder.BuildKey(key, 2, in prefix, in i);
+            key = builder.RebuildKey(key, 2, in prefix, in i);
         }
 
         return key;
     }
 
-    [Benchmark]
+    //[Benchmark]
     public RedisKey Fixed()
     {
-        var builder = KeyBuilder.Fixed;
+        var builder = KeyRebuilder.Fixed;
         byte[]? key = null;
         var prefix = _prefix;
 
         for (int i = 1; i < Max; i++)
         {
-            key = builder.BuildKey(key, 2, in prefix, in i);
+            key = builder.RebuildKey(key, 2, in prefix, in i);
         }
         return key;
     }
 
-    [Benchmark]
+    //[Benchmark]
     public RedisKey Fixed_Manual()
     {
         byte[] key = _zeroD10;

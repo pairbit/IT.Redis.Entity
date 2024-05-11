@@ -344,7 +344,7 @@ public class DocumentTest
             Assert.That(doc3.Name, Is.EqualTo(doc.Name));
             Assert.That(doc3.AttachmentIds, Is.EqualTo(doc.AttachmentIds));
 
-            var redisKey = re.KeyBuilder.BuildKey(null, 0, id);
+            var redisKey = re.KeyBuilder.RebuildKey(null, 0, id);
             Assert.That(redisKey.SequenceEqual(idbytes), Is.True);
         }
         finally

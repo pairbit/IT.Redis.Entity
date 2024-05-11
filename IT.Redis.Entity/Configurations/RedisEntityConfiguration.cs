@@ -69,6 +69,7 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
             var utf8Formatter = fieldInfo.Utf8Formatter;
             if (utf8Formatter != null) return utf8Formatter;
         }
+        //TODO: переделать на форматтер по умолчанию
         return Utf8FormatterVar.GetFormatter(property.PropertyType) ?? throw Ex.Utf8FormatterNotFound(property.PropertyType);
     }
 

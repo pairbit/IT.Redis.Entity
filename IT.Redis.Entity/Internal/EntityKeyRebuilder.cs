@@ -6,7 +6,7 @@ namespace IT.Redis.Entity.Internal;
 
 internal readonly record struct KeyInfo(PropertyInfo Property, object Utf8Formatter);
 
-internal class EntityKeyBuilder : IKeyBuilder
+internal class EntityKeyRebuilder : IKeyRebuilder
 {
     public const int MaxKeys = 8;
     private static readonly char _separatorChar = ':';
@@ -16,7 +16,7 @@ internal class EntityKeyBuilder : IKeyBuilder
     private readonly byte[] _prefix;
     private readonly Type _entityType;
 
-    public EntityKeyBuilder(Type entityType, string? prefix)
+    public EntityKeyRebuilder(Type entityType, string? prefix)
     {
         _entityType = entityType;
         _prefix = GetPrefix(prefix);
@@ -32,7 +32,7 @@ internal class EntityKeyBuilder : IKeyBuilder
         _keys.Add(new KeyInfo(property, utf8Formatter));
     }
 
-    public byte[] BuildKey<TKey1>(byte[]? key, byte bits, in TKey1 key1)
+    public byte[] RebuildKey<TKey1>(byte[]? key, byte bits, in TKey1 key1)
     {
         var f1 = GetFormatter<TKey1>(0);
         var prefix = _prefix;
@@ -51,7 +51,7 @@ internal class EntityKeyBuilder : IKeyBuilder
         return key;
     }
 
-    public byte[] BuildKey<TKey1, TKey2>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2)
+    public byte[] RebuildKey<TKey1, TKey2>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2)
     {
         var f1 = GetFormatter<TKey1>(0);
         var f2 = GetFormatter<TKey2>(1);
@@ -75,7 +75,7 @@ internal class EntityKeyBuilder : IKeyBuilder
         return key;
     }
 
-    public byte[] BuildKey<TKey1, TKey2, TKey3>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3)
+    public byte[] RebuildKey<TKey1, TKey2, TKey3>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3)
     {
         var f1 = GetFormatter<TKey1>(0);
         var f2 = GetFormatter<TKey2>(1);
@@ -104,7 +104,7 @@ internal class EntityKeyBuilder : IKeyBuilder
         return key;
     }
 
-    public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4)
+    public byte[] RebuildKey<TKey1, TKey2, TKey3, TKey4>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4)
     {
         var f1 = GetFormatter<TKey1>(0);
         var f2 = GetFormatter<TKey2>(1);
@@ -139,7 +139,7 @@ internal class EntityKeyBuilder : IKeyBuilder
         return key;
     }
 
-    public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4, TKey5>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5)
+    public byte[] RebuildKey<TKey1, TKey2, TKey3, TKey4, TKey5>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5)
     {
         var f1 = GetFormatter<TKey1>(0);
         var f2 = GetFormatter<TKey2>(1);
@@ -179,7 +179,7 @@ internal class EntityKeyBuilder : IKeyBuilder
         return key;
     }
 
-    public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6)
+    public byte[] RebuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6)
     {
         var f1 = GetFormatter<TKey1>(0);
         var f2 = GetFormatter<TKey2>(1);
@@ -224,7 +224,7 @@ internal class EntityKeyBuilder : IKeyBuilder
         return key;
     }
 
-    public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6, TKey7>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6, in TKey7 key7)
+    public byte[] RebuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6, TKey7>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6, in TKey7 key7)
     {
         var f1 = GetFormatter<TKey1>(0);
         var f2 = GetFormatter<TKey2>(1);
@@ -274,7 +274,7 @@ internal class EntityKeyBuilder : IKeyBuilder
         return key;
     }
 
-    public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6, TKey7, TKey8>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6, in TKey7 key7, in TKey8 key8)
+    public byte[] RebuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6, TKey7, TKey8>(byte[]? key, byte bits, in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6, in TKey7 key7, in TKey8 key8)
     {
         var f1 = GetFormatter<TKey1>(0);
         var f2 = GetFormatter<TKey2>(1);

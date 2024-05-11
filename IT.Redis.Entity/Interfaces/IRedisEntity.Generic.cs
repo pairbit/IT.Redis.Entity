@@ -2,7 +2,7 @@
 
 public interface IRedisEntity<TEntity>
 {
-    IKeyBuilder KeyBuilder { get; }
+    IKeyRebuilder KeyBuilder { get; }
 
     RedisKey ReadKey(TEntity entity);
 

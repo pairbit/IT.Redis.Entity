@@ -13,7 +13,7 @@ internal static class Compiler
 
     private static readonly Type TypeRedisKey = typeof(byte[]);
     private static readonly Type TypeRedisKeyBits = typeof(byte);
-    private static readonly Type TypeKeyBuilder = typeof(IKeyBuilder);
+    private static readonly Type TypeKeyBuilder = typeof(IKeyRebuilder);
 
     private static readonly ConstantExpression NullRedisKey = Expression.Constant(null, TypeRedisKey);
     private static readonly ConstantExpression ZeroRedisKeyBits = Expression.Constant((byte)0, TypeRedisKeyBits);
@@ -65,7 +65,7 @@ internal static class Compiler
     }
 
     //keyBuilder.Build(entity.Key1, entity.Key2)
-    internal static Func<TEntity, IKeyBuilder, byte[]> GetReaderKey<TEntity>(IReadOnlyList<PropertyInfo> keys)
+    internal static Func<TEntity, IKeyRebuilder, byte[]> GetReaderKey<TEntity>(IReadOnlyList<PropertyInfo> keys)
     {
         var entityType = typeof(TEntity);
         var eEntity = Expression.Parameter(entityType, "entity");
@@ -115,7 +115,7 @@ internal static class Compiler
             );
         }
 
-        return Expression.Lambda<Func<TEntity, IKeyBuilder, byte[]>>(
+        return Expression.Lambda<Func<TEntity, IKeyRebuilder, byte[]>>(
             eBody, eEntity, ParameterKeyBuilder).Compile();
     }
 
@@ -148,13 +148,13 @@ internal static class Compiler
         for (int i = 0; i < methods.Length; i++)
         {
             var method = methods[i];
-            if (method.Name == nameof(IKeyBuilder.BuildKey) && method.ContainsGenericParameters)
+            if (method.Name == nameof(IKeyRebuilder.RebuildKey) && method.ContainsGenericParameters)
             {
                 var args = method.GetGenericArguments();
                 if (args.Length == count) return method;
             }
         }
 
-        throw new InvalidOperationException($"Method '{nameof(IKeyBuilder.BuildKey)}' with {count} arguments not found");
+        throw new InvalidOperationException($"Method '{nameof(IKeyRebuilder.RebuildKey)}' with {count} arguments not found");
     }
 }
