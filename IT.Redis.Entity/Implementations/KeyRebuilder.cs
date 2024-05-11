@@ -3,19 +3,13 @@ using IT.Redis.Entity.Utf8Formatters;
 
 namespace IT.Redis.Entity;
 
-public class KeyRebuilder : IKeyRebuilder
+public class KeyRebuilder : KeyBuilder, IKeyRebuilder
 {
-    public static readonly KeyRebuilder Default = new(Utf8FormatterVar.Default);
-    public static readonly KeyRebuilder Fixed = new(Utf8FormatterFixed.Default);
-
-    private readonly byte _separator;
-    private readonly IUtf8Formatter _utf8Formatter;
+    public static new readonly KeyRebuilder Default = new(Utf8FormatterVar.Default);
+    public static new readonly KeyRebuilder Fixed = new(Utf8FormatterFixed.Default);
 
     public KeyRebuilder(IUtf8Formatter utf8Formatter, byte separator = (byte)':')
-    {
-        _utf8Formatter = utf8Formatter ?? throw new ArgumentNullException(nameof(utf8Formatter));
-        _separator = separator;
-    }
+        : base(utf8Formatter, separator) { }
 
     public byte[] RebuildKey<TKey1>(byte[]? key, byte bits, in TKey1 key1)
     {

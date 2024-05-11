@@ -146,7 +146,7 @@ public class ReadmeTest
         var redisKey = reDoc.KeyBuilder.RebuildKey(null, 0, guid, 1);
         Assert.That(redisKey, Is.EqualTo(doc.RedisKey));
 
-        var redisKey2 = KeyRebuilder.Default.RebuildKey(null, 0, "app:docs", guid, 1);
+        var redisKey2 = KeyRebuilder.Default.BuildKey("app:docs", guid, 1);
         Assert.That(redisKey2, Is.EqualTo(redisKey));
         
         var doc1 = _db.EntityGet(redisKey, reDoc.Fields);

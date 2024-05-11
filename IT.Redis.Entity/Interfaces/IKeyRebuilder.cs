@@ -1,6 +1,6 @@
 ﻿namespace IT.Redis.Entity;
 
-public interface IKeyRebuilder
+public interface IKeyRebuilder : IKeyBuilder
 {
     byte[] RebuildKey<TKey1>(byte[]? key, byte bits, in TKey1 key1);
 
