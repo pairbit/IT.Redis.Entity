@@ -34,7 +34,7 @@ public class RedisEntity<TEntity>
     /// </summary>
     public RedisEntityFields<TEntity> Fields { get; }
 
-    public RedisEntity(RedisEntityFields<TEntity> allFields, IKeyRebuilder keyBuilder,
+    internal RedisEntity(RedisEntityFields<TEntity> allFields, IKeyRebuilder keyBuilder,
         KeyReader<TEntity>? keyReader)
     {
         if (allFields == null) throw new ArgumentNullException(nameof(allFields));
@@ -80,4 +80,11 @@ public class RedisEntity<TEntity>
 
     public RedisKey ReadKey(TEntity entity) => (_keyReader ?? throw new InvalidOperationException("Key not found"))
         (entity, _keyBuilder);
+
+    public RedisEntity<TEntity> Sub(params string[] propertyNames)
+    {
+        var allFields = AllFields;
+        var subFields = allFields.Sub(propertyNames);
+        return subFields == allFields ? this : new(subFields, _keyBuilder, _keyReader);
+    }
 }

@@ -35,6 +35,8 @@ public class RedisEntityFields<TEntity>
         if (propertyNames == null) throw new ArgumentNullException(nameof(propertyNames));
         if (propertyNames.Length == 0) throw new ArgumentException("is empty", nameof(propertyNames));
 
+        //TODO: Distintc(propertyNames) and check equals
+
         var sub = new Dictionary<string, RedisEntityField<TEntity>>(propertyNames.Length);
         var dic = _dictionary;
 
