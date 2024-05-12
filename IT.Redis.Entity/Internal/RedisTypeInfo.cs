@@ -1,6 +1,6 @@
-﻿namespace IT.Redis.Entity;
+﻿namespace IT.Redis.Entity.Internal;
 
-public class RedisTypeInfo : ICloneable
+internal class RedisTypeInfo : ICloneable
 {
     public string? KeyPrefix { get; set; }
 

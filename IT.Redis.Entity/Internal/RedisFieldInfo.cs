@@ -1,6 +1,6 @@
-﻿namespace IT.Redis.Entity;
+﻿namespace IT.Redis.Entity.Internal;
 
-public class RedisFieldInfo : ICloneable
+internal class RedisFieldInfo : ICloneable
 {
     public object? Formatter { get; set; }
 

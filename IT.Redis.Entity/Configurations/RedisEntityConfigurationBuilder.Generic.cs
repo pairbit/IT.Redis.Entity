@@ -17,7 +17,7 @@ public class RedisEntityConfigurationBuilder<TEntity>
         _formatter = formatter;
     }
 
-    public RedisEntityConfigurationBuilder(
+    internal RedisEntityConfigurationBuilder(
         IRedisValueFormatter? formatter,
         IDictionary<Type, RedisTypeInfo> types,
         IDictionary<PropertyInfo, RedisFieldInfo> fields)

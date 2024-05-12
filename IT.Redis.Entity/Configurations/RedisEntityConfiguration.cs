@@ -11,7 +11,7 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
     private readonly IReadOnlyDictionary<Type, RedisTypeInfo>? _types;
     private readonly IReadOnlyDictionary<PropertyInfo, RedisFieldInfo> _fields;
 
-    public RedisEntityConfiguration(
+    internal RedisEntityConfiguration(
         IRedisValueFormatter? formatter,
         IReadOnlyDictionary<Type, RedisTypeInfo>? types,
         IReadOnlyDictionary<PropertyInfo, RedisFieldInfo> fields,
