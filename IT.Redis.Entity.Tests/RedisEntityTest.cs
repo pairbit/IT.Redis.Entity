@@ -5,12 +5,12 @@ namespace IT.Redis.Entity.Tests;
 public abstract class RedisEntityTest
 {
     private readonly IDatabase _db;
-    private readonly IRedisEntity<Document> _re;
+    private readonly RedisEntity<Document> _re;
 
     private static readonly RedisKey KeyPrefix = "doc:";
     private static readonly RedisKey Key = KeyPrefix.Append("1");
 
-    public RedisEntityTest(IRedisEntity<Document> re)
+    public RedisEntityTest(RedisEntity<Document> re)
     {
         var connection = ConnectionMultiplexer.Connect(Const.Connection);
         _db = connection.GetDatabase()!;

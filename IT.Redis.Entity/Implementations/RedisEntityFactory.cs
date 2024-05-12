@@ -12,9 +12,9 @@ public class RedisEntityFactory : IRedisEntityFactory
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
-    public IRedisEntity<TEntity> New<TEntity>() => New<TEntity>(_configuration);
+    public RedisEntity<TEntity> New<TEntity>() => New<TEntity>(_configuration);
 
-    public static IRedisEntity<TEntity> New<TEntity>(IRedisEntityConfiguration configuration)
+    public static RedisEntity<TEntity> New<TEntity>(IRedisEntityConfiguration configuration)
     {
         var properties = RedisEntity<TEntity>.Properties;
         var dic = new Dictionary<string, RedisEntityField<TEntity>>(properties.Length);

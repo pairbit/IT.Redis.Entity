@@ -2,13 +2,13 @@
 
 namespace IT.Redis.Entity;
 
-public class RedisEntity<TEntity> : IRedisEntity<TEntity>
+public class RedisEntity<TEntity>
 {
     internal static readonly PropertyInfo[] Properties = typeof(TEntity).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
-    private static Lazy<IRedisEntity<TEntity>> _default = new(RedisEntity.Factory.New<TEntity>);
+    private static Lazy<RedisEntity<TEntity>> _default = new(RedisEntity.Factory.New<TEntity>);
 
-    public static Func<IRedisEntity<TEntity>> Factory
+    public static Func<RedisEntity<TEntity>> Factory
     {
         set
         {
@@ -16,7 +16,7 @@ public class RedisEntity<TEntity> : IRedisEntity<TEntity>
         }
     }
 
-    public static IRedisEntity<TEntity> Default => _default.Value;
+    public static RedisEntity<TEntity> Default => _default.Value;
 
     private readonly KeyReader<TEntity>? _keyReader;
     private readonly IKeyRebuilder _keyBuilder;

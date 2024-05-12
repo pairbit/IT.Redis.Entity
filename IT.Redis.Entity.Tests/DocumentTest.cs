@@ -290,7 +290,7 @@ public class DocumentTest
         ReadKey_Base64Formatter(factory.New<IDocument>());
     }
 
-    private void ReadKeyTest(IRedisEntity<DocumentAnnotation> re)
+    private void ReadKeyTest(RedisEntity<DocumentAnnotation> re)
     {
         var fields = re.Fields;
         var id = Guid.NewGuid();
@@ -354,7 +354,7 @@ public class DocumentTest
         }
     }
 
-    private void ReadKey_Base64Formatter(IRedisEntity<IDocument> readerWriter)
+    private void ReadKey_Base64Formatter(RedisEntity<IDocument> readerWriter)
     {
         var doc = new DocumentPOCO
         {

@@ -2,5 +2,5 @@
 
 public interface IRedisEntityFactory
 {
-    IRedisEntity<TEntity> New<TEntity>();
+    RedisEntity<TEntity> New<TEntity>();
 }
