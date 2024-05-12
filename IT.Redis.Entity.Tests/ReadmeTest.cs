@@ -143,7 +143,7 @@ public class ReadmeTest
         Assert.That(_db.EntityLoad(doc, reDoc), Is.True);
         Assert.That(doc.Name, Is.EqualTo("doc1"));
 
-        var redisKey = reDoc.KeyBuilder.RebuildKey(null, 0, guid, 1);
+        var redisKey = reDoc.KeyBuilder.BuildKey(guid, 1);
         Assert.That(redisKey, Is.EqualTo(doc.RedisKey));
 
         var redisKey2 = KeyRebuilder.Default.BuildKey("app:docs", guid, 1);
@@ -155,7 +155,7 @@ public class ReadmeTest
         Assert.That(doc1.Name, Is.EqualTo("doc1"));
         Assert.That(_db.KeyDelete(doc.RedisKey), Is.True);
 
-        var redisKey3 = reDoc.KeyBuilder.RebuildKey(null, 0, guid, 3);
+        var redisKey3 = reDoc.KeyBuilder.BuildKey(guid, 3);
         var doc3 = _db.EntityGet(redisKey3, reDoc.Fields);
         Assert.That(doc3, Is.Null);
 
@@ -171,11 +171,11 @@ public class ReadmeTest
 
         Assert.That(person.Name, Is.EqualTo(person2.Name));
 
-        redisKey = rep.KeyBuilder.RebuildKey(null, 0, 12);
+        redisKey = rep.KeyBuilder.BuildKey(12);
 
         Assert.That(person.RedisKey, Is.EqualTo(redisKey));
 
-        redisKey2 = KeyRebuilder.Default.RebuildKey(null, 0, "app:persons", 12);
+        redisKey2 = KeyRebuilder.Default.BuildKey("app:persons", 12);
         
         Assert.That(redisKey2, Is.EqualTo(redisKey));
 
