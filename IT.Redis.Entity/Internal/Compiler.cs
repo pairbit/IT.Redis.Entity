@@ -13,7 +13,8 @@ internal static class Compiler
 
     private static readonly Type TypeRedisKey = typeof(byte[]);
     private static readonly Type TypeRedisKeyBits = typeof(byte);
-    private static readonly Type TypeKeyBuilder = typeof(IKeyRebuilder);
+    private static readonly Type TypeKeyBuilder = typeof(IKeyBuilder);
+    private static readonly Type TypeKeyRebuilder = typeof(IKeyRebuilder);
 
     private static readonly ConstantExpression NullRedisKey = Expression.Constant(null, TypeRedisKey);
     private static readonly ConstantExpression ZeroRedisKeyBits = Expression.Constant((byte)0, TypeRedisKeyBits);
@@ -25,7 +26,7 @@ internal static class Compiler
     private static readonly ParameterExpression ParameterRedisValue = Expression.Parameter(typeof(RedisValue), "redisValue");
     private static readonly ParameterExpression ParameterDeserializer = Expression.Parameter(typeof(RedisValueDeserializerProxy), "deserializer");
     private static readonly ParameterExpression ParameterSerializer = Expression.Parameter(typeof(IRedisValueSerializer), "serializer");
-    private static readonly ParameterExpression ParameterKeyBuilder = Expression.Parameter(TypeKeyBuilder, "keyBuilder");
+    private static readonly ParameterExpression ParameterKeyRebuilder = Expression.Parameter(TypeKeyRebuilder, "keyRebuilder");
 
     /*
      Expression<Func<Document, IRedisValueSerializer, RedisValue>> exp =
@@ -70,27 +71,28 @@ internal static class Compiler
         var entityType = typeof(TEntity);
         var eEntity = Expression.Parameter(entityType, "entity");
         var eRedisKey = GetPropOrField(eEntity, entityType, TypeRedisKey, PropNameRedisKey, FieldNameRedisKey);
-        var propertyTypes = new Type[keys.Count];
-        var eArguments = new Expression[2 + keys.Count];
+        var keyTypes = new Type[keys.Count];
         var hasKeySetter = false;
-
         for (int i = 0; i < keys.Count; i++)
         {
             var key = keys[i];
-            propertyTypes[i] = key.PropertyType;
-            eArguments[i + 2] = Expression.Property(eEntity, key);
-
+            keyTypes[i] = key.PropertyType;
             if (key.SetMethod != null) hasKeySetter = true;
         }
 
-        var methodBuild = GetMethodBuild(keys.Count).MakeGenericMethod(propertyTypes);
         Expression eBody;
-
         if (hasKeySetter)
         {
+            var methodRebuild = GetMethod(keys.Count, TypeKeyRebuilder, nameof(IKeyRebuilder.RebuildKey)).MakeGenericMethod(keyTypes);
             var eRedisKeyBits = GetPropOrField(eEntity, entityType, TypeRedisKeyBits, PropNameRedisKeyBits, FieldNameRedisKeyBits);
-            eArguments[0] = eRedisKey;
-            eArguments[1] = eRedisKeyBits;
+            var eArgs = new Expression[2 + keys.Count];
+            eArgs[0] = eRedisKey;
+            eArgs[1] = eRedisKeyBits;
+            for (int i = 0; i < keys.Count; i++)
+            {
+                eArgs[i + 2] = Expression.Property(eEntity, keys[i]);
+            }
+
             eBody = Expression.Block(
                         Expression.IfThen(
                             Expression.Or(
@@ -98,7 +100,7 @@ internal static class Compiler
                                 Expression.Equal(eRedisKey, NullRedisKey)
                             ),
                             Expression.Block(
-                                Expression.Assign(eRedisKey, Expression.Call(ParameterKeyBuilder, methodBuild, eArguments)),
+                                Expression.Assign(eRedisKey, Expression.Call(ParameterKeyRebuilder, methodRebuild, eArgs)),
                                 Expression.Assign(eRedisKeyBits, ZeroRedisKeyBits)
                             )
                         ),
@@ -107,16 +109,20 @@ internal static class Compiler
         }
         else
         {
-            eArguments[0] = NullRedisKey;
-            eArguments[1] = ZeroRedisKeyBits;
+            var methodBuild = GetMethod(keys.Count, TypeKeyBuilder, nameof(IKeyBuilder.BuildKey)).MakeGenericMethod(keyTypes);
+            var eArgs = new Expression[keys.Count];
+            for (int i = 0; i < keys.Count; i++)
+            {
+                eArgs[i] = Expression.Property(eEntity, keys[i]);
+            }
             eBody = Expression.Coalesce(
                 eRedisKey,
-                Expression.Assign(eRedisKey, Expression.Call(ParameterKeyBuilder, methodBuild, eArguments))
+                Expression.Assign(eRedisKey, Expression.Call(ParameterKeyRebuilder, methodBuild, eArgs))
             );
         }
 
         return Expression.Lambda<Func<TEntity, IKeyRebuilder, byte[]>>(
-            eBody, eEntity, ParameterKeyBuilder).Compile();
+            eBody, eEntity, ParameterKeyRebuilder).Compile();
     }
 
     private static Expression GetPropOrField(ParameterExpression eEntity, Type entityType,
@@ -142,19 +148,19 @@ internal static class Compiler
         }
     }
 
-    private static MethodInfo GetMethodBuild(int count)
+    private static MethodInfo GetMethod(int count, Type type, string name)
     {
-        var methods = TypeKeyBuilder.GetMethods(BindingFlags.Instance | BindingFlags.Public);
+        var methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public);
         for (int i = 0; i < methods.Length; i++)
         {
             var method = methods[i];
-            if (method.Name == nameof(IKeyRebuilder.RebuildKey) && method.ContainsGenericParameters)
+            if (method.Name == name && method.ContainsGenericParameters)
             {
                 var args = method.GetGenericArguments();
                 if (args.Length == count) return method;
             }
         }
 
-        throw new InvalidOperationException($"Method '{nameof(IKeyRebuilder.RebuildKey)}' with {count} arguments not found");
+        throw new InvalidOperationException($"Method '{name}' with {count} arguments not found");
     }
 }

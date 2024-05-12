@@ -373,41 +373,160 @@ internal class EntityKeyRebuilder : IKeyRebuilder
 
     public byte[] BuildKey<TKey1>(in TKey1 key1)
     {
-        throw new NotImplementedException();
+        var f1 = GetFormatter<TKey1>(0);
+        var prefix = _prefix;
+        var offset = prefix.Length;
+        var key = new byte[offset + f1.GetLength(in key1)];
+        if (offset > 0) prefix.CopyTo(key.AsSpan());
+        f1.Format(in key1, key.AsSpan(offset));
+        return key;
     }
 
     public byte[] BuildKey<TKey1, TKey2>(in TKey1 key1, in TKey2 key2)
     {
-        throw new NotImplementedException();
+        var f1 = GetFormatter<TKey1>(0);
+        var f2 = GetFormatter<TKey2>(1);
+        var prefix = _prefix;
+        var offset = prefix.Length;
+        var key = new byte[1 + offset + f1.GetLength(in key1) + f2.GetLength(in key2)];
+        if (offset > 0) prefix.CopyTo(key.AsSpan());
+        offset += f1.Format(in key1, key.AsSpan(offset));
+        key[offset++] = _separator;
+        f2.Format(in key2, key.AsSpan(offset));
+        return key;
     }
 
     public byte[] BuildKey<TKey1, TKey2, TKey3>(in TKey1 key1, in TKey2 key2, in TKey3 key3)
     {
-        throw new NotImplementedException();
+        var f1 = GetFormatter<TKey1>(0);
+        var f2 = GetFormatter<TKey2>(1);
+        var f3 = GetFormatter<TKey3>(2);
+        var prefix = _prefix;
+        var offset = prefix.Length;
+        var key = new byte[2 + offset + f1.GetLength(in key1) + f2.GetLength(in key2) + f3.GetLength(in key3)];
+        if (offset > 0) prefix.CopyTo(key.AsSpan());
+        var sep = _separator;
+        offset += f1.Format(in key1, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f2.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
+        f3.Format(in key3, key.AsSpan(offset));
+        return key;
     }
 
     public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4>(in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4)
     {
-        throw new NotImplementedException();
+        var f1 = GetFormatter<TKey1>(0);
+        var f2 = GetFormatter<TKey2>(1);
+        var f3 = GetFormatter<TKey3>(2);
+        var f4 = GetFormatter<TKey4>(3);
+        var prefix = _prefix;
+        var offset = prefix.Length;
+        var key = new byte[3 + offset + f1.GetLength(in key1) + f2.GetLength(in key2) + f3.GetLength(in key3)
+                             + f4.GetLength(in key4)];
+        if (offset > 0) prefix.CopyTo(key.AsSpan());
+        var sep = _separator;
+        offset += f1.Format(in key1, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f2.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f3.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
+        f4.Format(in key4, key.AsSpan(offset));
+        return key;
     }
 
     public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4, TKey5>(in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5)
     {
-        throw new NotImplementedException();
+        var f1 = GetFormatter<TKey1>(0);
+        var f2 = GetFormatter<TKey2>(1);
+        var f3 = GetFormatter<TKey3>(2);
+        var f4 = GetFormatter<TKey4>(3);
+        var f5 = GetFormatter<TKey5>(4);
+        var prefix = _prefix;
+        var offset = prefix.Length;
+        var key = new byte[4 + offset + f1.GetLength(in key1) + f2.GetLength(in key2)
+            + f3.GetLength(in key3) + f4.GetLength(in key4) + f5.GetLength(in key5)];
+        if (offset > 0) prefix.CopyTo(key.AsSpan());
+        var sep = _separator;
+        offset += f1.Format(in key1, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f2.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f3.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f4.Format(in key4, key.AsSpan(offset)); key[offset++] = sep;
+        f5.Format(in key5, key.AsSpan(offset));
+        return key;
     }
 
     public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6>(in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6)
     {
-        throw new NotImplementedException();
+        var f1 = GetFormatter<TKey1>(0);
+        var f2 = GetFormatter<TKey2>(1);
+        var f3 = GetFormatter<TKey3>(2);
+        var f4 = GetFormatter<TKey4>(3);
+        var f5 = GetFormatter<TKey5>(4);
+        var f6 = GetFormatter<TKey6>(5);
+        var prefix = _prefix;
+        var offset = prefix.Length;
+        var key = new byte[5 + offset + f1.GetLength(in key1) + f2.GetLength(in key2)
+            + f3.GetLength(in key3) + f4.GetLength(in key4) + f5.GetLength(in key5)
+            + f6.GetLength(in key6)];
+        if (offset > 0) prefix.CopyTo(key.AsSpan());
+        var sep = _separator;
+        offset += f1.Format(in key1, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f2.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f3.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f4.Format(in key4, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f5.Format(in key5, key.AsSpan(offset)); key[offset++] = sep;
+        f6.Format(in key6, key.AsSpan(offset));
+        return key;
     }
 
     public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6, TKey7>(in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6, in TKey7 key7)
     {
-        throw new NotImplementedException();
+        var f1 = GetFormatter<TKey1>(0);
+        var f2 = GetFormatter<TKey2>(1);
+        var f3 = GetFormatter<TKey3>(2);
+        var f4 = GetFormatter<TKey4>(3);
+        var f5 = GetFormatter<TKey5>(4);
+        var f6 = GetFormatter<TKey6>(5);
+        var f7 = GetFormatter<TKey7>(6);
+        var prefix = _prefix;
+        var offset = prefix.Length;
+        var key = new byte[6 + offset + f1.GetLength(in key1) + f2.GetLength(in key2)
+            + f3.GetLength(in key3) + f4.GetLength(in key4) + f5.GetLength(in key5)
+            + f6.GetLength(in key6) + f7.GetLength(in key7)];
+        if (offset > 0) prefix.CopyTo(key.AsSpan());
+        var sep = _separator;
+        offset += f1.Format(in key1, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f2.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f3.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f4.Format(in key4, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f5.Format(in key5, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f6.Format(in key6, key.AsSpan(offset)); key[offset++] = sep;
+        f7.Format(in key7, key.AsSpan(offset));
+        return key;
     }
 
     public byte[] BuildKey<TKey1, TKey2, TKey3, TKey4, TKey5, TKey6, TKey7, TKey8>(in TKey1 key1, in TKey2 key2, in TKey3 key3, in TKey4 key4, in TKey5 key5, in TKey6 key6, in TKey7 key7, in TKey8 key8)
     {
-        throw new NotImplementedException();
+        var f1 = GetFormatter<TKey1>(0);
+        var f2 = GetFormatter<TKey2>(1);
+        var f3 = GetFormatter<TKey3>(2);
+        var f4 = GetFormatter<TKey4>(3);
+        var f5 = GetFormatter<TKey5>(4);
+        var f6 = GetFormatter<TKey6>(5);
+        var f7 = GetFormatter<TKey7>(6);
+        var f8 = GetFormatter<TKey8>(7);
+        var prefix = _prefix;
+        var offset = prefix.Length;
+        var key = new byte[7 + offset + f1.GetLength(in key1) + f2.GetLength(in key2)
+            + f3.GetLength(in key3) + f4.GetLength(in key4) + f5.GetLength(in key5)
+            + f6.GetLength(in key6) + f7.GetLength(in key7) + f8.GetLength(in key8)];
+        if (offset > 0) prefix.CopyTo(key.AsSpan());
+        var sep = _separator;
+        offset += f1.Format(in key1, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f2.Format(in key2, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f3.Format(in key3, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f4.Format(in key4, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f5.Format(in key5, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f6.Format(in key6, key.AsSpan(offset)); key[offset++] = sep;
+        offset += f7.Format(in key7, key.AsSpan(offset)); key[offset++] = sep;
+        f8.Format(in key8, key.AsSpan(offset));
+        return key;
     }
 }
