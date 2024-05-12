@@ -19,7 +19,7 @@ public class EntityKeyBuilderTest
 
 #if NETCOREAPP3_1_OR_GREATER
         RedisEntity<DocumentAnnotation>.Factory =
-            () => new RedisEntityImpl<DocumentAnnotation>(
+            () => RedisEntityFactory.New<DocumentAnnotation>(
                 new DataAnnotationConfiguration(RedisValueFormatterRegistry.Default));
 
         Assert.That(Assert.Throws<ArgumentException>(() => RedisEntity<DocumentAnnotation>.Default.KeyBuilder.

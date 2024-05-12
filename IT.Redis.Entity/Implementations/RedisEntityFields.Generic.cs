@@ -16,11 +16,11 @@ public class RedisEntityFields<TEntity>
     internal RedisEntityFields(IReadOnlyDictionary<string, RedisEntityField<TEntity>> dictionary)
     {
         if (dictionary.Count == 0) throw new ArgumentException("Empty", nameof(dictionary));
-        _dictionary = dictionary;
         var array = dictionary.Values.ToArray();
 
         Array = array;
         ForRedis = array.Select(x => x.ForRedis).ToArray();
+        _dictionary = dictionary;
     }
 
     private RedisEntityFields()

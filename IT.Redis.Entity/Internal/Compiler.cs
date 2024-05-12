@@ -66,8 +66,10 @@ internal static class Compiler
     }
 
     //keyBuilder.Build(entity.Key1, entity.Key2)
-    internal static Func<TEntity, IKeyRebuilder, byte[]> GetReaderKey<TEntity>(IReadOnlyList<PropertyInfo> keys)
+    internal static KeyReader<TEntity>? GetKeyReader<TEntity>(IReadOnlyList<PropertyInfo> keys)
     {
+        if (keys.Count == 0) return null;
+
         var entityType = typeof(TEntity);
         var eEntity = Expression.Parameter(entityType, "entity");
         var eRedisKey = GetPropOrField(eEntity, entityType, TypeRedisKey, PropNameRedisKey, FieldNameRedisKey);
@@ -121,8 +123,7 @@ internal static class Compiler
             );
         }
 
-        return Expression.Lambda<Func<TEntity, IKeyRebuilder, byte[]>>(
-            eBody, eEntity, ParameterKeyRebuilder).Compile();
+        return Expression.Lambda<KeyReader<TEntity>>(eBody, eEntity, ParameterKeyRebuilder).Compile();
     }
 
     private static Expression GetPropOrField(ParameterExpression eEntity, Type entityType,

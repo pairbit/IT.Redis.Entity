@@ -224,7 +224,7 @@ public class DocumentTest
     [Test]
     public void DataAnnotationConfiguration_ReadKeyTest()
     {
-        ReadKeyTest(new RedisEntityImpl<DocumentAnnotation>(
+        ReadKeyTest(RedisEntityFactory.New<DocumentAnnotation>(
             new DataAnnotationConfiguration(
                 RedisValueFormatterRegistry.Default)));
     }
