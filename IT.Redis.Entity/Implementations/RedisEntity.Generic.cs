@@ -32,6 +32,8 @@ public class RedisEntity<TEntity>
     /// </summary>
     public RedisEntityFields<TEntity> Fields { get; }
 
+    public bool CanReadKey => _keyReader != null;
+
     internal RedisEntity(RedisEntityFields<TEntity> allFields, IKeyRebuilder keyBuilder,
         KeyReader<TEntity>? keyReader)
     {
