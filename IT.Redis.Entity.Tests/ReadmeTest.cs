@@ -51,6 +51,18 @@ public class ReadmeTest
         }
 
         public string? Name { get; set; }
+
+        internal static byte[] KeyReader(Document entity, IKeyRebuilder builder)
+        {
+            var redisKey = entity._redisKey;
+            var redisKeyBits = entity._redisKeyBits;
+            if (redisKeyBits > 0 || redisKey == null)
+            {
+                entity._redisKey = redisKey = builder.RebuildKey(redisKey, redisKeyBits, entity._guid, entity._index);
+                entity._redisKeyBits = 0;
+            }
+            return redisKey;
+        }
     }
 
     class DocumentKeyReader : Document, IKeyReader
@@ -62,6 +74,7 @@ public class ReadmeTest
             if (redisKeyBits > 0 || redisKey == null)
             {
                 _redisKey = redisKey = builder.RebuildKey(redisKey, redisKeyBits, _guid, _index);
+                _redisKeyBits = 0;
             }
             return redisKey;
         }
@@ -121,6 +134,7 @@ public class ReadmeTest
                      .HasKeyPrefix("app:docs")
                      .HasKey(x => x.Guid)
                      .HasKey(x => x.Index);
+                     //.HasKeyReader(Document.KeyReader);
 
         //configBuilder.Entity<DocumentKeyReader>()
         //             .HasKeyPrefix("app:docs")

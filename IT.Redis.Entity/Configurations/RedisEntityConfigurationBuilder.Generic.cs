@@ -118,11 +118,11 @@ public class RedisEntityConfigurationBuilder<TEntity>
         return this;
     }
 
-    public RedisEntityConfigurationBuilder<TEntity> HasKeyReader<T>(KeyReader<TEntity> keyReader)
+    public RedisEntityConfigurationBuilder<TEntity> HasKeyReader(KeyReader<TEntity> keyReader)
     {
         if (keyReader == null) throw new ArgumentNullException(nameof(keyReader));
 
-        _types.GetOrAdd(typeof(T)).KeyReader = keyReader;
+        _types.GetOrAdd(typeof(TEntity)).KeyReader = keyReader;
 
         return this;
     }
