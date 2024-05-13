@@ -77,7 +77,7 @@ public class ReadmeTest
         }
     }
 
-    class Person
+    class Person : IKeyReader
     {
         private readonly int _id;
 
@@ -94,9 +94,19 @@ public class ReadmeTest
         public int Id => _id;
 
         public string? Name { get; set; }
+
+        internal static byte[] KeyReader(Person entity, IKeyRebuilder builder)
+        {
+            return entity._redisKey ??= builder.BuildKey(entity.Id);
+        }
+
+        byte[] IKeyReader.ReadKey(IKeyRebuilder builder)
+        {
+            return _redisKey ??= builder.BuildKey(_id);
+        }
     }
 
-    class Manual
+    class Manual : IKeyReader
     {
         private byte[]? _redisKey;
 
@@ -107,6 +117,18 @@ public class ReadmeTest
         }
 
         public string? Name { get; set; }
+
+#pragma warning disable IDE0060 // Remove unused parameter
+        internal static byte[] KeyReader(Manual entity, IKeyRebuilder builder)
+#pragma warning restore IDE0060 // Remove unused parameter
+        {
+            return entity._redisKey!;
+        }
+
+        byte[] IKeyReader.ReadKey(IKeyRebuilder builder)
+        {
+            return _redisKey!;
+        }
     }
 
     public ReadmeTest()
@@ -131,19 +153,16 @@ public class ReadmeTest
                      .HasKeyPrefix("app:docs")
                      .HasKey(x => x.Guid)
                      .HasKey(x => x.Index);
-                     //.HasKeyReader(Document.KeyReader);
-
-        //configBuilder.Entity<DocumentKeyReader>()
-        //             .HasKeyPrefix("app:docs")
-        //             .HasKey(x => x.Guid)
-        //             .HasKey(x => x.Index);
+        //.HasKeyReader(Document.KeyReader);
 
         configBuilder.Entity<Person>()
                      .HasKeyPrefix("app:persons")
                      .HasKey(x => x.Id);
+        //.HasKeyReader(Person.KeyReader);
 
         configBuilder.Entity<Manual>()
                      .HasKeyPrefix("app:manuals");
+                     //.HasKeyReader(Manual.KeyReader);
 
         var config = configBuilder.Build();
 
@@ -213,12 +232,12 @@ public class ReadmeTest
 
         var rem = config.New<Manual>();
 
-        //var manual = new Manual { Name = "m1" };
+        var manual = new Manual { Name = "m1" };
 
-        //manual.RedisKey = rem.KeyBuilder.BuildKey(null, 0, 1);
+        manual.RedisKey = KeyBuilder.Default.BuildKey("app:manuals", 1);
 
-        //_db.EntitySet(manual, rem);
+        _db.EntitySet(manual, rem);
 
-        //Assert.That(_db.KeyDelete(manual.RedisKey), Is.True);
+        Assert.That(_db.KeyDelete(manual.RedisKey), Is.True);
     }
 }
