@@ -21,7 +21,7 @@ public class DocumentTest
 
     static DocumentTest()
     {
-        RedisEntity.Factory = new RedisEntityFactory(new AnnotationConfiguration(RedisValueFormatterRegistry.Default));
+        RedisEntity.Config = new AnnotationConfiguration(RedisValueFormatterRegistry.Default);
     }
 
     public DocumentTest()
@@ -224,9 +224,8 @@ public class DocumentTest
     [Test]
     public void DataAnnotationConfiguration_ReadKeyTest()
     {
-        ReadKeyTest(RedisEntityFactory.New<DocumentAnnotation>(
-            new DataAnnotationConfiguration(
-                RedisValueFormatterRegistry.Default)));
+        ReadKeyTest(new DataAnnotationConfiguration(RedisValueFormatterRegistry.Default)
+            .New<DocumentAnnotation>());
     }
 #endif
 
@@ -283,11 +282,8 @@ public class DocumentTest
         configBuilder.Entity<IDocument>().ConfigureIDocument();
 
         var config = configBuilder.Build();
-        var factory = new RedisEntityFactory(config);
-
-        ReadKeyTest(factory.New<DocumentAnnotation>());
-
-        ReadKey_Base64Formatter(factory.New<IDocument>());
+        ReadKeyTest(config.New<DocumentAnnotation>());
+        ReadKey_Base64Formatter(config.New<IDocument>());
     }
 
     private void ReadKeyTest(RedisEntity<DocumentAnnotation> re)

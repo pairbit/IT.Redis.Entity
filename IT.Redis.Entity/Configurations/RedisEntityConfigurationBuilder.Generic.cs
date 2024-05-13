@@ -6,6 +6,8 @@ namespace IT.Redis.Entity.Configurations;
 
 public class RedisEntityConfigurationBuilder<TEntity>
 {
+    private static readonly int MaxProperties = typeof(TEntity).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Length;
+
     private readonly IRedisValueFormatter? _formatter;
     private readonly IDictionary<Type, RedisTypeInfo> _types;
     private readonly IDictionary<PropertyInfo, RedisFieldInfo> _fields;
@@ -13,7 +15,7 @@ public class RedisEntityConfigurationBuilder<TEntity>
     public RedisEntityConfigurationBuilder(IRedisValueFormatter? formatter = null)
     {
         _types = new Dictionary<Type, RedisTypeInfo>(1);
-        _fields = new Dictionary<PropertyInfo, RedisFieldInfo>(RedisEntity<TEntity>.Properties.Length);
+        _fields = new Dictionary<PropertyInfo, RedisFieldInfo>(MaxProperties);
         _formatter = formatter;
     }
 
@@ -27,7 +29,7 @@ public class RedisEntityConfigurationBuilder<TEntity>
         _formatter = formatter;
     }
 
-    public RedisEntityConfiguration Build(bool autoReaderWriter = true)
+    public RedisEntityConfiguration Build()
     {
         var types = _types.TryGetValue(typeof(TEntity), out var typeInfo)
             ? new Dictionary<Type, RedisTypeInfo>(1) { { typeof(TEntity), typeInfo.Clone() } }
@@ -42,7 +44,7 @@ public class RedisEntityConfigurationBuilder<TEntity>
                 fields.Add(item.Key, item.Value.Clone());
             }
         }
-        return new RedisEntityConfiguration(_formatter, types, fields, autoReaderWriter);
+        return new RedisEntityConfiguration(_formatter, types, fields);
     }
 
     public RedisEntityConfigurationBuilder<TEntity> HasKeyPrefix(string keyPrefix)
@@ -50,10 +52,8 @@ public class RedisEntityConfigurationBuilder<TEntity>
         if (keyPrefix == null) throw new ArgumentNullException(nameof(keyPrefix));
         if (keyPrefix.Length == 0) throw new ArgumentException("Key prefix is empty", nameof(keyPrefix));
 
-        var typeInfo = _types.GetOrAdd(typeof(TEntity), out var isExists);
-
-        typeInfo.KeyPrefix = isExists && typeInfo.KeyPrefix != null
-            ? $"{typeInfo.KeyPrefix}:{keyPrefix}" : keyPrefix;
+        var typeInfo = _types.GetOrAdd(typeof(TEntity));
+        typeInfo.KeyPrefix = typeInfo.KeyPrefix != null ? $"{typeInfo.KeyPrefix}:{keyPrefix}" : keyPrefix;
 
         return this;
     }
@@ -114,6 +114,15 @@ public class RedisEntityConfigurationBuilder<TEntity>
         if (reader == null) throw new ArgumentNullException(nameof(reader));
 
         _fields.GetOrAdd(GetProperty(propertySelector)).Reader = reader;
+
+        return this;
+    }
+
+    public RedisEntityConfigurationBuilder<TEntity> HasKeyReader<T>(KeyReader<TEntity> keyReader)
+    {
+        if (keyReader == null) throw new ArgumentNullException(nameof(keyReader));
+
+        _types.GetOrAdd(typeof(T)).KeyReader = keyReader;
 
         return this;
     }

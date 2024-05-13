@@ -11,10 +11,10 @@ public class DataContractAnnotationConfiguration : AnnotationConfiguration
 
     //DataContractAttribute
 
-    protected override bool IsIgnore(PropertyInfo property)
+    public override bool IsIgnore(PropertyInfo property)
         => property.GetCustomAttribute<IgnoreDataMemberAttribute>() != null || base.IsIgnore(property);
 
-    protected override bool TryGetField(PropertyInfo property, out RedisValue field)
+    public override bool TryGetField(PropertyInfo property, out RedisValue field)
     {
         var dataMember = property.GetCustomAttribute<DataMemberAttribute>();
         if (dataMember != null)

@@ -15,7 +15,7 @@ public class RedisEntityConfigurationBuilder
         _formatter = formatter;
     }
 
-    public RedisEntityConfiguration Build(bool autoReaderWriter = true)
+    public RedisEntityConfiguration Build()
     {
         var types = new Dictionary<Type, RedisTypeInfo>(_types.Count);
         var fields = new Dictionary<PropertyInfo, RedisFieldInfo>(_fields.Count);
@@ -27,7 +27,7 @@ public class RedisEntityConfigurationBuilder
         {
             fields.Add(item.Key, item.Value.Clone());
         }
-        return new(_formatter, types, fields, autoReaderWriter);
+        return new(_formatter, types, fields);
     }
 
     public RedisEntityConfigurationBuilder<TEntity> Entity<TEntity>()
@@ -41,10 +41,8 @@ public class RedisEntityConfigurationBuilder
         if (keyPrefix == null) throw new ArgumentNullException(nameof(keyPrefix));
         if (keyPrefix.Length == 0) throw new ArgumentException("Key prefix is empty", nameof(keyPrefix));
 
-        var typeInfo = _types.GetOrAdd(entityType, out var isExists);
-
-        typeInfo.KeyPrefix = isExists && typeInfo.KeyPrefix != null
-            ? $"{typeInfo.KeyPrefix}:{keyPrefix}" : keyPrefix;
+        var typeInfo = _types.GetOrAdd(entityType);
+        typeInfo.KeyPrefix = typeInfo.KeyPrefix != null ? $"{typeInfo.KeyPrefix}:{keyPrefix}" : keyPrefix;
 
         return this;
     }

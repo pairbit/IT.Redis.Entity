@@ -9,16 +9,16 @@ public class ReadmeTest
     //Declaring an entity class with mutable keys
     class Document
     {
-        private Guid _guid;
-        private int _index;
+        protected Guid _guid;
+        protected int _index;
 
 #pragma warning disable IDE0044 // Add readonly modifier
 #pragma warning disable CS0649
-        private byte[]? _redisKey;
+        protected byte[]? _redisKey;
 #pragma warning restore CS0649
 #pragma warning restore IDE0044 // Add readonly modifier
 
-        private byte _redisKeyBits;
+        protected byte _redisKeyBits;
 
         public byte[]? RedisKey => _redisKey;
 
@@ -51,6 +51,20 @@ public class ReadmeTest
         }
 
         public string? Name { get; set; }
+    }
+
+    class DocumentKeyReader : Document, IKeyReader
+    {
+        byte[] IKeyReader.ReadKey(IKeyRebuilder builder)
+        {
+            var redisKey = _redisKey;
+            var redisKeyBits = _redisKeyBits;
+            if (redisKeyBits > 0 || redisKey == null)
+            {
+                _redisKey = redisKey = builder.RebuildKey(redisKey, redisKeyBits, _guid, _index);
+            }
+            return redisKey;
+        }
     }
 
     class Person
@@ -108,6 +122,11 @@ public class ReadmeTest
                      .HasKey(x => x.Guid)
                      .HasKey(x => x.Index);
 
+        //configBuilder.Entity<DocumentKeyReader>()
+        //             .HasKeyPrefix("app:docs")
+        //             .HasKey(x => x.Guid)
+        //             .HasKey(x => x.Index);
+
         configBuilder.Entity<Person>()
                      .HasKeyPrefix("app:persons")
                      .HasKey(x => x.Id);
@@ -115,9 +134,9 @@ public class ReadmeTest
         configBuilder.Entity<Manual>()
                      .HasKeyPrefix("app:manuals");
 
-        var factory = new RedisEntityFactory(configBuilder.Build());
+        var config = configBuilder.Build();
 
-        var reDoc = factory.New<Document>();
+        var reDoc = config.New<Document>();
 
         var guid = Guid.NewGuid();
         var doc = new Document
@@ -159,7 +178,7 @@ public class ReadmeTest
         var doc3 = _db.EntityGet(redisKey3, reDoc.Fields);
         Assert.That(doc3, Is.Null);
 
-        var rep = factory.New<Person>();
+        var rep = config.New<Person>();
 
         var person = new Person(12) { Name = "John" };
 
@@ -181,7 +200,7 @@ public class ReadmeTest
 
         Assert.That(_db.KeyDelete(person.RedisKey), Is.True);
 
-        var rem = factory.New<Manual>();
+        var rem = config.New<Manual>();
 
         //var manual = new Manual { Name = "m1" };
 

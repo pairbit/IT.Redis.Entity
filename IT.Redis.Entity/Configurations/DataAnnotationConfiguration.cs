@@ -20,13 +20,13 @@ public class DataAnnotationConfiguration : AnnotationConfiguration
         return base.GetKeyPrefix(type);
     }
 
-    protected override bool HasKey(PropertyInfo property)
-        => property.GetCustomAttribute<KeyAttribute>() != null || base.HasKey(property);
+    public override bool IsKey(PropertyInfo property)
+        => property.GetCustomAttribute<KeyAttribute>() != null || base.IsKey(property);
 
-    protected override bool IsIgnore(PropertyInfo property)
+    public override bool IsIgnore(PropertyInfo property)
         => property.GetCustomAttribute<NotMappedAttribute>() != null || base.IsIgnore(property);
 
-    protected override bool TryGetField(PropertyInfo property, out RedisValue field)
+    public override bool TryGetField(PropertyInfo property, out RedisValue field)
     {
         var column = property.GetCustomAttribute<ColumnAttribute>();
         if (column != null)

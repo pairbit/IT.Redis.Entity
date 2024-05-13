@@ -6,7 +6,6 @@ namespace IT.Redis.Entity.Configurations;
 
 public class RedisEntityConfiguration : IRedisEntityConfiguration
 {
-    private readonly bool _autoReaderWriter = true;
     private readonly IRedisValueFormatter _formatter;
     private readonly IReadOnlyDictionary<Type, RedisTypeInfo>? _types;
     private readonly IReadOnlyDictionary<PropertyInfo, RedisFieldInfo> _fields;
@@ -14,42 +13,52 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
     internal RedisEntityConfiguration(
         IRedisValueFormatter? formatter,
         IReadOnlyDictionary<Type, RedisTypeInfo>? types,
-        IReadOnlyDictionary<PropertyInfo, RedisFieldInfo> fields,
-        bool autoReaderWriter)
+        IReadOnlyDictionary<PropertyInfo, RedisFieldInfo> fields)
     {
         _formatter = formatter ?? RedisValueFormatterNotRegistered.Default;
         _types = types;
         _fields = fields;
-        _autoReaderWriter = autoReaderWriter;   
     }
 
     public string? GetKeyPrefix(Type type)
         => _types != null && _types.TryGetValue(type, out var typeInfo) ? typeInfo.KeyPrefix : null;
 
-    public RedisValue GetField(PropertyInfo property, out bool hasKey)
-    {
-        hasKey = false;
+    public BindingFlags GetBindingFlags(Type type)
+        => BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
+    public bool IsKey(PropertyInfo property)
+        => _fields.TryGetValue(property, out var fieldInfo) && fieldInfo.HasKey;
+
+    public bool IsIgnore(PropertyInfo property)
+        => _fields.TryGetValue(property, out var fieldInfo) && fieldInfo.Ignored;
+
+    public bool TryGetField(PropertyInfo property, out RedisValue field)
+    {
         if (_fields.TryGetValue(property, out var fieldInfo))
         {
-            if (fieldInfo.Ignored) return RedisValue.Null;
-
-            if (fieldInfo.HasKey)
+            if (fieldInfo.FieldId != null)
             {
-                hasKey = true;
-                return RedisValue.Null;
+                field = (int)fieldInfo.FieldId.Value;
+                return true;
             }
-
-            if (fieldInfo.FieldId != null) return (int)fieldInfo.FieldId.Value;
-            if (fieldInfo.FieldName != null) return fieldInfo.FieldName;
+            if (fieldInfo.FieldName != null)
+            {
+                field = fieldInfo.FieldName;
+                return true;
+            }
         }
 
         if (property.Name != Compiler.PropNameRedisKey &&
             property.Name != Compiler.PropNameRedisKeyBits &&
             (property.GetMethod?.IsPublic == true ||
-            property.SetMethod?.IsPublic == true)) return property.Name;
+            property.SetMethod?.IsPublic == true))
+        {
+            field = property.Name;
+            return true;
+        }
 
-        return RedisValue.Null;
+        field = RedisValue.Null;
+        return false;
     }
 
     public IRedisValueFormatter GetFormatter(PropertyInfo property)
@@ -74,22 +83,14 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
     }
 
     public RedisValueWriter<TEntity>? GetWriter<TEntity>(PropertyInfo property)
-    {
-        if (_fields.TryGetValue(property, out var fieldInfo))
-        {
-            var writer = fieldInfo.Writer;
-            if (writer != null) return (RedisValueWriter<TEntity>?)writer;
-        }
-        return _autoReaderWriter ? Compiler.GetWriter<TEntity>(property) : null;
-    }
+        => _fields.TryGetValue(property, out var fieldInfo)
+            ? (RedisValueWriter<TEntity>?)fieldInfo.Writer : null;
 
     public RedisValueReader<TEntity>? GetReader<TEntity>(PropertyInfo property)
-    {
-        if (_fields.TryGetValue(property, out var fieldInfo))
-        {
-            var reader = fieldInfo.Reader;
-            if (reader != null) return (RedisValueReader<TEntity>?)reader;
-        }
-        return _autoReaderWriter ? Compiler.GetReader<TEntity>(property) : null;
-    }
+        => _fields.TryGetValue(property, out var fieldInfo)
+            ? (RedisValueReader<TEntity>?)fieldInfo.Reader : null;
+
+    public KeyReader<TEntity>? GetKeyReader<TEntity>()
+        => _types != null && _types.TryGetValue(typeof(TEntity), out var typeInfo)
+            ? (KeyReader<TEntity>?)typeInfo.KeyReader : null;
 }

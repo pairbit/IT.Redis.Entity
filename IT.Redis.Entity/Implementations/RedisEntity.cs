@@ -2,11 +2,12 @@
 
 public static class RedisEntity
 {
-    private static IRedisEntityFactory _factory = new RedisEntityFactory(new Configurations.AnnotationConfiguration());
+    private static IRedisEntityConfiguration _config 
+        = new Configurations.AnnotationConfiguration();
 
-    public static IRedisEntityFactory Factory
+    public static IRedisEntityConfiguration Config
     {
-        get { return _factory; }
-        set { _factory = value ?? throw new ArgumentNullException(nameof(value)); }
+        get { return _config; }
+        set { _config = value ?? throw new ArgumentNullException(nameof(value)); }
     }
 }

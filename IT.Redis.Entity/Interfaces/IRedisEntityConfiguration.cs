@@ -1,5 +1,4 @@
-﻿using IT.Redis.Entity.Internal;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace IT.Redis.Entity;
 
@@ -7,7 +6,15 @@ public interface IRedisEntityConfiguration
 {
     string? GetKeyPrefix(Type type);
 
-    RedisValue GetField(PropertyInfo property, out bool hasKey);
+    BindingFlags GetBindingFlags(Type type);
+
+    KeyReader<TEntity>? GetKeyReader<TEntity>();
+
+    bool IsIgnore(PropertyInfo property);
+
+    bool IsKey(PropertyInfo property);
+
+    bool TryGetField(PropertyInfo property, out RedisValue field);
 
     IRedisValueFormatter GetFormatter(PropertyInfo property);
     

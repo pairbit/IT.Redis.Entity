@@ -1,12 +1,10 @@
-﻿using System.Reflection;
+﻿using IT.Redis.Entity.Extensions;
 
 namespace IT.Redis.Entity;
 
 public class RedisEntity<TEntity>
 {
-    internal static readonly PropertyInfo[] Properties = typeof(TEntity).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
-    private static Lazy<RedisEntity<TEntity>> _default = new(RedisEntity.Factory.New<TEntity>);
+    private static Lazy<RedisEntity<TEntity>> _default = new(RedisEntity.Config.New<TEntity>);
 
     public static Func<RedisEntity<TEntity>> Factory
     {
