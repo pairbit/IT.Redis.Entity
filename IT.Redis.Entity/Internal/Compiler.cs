@@ -71,58 +71,68 @@ internal static class Compiler
         var entityType = typeof(TEntity);
         if (typeof(IKeyReader).IsAssignableFrom(entityType)) return ReadKeyProxy;
 
-        if (keys.Count == 0) return null;
-
         var eEntity = Expression.Parameter(entityType, "entity");
-        var eRedisKey = GetPropOrField(eEntity, entityType, TypeRedisKey, PropNameRedisKey, FieldNameRedisKey);
-        var keyTypes = new Type[keys.Count];
-        var hasKeySetter = false;
-        for (int i = 0; i < keys.Count; i++)
-        {
-            var key = keys[i];
-            keyTypes[i] = key.PropertyType;
-            if (key.SetMethod != null) hasKeySetter = true;
-        }
-
         Expression eBody;
-        if (hasKeySetter)
-        {
-            var methodRebuild = GetMethod(keys.Count, TypeKeyRebuilder, nameof(IKeyRebuilder.RebuildKey)).MakeGenericMethod(keyTypes);
-            var eRedisKeyBits = GetPropOrField(eEntity, entityType, TypeRedisKeyBits, PropNameRedisKeyBits, FieldNameRedisKeyBits);
-            var eArgs = new Expression[2 + keys.Count];
-            eArgs[0] = eRedisKey;
-            eArgs[1] = eRedisKeyBits;
-            for (int i = 0; i < keys.Count; i++)
-            {
-                eArgs[i + 2] = Expression.Property(eEntity, keys[i]);
-            }
 
-            eBody = Expression.Block(
-                        Expression.IfThen(
-                            Expression.Or(
-                                Expression.GreaterThan(eRedisKeyBits, ZeroRedisKeyBits),
-                                Expression.Equal(eRedisKey, NullRedisKey)
-                            ),
-                            Expression.Block(
-                                Expression.Assign(eRedisKey, Expression.Call(ParameterKeyRebuilder, methodRebuild, eArgs)),
-                                Expression.Assign(eRedisKeyBits, ZeroRedisKeyBits)
-                            )
-                        ),
-                        eRedisKey
-                    );
+        if (keys.Count == 0)
+        {
+            var redisKeyProp = GetRedisKeyProperty(entityType);
+
+            if (redisKeyProp == null) return null;
+
+            eBody = Expression.Property(eEntity, redisKeyProp);
         }
         else
         {
-            var methodBuild = GetMethod(keys.Count, TypeKeyBuilder, nameof(IKeyBuilder.BuildKey)).MakeGenericMethod(keyTypes);
-            var eArgs = new Expression[keys.Count];
+            var eRedisKey = GetPropOrField(eEntity, TypeRedisKey, PropNameRedisKey, FieldNameRedisKey);
+            var keyTypes = new Type[keys.Count];
+            var hasKeySetter = false;
             for (int i = 0; i < keys.Count; i++)
             {
-                eArgs[i] = Expression.Property(eEntity, keys[i]);
+                var key = keys[i];
+                keyTypes[i] = key.PropertyType;
+                if (key.SetMethod != null) hasKeySetter = true;
             }
-            eBody = Expression.Coalesce(
-                eRedisKey,
-                Expression.Assign(eRedisKey, Expression.Call(ParameterKeyRebuilder, methodBuild, eArgs))
-            );
+
+            if (hasKeySetter)
+            {
+                var methodRebuild = GetMethod(keys.Count, TypeKeyRebuilder, nameof(IKeyRebuilder.RebuildKey)).MakeGenericMethod(keyTypes);
+                var eRedisKeyBits = GetPropOrField(eEntity, TypeRedisKeyBits, PropNameRedisKeyBits, FieldNameRedisKeyBits);
+                var eArgs = new Expression[2 + keys.Count];
+                eArgs[0] = eRedisKey;
+                eArgs[1] = eRedisKeyBits;
+                for (int i = 0; i < keys.Count; i++)
+                {
+                    eArgs[i + 2] = Expression.Property(eEntity, keys[i]);
+                }
+
+                eBody = Expression.Block(
+                            Expression.IfThen(
+                                Expression.Or(
+                                    Expression.GreaterThan(eRedisKeyBits, ZeroRedisKeyBits),
+                                    Expression.Equal(eRedisKey, NullRedisKey)
+                                ),
+                                Expression.Block(
+                                    Expression.Assign(eRedisKey, Expression.Call(ParameterKeyRebuilder, methodRebuild, eArgs)),
+                                    Expression.Assign(eRedisKeyBits, ZeroRedisKeyBits)
+                                )
+                            ),
+                            eRedisKey
+                        );
+            }
+            else
+            {
+                var methodBuild = GetMethod(keys.Count, TypeKeyBuilder, nameof(IKeyBuilder.BuildKey)).MakeGenericMethod(keyTypes);
+                var eArgs = new Expression[keys.Count];
+                for (int i = 0; i < keys.Count; i++)
+                {
+                    eArgs[i] = Expression.Property(eEntity, keys[i]);
+                }
+                eBody = Expression.Coalesce(
+                    eRedisKey,
+                    Expression.Assign(eRedisKey, Expression.Call(ParameterKeyRebuilder, methodBuild, eArgs))
+                );
+            }
         }
 
         return Expression.Lambda<KeyReader<TEntity>>(eBody, eEntity, ParameterKeyRebuilder).Compile();
@@ -133,9 +143,10 @@ internal static class Compiler
         return ((IKeyReader)entity!).ReadKey(builder);
     }
 
-    private static Expression GetPropOrField(ParameterExpression eEntity, Type entityType,
+    private static Expression GetPropOrField(ParameterExpression eEntity,
         Type memberType, string propName, string fieldName)
     {
+        var entityType = eEntity.Type;
         if (entityType.IsInterface)
         {
             var property = entityType.GetProperty(propName, BindingFlags.Instance | BindingFlags.Public);
@@ -154,6 +165,16 @@ internal static class Compiler
 
             return Expression.Field(eEntity, field);
         }
+    }
+
+    private static PropertyInfo? GetRedisKeyProperty(Type entityType)
+    {
+        var property = entityType.GetProperty(PropNameRedisKey, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+        if (property != null && (property.PropertyType != TypeRedisKey || property.GetMethod == null))
+            throw new InvalidOperationException($"Entity type '{entityType.FullName}' does not contain property '{PropNameRedisKey}' with type '{TypeRedisKey.FullName}' and get method");
+
+        return property;
     }
 
     private static MethodInfo GetMethod(int count, Type type, string name)

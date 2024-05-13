@@ -77,7 +77,7 @@ public class ReadmeTest
         }
     }
 
-    class Person : IKeyReader
+    class Person //: IKeyReader
     {
         private readonly int _id;
 
@@ -100,21 +100,17 @@ public class ReadmeTest
             return entity._redisKey ??= builder.BuildKey(entity.Id);
         }
 
-        byte[] IKeyReader.ReadKey(IKeyRebuilder builder)
-        {
-            return _redisKey ??= builder.BuildKey(_id);
-        }
+        //byte[] IKeyReader.ReadKey(IKeyRebuilder builder)
+        //{
+        //    return _redisKey ??= builder.BuildKey(_id);
+        //}
     }
 
-    class Manual : IKeyReader
+    class Manual //: IKeyReader
     {
         private byte[]? _redisKey;
 
-        public byte[]? RedisKey
-        {
-            get => _redisKey;
-            set => _redisKey = value;
-        }
+        public byte[]? RedisKey => _redisKey;
 
         public string? Name { get; set; }
 
@@ -125,9 +121,14 @@ public class ReadmeTest
             return entity._redisKey!;
         }
 
-        byte[] IKeyReader.ReadKey(IKeyRebuilder builder)
+        //byte[] IKeyReader.ReadKey(IKeyRebuilder builder)
+        //{
+        //    return _redisKey!;
+        //}
+
+        public void SetKey(byte[] key)
         {
-            return _redisKey!;
+            _redisKey = key;
         }
     }
 
@@ -162,7 +163,7 @@ public class ReadmeTest
 
         configBuilder.Entity<Manual>()
                      .HasKeyPrefix("app:manuals");
-                     //.HasKeyReader(Manual.KeyReader);
+        //.HasKeyReader(Manual.KeyReader);
 
         var config = configBuilder.Build();
 
@@ -197,7 +198,7 @@ public class ReadmeTest
 
         var redisKey2 = KeyRebuilder.Default.BuildKey("app:docs", guid, 1);
         Assert.That(redisKey2, Is.EqualTo(redisKey));
-        
+
         var doc1 = _db.EntityGet(redisKey, reDoc.Fields);
         Assert.That(doc1, Is.Not.Null);
         Assert.That(doc1.Guid, Is.Default);
@@ -225,7 +226,7 @@ public class ReadmeTest
         Assert.That(person.RedisKey, Is.EqualTo(redisKey));
 
         redisKey2 = KeyRebuilder.Default.BuildKey("app:persons", 12);
-        
+
         Assert.That(redisKey2, Is.EqualTo(redisKey));
 
         Assert.That(_db.KeyDelete(person.RedisKey), Is.True);
@@ -234,7 +235,7 @@ public class ReadmeTest
 
         var manual = new Manual { Name = "m1" };
 
-        manual.RedisKey = KeyBuilder.Default.BuildKey("app:manuals", 1);
+        manual.SetKey(KeyBuilder.Default.BuildKey("app:manuals", 1));
 
         _db.EntitySet(manual, rem);
 
