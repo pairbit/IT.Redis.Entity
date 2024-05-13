@@ -15,9 +15,12 @@
 //bench.KE_Default();
 //bench.KE_Fixed();
 
-var bench = new KeyBuilderBenchmark { Max = 3 };
-if (bench.Builder_Var() != bench.Rebuilder_Var()) throw new System.Exception();
-BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(KeyBuilderBenchmark));
+//var bench = new KeyBuilderBenchmark { Max = 3 };
+//if (bench.Builder_Var() != bench.Rebuilder_Var()) throw new System.Exception();
+//BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(KeyBuilderBenchmark));
+
+new MethodBenchmark().Validate();
+BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(MethodBenchmark));
 
 //var bench = new EntityBenchmark();
 //bench.Validate();
