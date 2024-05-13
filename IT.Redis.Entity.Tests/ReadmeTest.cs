@@ -7,18 +7,18 @@ public class ReadmeTest
     private readonly IDatabase _db;
 
     //Declaring an entity class with mutable keys
-    class Document
+    class Document : IKeyReader
     {
-        protected Guid _guid;
-        protected int _index;
+        private Guid _guid;
+        private int _index;
 
 #pragma warning disable IDE0044 // Add readonly modifier
 #pragma warning disable CS0649
-        protected byte[]? _redisKey;
+        private byte[]? _redisKey;
 #pragma warning restore CS0649
 #pragma warning restore IDE0044 // Add readonly modifier
 
-        protected byte _redisKeyBits;
+        private byte _redisKeyBits;
 
         public byte[]? RedisKey => _redisKey;
 
@@ -63,10 +63,7 @@ public class ReadmeTest
             }
             return redisKey;
         }
-    }
 
-    class DocumentKeyReader : Document, IKeyReader
-    {
         byte[] IKeyReader.ReadKey(IKeyRebuilder builder)
         {
             var redisKey = _redisKey;
