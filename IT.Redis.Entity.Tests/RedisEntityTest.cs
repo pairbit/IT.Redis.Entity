@@ -1,14 +1,26 @@
 using DocLib;
+using IT.Redis.Entity.Configurations;
 
 namespace IT.Redis.Entity.Tests;
 
-public abstract class RedisEntityTest
+public class RedisEntityTest
 {
     private readonly IDatabase _db;
     private readonly RedisEntity<Document> _re;
 
     private static readonly RedisKey KeyPrefix = "doc:";
     private static readonly RedisKey Key = KeyPrefix.Append("1");
+    private static readonly RedisKey NFKey = KeyPrefix.Append("notfound");
+
+    static RedisEntityTest()
+    {
+        RedisEntity.Config = new AnnotationConfiguration(RedisValueFormatterRegistry.Default);
+    }
+
+    public RedisEntityTest() : this(RedisEntity<Document>.Default)
+    {
+
+    }
 
     public RedisEntityTest(RedisEntity<Document> re)
     {
@@ -235,16 +247,30 @@ public abstract class RedisEntityTest
         var fields = re.Fields;
 
         var fieldPrice = fields[nameof(Document.Price)];
-        var price = 999;
+        var price = 0;
 
         Assert.That(_db.EntitySetField<Document, long>(in Key, fieldPrice, price), Is.True);
 
-        long price2 = default;
+        try
+        {
+            long price2 = default;
+            Assert.That(_db.EntityLoadField(in NFKey, ref price2, fieldPrice), Is.False);
+            Assert.That(price2, Is.Default);
 
-        _db.EntityLoadField(in Key, ref price2, fieldPrice);
+            Assert.That(_db.EntityLoadField(in Key, ref price2, fieldPrice), Is.True);
+            Assert.That(price2, Is.EqualTo(price));
 
-        Assert.That(price2, Is.EqualTo(price));
+            var existsValue = _db.EntityGetField<Document, long>(in NFKey, fieldPrice);
+            Assert.That(existsValue.Exists, Is.False);
+            Assert.That(existsValue.Value, Is.Default);
 
-        Assert.That(_db.EntityGetField<Document, long>(in Key, fieldPrice), Is.EqualTo(price));
+            existsValue = _db.EntityGetField<Document, long>(in Key, fieldPrice);
+            Assert.That(existsValue.Exists, Is.True);
+            Assert.That(existsValue.Value, Is.EqualTo(price));
+        }
+        finally
+        {
+            _db.KeyDelete(Key);
+        }
     }
 }

@@ -75,13 +75,13 @@ public static class xIDatabaseAsync
         return fields.GetEntity<TEntity, TEntity>(await db.HashGetAsync(key, fields.ForRedis, flags).ConfigureAwait(false));
     }
 
-    public static async Task<TField?> EntityGetFieldAsync<TEntity, TField>(this IDatabaseAsync db, RedisKey key, RedisEntityField<TEntity> field, CommandFlags flags = CommandFlags.None)
+    public static async Task<ExistsValue<TField?>> EntityGetFieldAsync<TEntity, TField>(this IDatabaseAsync db, RedisKey key, RedisEntityField<TEntity> field, CommandFlags flags = CommandFlags.None)
     {
         var redisValue = await db.HashGetAsync(key, field.ForRedis, flags).ConfigureAwait(false);
         if (redisValue.IsNull) return default;
 
         TField? value = default;
         field.GetFormatter<TField>().Deserialize(in redisValue, ref value);
-        return value;
+        return new(value);
     }
 }
