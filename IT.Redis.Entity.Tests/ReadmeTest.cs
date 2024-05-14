@@ -167,7 +167,7 @@ public class ReadmeTest
 
         var config = configBuilder.Build();
 
-        var reDoc = config.New<Document>();
+        var reDoc = config.NewEntity<Document>();
 
         var guid = Guid.NewGuid();
         var doc = new Document
@@ -209,7 +209,7 @@ public class ReadmeTest
         var doc3 = _db.EntityGet(redisKey3, reDoc.Fields);
         Assert.That(doc3, Is.Null);
 
-        var rep = config.New<Person>();
+        var rep = config.NewEntity<Person>();
 
         var person = new Person(12) { Name = "John" };
 
@@ -231,7 +231,7 @@ public class ReadmeTest
 
         Assert.That(_db.KeyDelete(person.RedisKey), Is.True);
 
-        var rem = config.New<Manual>();
+        var rem = config.NewEntity<Manual>();
 
         var manual = new Manual { Name = "m1" };
 

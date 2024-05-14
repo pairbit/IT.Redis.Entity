@@ -4,7 +4,7 @@ namespace IT.Redis.Entity;
 
 public class RedisEntity<TEntity>
 {
-    private static Lazy<RedisEntity<TEntity>> _default = new(RedisEntity.Config.New<TEntity>);
+    private static Lazy<RedisEntity<TEntity>> _default = new(RedisEntity.Config.NewEntity<TEntity>);
 
     public static Func<RedisEntity<TEntity>> Factory
     {

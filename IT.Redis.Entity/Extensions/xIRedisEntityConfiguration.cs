@@ -5,7 +5,7 @@ namespace IT.Redis.Entity.Extensions;
 
 public static class xIRedisEntityConfiguration
 {
-    public static RedisEntity<TEntity> New<TEntity>(this IRedisEntityConfiguration configuration)
+    public static RedisEntity<TEntity> NewEntity<TEntity>(this IRedisEntityConfiguration configuration)
     {
         var type = typeof(TEntity);
         var properties = configuration.GetProperties(type);

@@ -15,8 +15,8 @@ public class EntityBenchmark
 {
     private static readonly IRedisValueFormatter _formatter = RedisValueFormatterRegistry.Default;
     private static readonly RedisValueDeserializerProxy _dp = new(_formatter);
-    private static readonly RedisEntity<Document> _re = new DataContractAnnotationConfiguration(RedisValueFormatterRegistry.Default).New<Document>();
-    private static readonly RedisEntity<Document> _re_manual = GetConfig().New<Document>();
+    private static readonly RedisEntity<Document> _re = new DataContractAnnotationConfiguration(RedisValueFormatterRegistry.Default).NewEntity<Document>();
+    private static readonly RedisEntity<Document> _re_manual = GetConfig().NewEntity<Document>();
 
     private static readonly Document Data = Document.Data;
     private static readonly RedisValue[] Values = _re.Fields.GetValues(Data);

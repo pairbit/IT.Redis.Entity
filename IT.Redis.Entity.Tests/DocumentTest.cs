@@ -225,7 +225,7 @@ public class DocumentTest
     public void DataAnnotationConfiguration_ReadKeyTest()
     {
         ReadKeyTest(new DataAnnotationConfiguration(RedisValueFormatterRegistry.Default)
-            .New<DocumentAnnotation>());
+            .NewEntity<DocumentAnnotation>());
     }
 #endif
 
@@ -282,8 +282,8 @@ public class DocumentTest
         configBuilder.Entity<IDocument>().ConfigureIDocument();
 
         var config = configBuilder.Build();
-        ReadKeyTest(config.New<DocumentAnnotation>());
-        ReadKey_Base64Formatter(config.New<IDocument>());
+        ReadKeyTest(config.NewEntity<DocumentAnnotation>());
+        ReadKey_Base64Formatter(config.NewEntity<IDocument>());
     }
 
     private void ReadKeyTest(RedisEntity<DocumentAnnotation> re)
