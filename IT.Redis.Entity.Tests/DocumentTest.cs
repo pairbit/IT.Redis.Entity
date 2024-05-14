@@ -304,7 +304,7 @@ public class DocumentTest
             Assert.That(doc.RedisKeyBits, Is.EqualTo(1));
             Assert.That(doc.RedisKey, Is.Null);
 
-            Assert.That(_db.EntitySet(doc, fields[nameof(DocumentAnnotation.AttachmentIds)], re), Is.True);
+            Assert.That(_db.EntitySet(doc, fields[nameof(DocumentAnnotation.AttachmentIds)]), Is.True);
 
             Assert.That(doc.RedisKeyBits, Is.EqualTo(0));
             Assert.That(doc.RedisKey, Is.Not.Null);
@@ -330,9 +330,9 @@ public class DocumentTest
             Assert.That(doc2.AttachmentIds, Is.EqualTo(doc.AttachmentIds));
             Assert.That(doc2.Name, Is.Null);
 
-            Assert.That(_db.EntitySet(doc, re.Fields[nameof(DocumentAnnotation.Name)], re), Is.True);
+            Assert.That(_db.EntitySet(doc, re.Fields[nameof(DocumentAnnotation.Name)]), Is.True);
 
-            var doc3 = _db.EntityGet<DocumentAnnotation>(doc2.RedisKey, fields);
+            var doc3 = _db.EntityGet<DocumentAnnotation>(doc2.RedisKey, re);
 
             Assert.That(doc3, Is.Not.Null);
             Assert.That(doc3.Id, Is.EqualTo(Guid.Empty));

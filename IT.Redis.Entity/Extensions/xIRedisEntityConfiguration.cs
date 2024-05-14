@@ -9,10 +9,12 @@ public static class xIRedisEntityConfiguration
     {
         var type = typeof(TEntity);
         var properties = configuration.GetProperties(type);
-        var fields = configuration.GetFields<TEntity>(properties);
+        if (properties.Length == 0) throw new InvalidOperationException();
+
         var keys = configuration.GetKeys(properties);
         var keyBuilder = configuration.GetKeyBuilder(type, keys);
         var keyReader = configuration.GetKeyReader<TEntity>(keys);
+        var fields = configuration.GetFields<TEntity>(properties, keyBuilder, keyReader);
         return new RedisEntity<TEntity>(fields, keyBuilder, keyReader);
     }
 
@@ -20,9 +22,9 @@ public static class xIRedisEntityConfiguration
         => type.GetProperties(configuration.GetBindingFlags(type))
                .Where(x => !configuration.IsIgnore(x)).ToArray();
 
-    private static RedisEntityFields<TEntity> GetFields<TEntity>(this IRedisEntityConfiguration configuration, PropertyInfo[] properties)
+    private static RedisEntityFields<TEntity> GetFields<TEntity>(this IRedisEntityConfiguration configuration, PropertyInfo[] properties,
+        IKeyRebuilder keyBuilder, KeyReader<TEntity>? keyReader)
     {
-        if (properties.Length == 0) throw new InvalidOperationException();
         var dic = new Dictionary<string, RedisEntityField<TEntity>>(properties.Length);
 
 #if NETSTANDARD2_0 || NET461
@@ -40,7 +42,7 @@ public static class xIRedisEntityConfiguration
 
                 if (!set.Add(redisField)) throw new InvalidOperationException($"Property '{propertyName}' has duplicate '{redisField}'");
 
-                dic.Add(propertyName, configuration.GetField<TEntity>(property, redisField));
+                dic.Add(propertyName, configuration.GetField<TEntity>(property, redisField, keyBuilder, keyReader));
             }
         }
 
@@ -48,7 +50,7 @@ public static class xIRedisEntityConfiguration
     }
 
     private static RedisEntityField<TEntity> GetField<TEntity>(this IRedisEntityConfiguration configuration,
-        PropertyInfo property, RedisValue redisField)
+        PropertyInfo property, RedisValue redisField, IKeyRebuilder keyBuilder, KeyReader<TEntity>? keyReader)
     {
         var writer = configuration.GetWriter<TEntity>(property) ?? Compiler.GetWriter<TEntity>(property);
         var reader = configuration.GetReader<TEntity>(property) ?? Compiler.GetReader<TEntity>(property);
@@ -58,7 +60,7 @@ public static class xIRedisEntityConfiguration
 
         var formatter = configuration.GetFormatter(property);
 
-        return new RedisEntityField<TEntity>(property, redisField, writer, reader, formatter);
+        return new RedisEntityField<TEntity>(property, redisField, writer, reader, formatter, keyBuilder, keyReader);
     }
 
     private static PropertyInfo[] GetKeys(this IRedisEntityConfiguration configuration, PropertyInfo[] properties)

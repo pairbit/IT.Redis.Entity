@@ -199,14 +199,14 @@ public class ReadmeTest
         var redisKey2 = KeyRebuilder.Default.BuildKey("app:docs", guid, 1);
         Assert.That(redisKey2, Is.EqualTo(redisKey));
 
-        var doc1 = _db.EntityGet(redisKey, reDoc.Fields);
+        var doc1 = _db.EntityGet(redisKey, reDoc);
         Assert.That(doc1, Is.Not.Null);
         Assert.That(doc1.Guid, Is.Default);
         Assert.That(doc1.Name, Is.EqualTo("doc1"));
         Assert.That(_db.KeyDelete(doc.RedisKey), Is.True);
 
         var redisKey3 = reDoc.KeyBuilder.BuildKey(guid, 3);
-        var doc3 = _db.EntityGet(redisKey3, reDoc.Fields);
+        var doc3 = _db.EntityGet(redisKey3, reDoc);
         Assert.That(doc3, Is.Null);
 
         var rep = config.NewEntity<Person>();

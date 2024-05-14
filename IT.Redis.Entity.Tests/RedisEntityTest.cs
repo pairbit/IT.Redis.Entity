@@ -58,7 +58,7 @@ public abstract class RedisEntityTest
         var redisFields = fields.ForRedis;
         try
         {
-            _db.EntitySet(Key, Document.Data, fields);
+            _db.EntitySet(Key, Document.Data, re);
 
             var documents = new Document?[10];
 
@@ -157,14 +157,13 @@ public abstract class RedisEntityTest
     public void EntitySetGet()
     {
         var re = _re;
-        var fields = re.Fields;
-        var EndDate_Modified = fields.Sub(
+        var EndDate_Modified = re.Sub(
 #if NET6_0_OR_GREATER
             nameof(Document.EndDate),
 #endif
             nameof(Document.Modified));
 
-        var Field_IsDeleted = fields[nameof(Document.IsDeleted)];
+        var Field_IsDeleted = re.Fields[nameof(Document.IsDeleted)];
 
         Assert.That(_db.EntityGet<Document>(Key, Field_IsDeleted), Is.Null);
         Assert.That(_db.EntityGet<Document>(Key, EndDate_Modified), Is.Null);
@@ -180,12 +179,12 @@ public abstract class RedisEntityTest
 
         try
         {
-            _db.EntitySet(Key, Document.Data, fields);
+            _db.EntitySet(Key, Document.Data, re);
 
-            Assert.That(_db.EntityLoad(Key, doc2, fields), Is.True);
+            Assert.That(_db.EntityLoad(Key, doc2, re), Is.True);
 
             Assert.That(doc2, Is.EqualTo(Document.Data));
-            Assert.That(_db.EntityGet(Key, fields), Is.EqualTo(Document.Data));
+            Assert.That(_db.EntityGet(Key, re), Is.EqualTo(Document.Data));
 #if NET6_0_OR_GREATER
             doc2.EndDate = new DateOnly(2022, 03, 20);
 #endif
@@ -205,8 +204,8 @@ public abstract class RedisEntityTest
             Assert.That(_db.EntityGet(Key, EndDate_Modified), Is.EqualTo(doc3));
             //Assert.That(_db.EntityGet<Document, IDocumentView>(Doc.Key1), Is.EqualTo(doc3));
 
-            Assert.That(_db.EntityGet(Key, fields), Is.EqualTo(doc2));
-            Assert.That(_db.EntityLoad(Key, doc3, fields), Is.True);
+            Assert.That(_db.EntityGet(Key, re), Is.EqualTo(doc2));
+            Assert.That(_db.EntityLoad(Key, doc3, re), Is.True);
 
             Assert.That(doc2, Is.EqualTo(doc3));
 

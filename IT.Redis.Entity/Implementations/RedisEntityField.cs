@@ -16,9 +16,14 @@ public class RedisEntityField<TEntity>
     private readonly RedisValueReader<TEntity>? _reader;
     private readonly IRedisValueSerializer? _serializer;
 
+    private readonly KeyReader<TEntity>? _keyReader;
+    private readonly IKeyRebuilder _keyBuilder;
+
     public PropertyInfo Property => _propertyInfo;
 
     public RedisValue ForRedis => _redisField;
+
+    public bool CanReadKey => _keyReader != null;
 
     public bool CanRead => _reader != null;
 
@@ -27,11 +32,14 @@ public class RedisEntityField<TEntity>
     internal RedisEntityField(PropertyInfo propertyInfo, RedisValue redisField,
         RedisValueWriter<TEntity>? writer,
         RedisValueReader<TEntity>? reader,
-        IRedisValueFormatter formatter)
+        IRedisValueFormatter formatter,
+        IKeyRebuilder keyBuilder, KeyReader<TEntity>? keyReader)
     {
         _propertyInfo = propertyInfo;
         _redisField = redisField;
         _formatterGeneric = RedisValueFormatterProxy.GetFormatterGeneric(propertyInfo.PropertyType, formatter);
+        _keyBuilder = keyBuilder;
+        _keyReader = keyReader;
 
         if (writer != null)
         {
@@ -45,6 +53,9 @@ public class RedisEntityField<TEntity>
             _serializer = formatter;
         }
     }
+
+    public RedisKey ReadKey(TEntity entity) => (_keyReader ?? throw new InvalidOperationException("Key not found"))
+        (entity, _keyBuilder);
 
     public RedisValue Read(TEntity entity)
     {
