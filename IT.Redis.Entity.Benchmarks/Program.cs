@@ -19,8 +19,8 @@
 //if (bench.Builder_Var() != bench.Rebuilder_Var()) throw new System.Exception();
 //BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(KeyBuilderBenchmark));
 
-new MethodBenchmark().Validate();
-BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(MethodBenchmark));
+new KeyReaderBenchmark().Validate();
+BenchmarkDotNet.Running.BenchmarkRunner.Run(typeof(KeyReaderBenchmark));
 
 //var bench = new EntityBenchmark();
 //bench.Validate();
