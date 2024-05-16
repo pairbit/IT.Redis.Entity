@@ -16,7 +16,9 @@ public class KeyReaderBenchmark
         private int _id;
 #pragma warning disable IDE0044 // Add readonly modifier
 #pragma warning disable IDE0051 // Remove unused private members
+#pragma warning disable CS0649
         private byte[]? _redisKey;
+#pragma warning restore CS0649
 #pragma warning restore IDE0051 // Remove unused private members
 #pragma warning restore IDE0044 // Add readonly modifier
 #pragma warning disable IDE0052 // Remove unread private members
@@ -111,7 +113,9 @@ public class KeyReaderBenchmark
     {
 #pragma warning disable IDE0044 // Add readonly modifier
 #pragma warning disable IDE0051 // Remove unused private members
+#pragma warning disable CS0649
         private byte[]? _redisKey;
+#pragma warning restore CS0649
 #pragma warning restore IDE0051 // Remove unused private members
 #pragma warning restore IDE0044 // Add readonly modifier
         private readonly int _id;
