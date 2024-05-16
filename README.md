@@ -65,7 +65,7 @@ Object mapping for Redis
 #endif
 ```
 
-## Set up reader and writer for redis entity
+## Configuration
 
 ```csharp
 var configBuilder = new RedisEntityConfigurationBuilder(formatter);
@@ -76,9 +76,9 @@ configBuilder
 .HasKey(x => x.Guid)
 .HasKey(x => x.Index);
 
-var factory = new RedisEntityFactory(configBuilder.Build());
+var config = configBuilder.Build();
 
-var reDoc = factory.New<Document>();
+var reDoc = config.NewEntity<Document>();
 ```
 
 ## Connect to the database redis
@@ -123,26 +123,26 @@ Assert.That(doc.Name, Is.EqualTo("doc1"));
 ## Build redisKey from EntityKeyBuilder
 
 ```csharp
-var redisKey = reDoc.KeyBuilder.BuildKey(null, 0, guid, 1);
+var redisKey = reDoc.KeyBuilder.BuildKey(guid, 1);
 Assert.That(redisKey, Is.EqualTo(doc.RedisKey));
 ```
 
 ## Build redisKey from KeyBuilder
 
 ```csharp
-var redisKey2 = KeyBuilder.Default.BuildKey(null, 0, "app:docs", guid, 1);
+var redisKey2 = KeyBuilder.Default.BuildKey("app:docs", guid, 1);
 Assert.That(redisKey2, Is.EqualTo(redisKey));
 ```
 
 ## Get Document by redis key
 
 ```csharp
-var doc1 = db.EntityGet(redisKey, reDoc.Fields);
+var doc1 = db.EntityGet(redisKey, reDoc);
 Assert.That(doc1, Is.Not.Null);
 Assert.That(doc1.Name, Is.EqualTo("doc1"));
 
-var redisKey3 = reDoc.KeyBuilder.BuildKey(null, 0, guid, 3);
-var doc3 = db.EntityGet(redisKey3, reDoc.Fields);
+var redisKey3 = reDoc.KeyBuilder.BuildKey(guid, 3);
+var doc3 = db.EntityGet(redisKey3, reDoc);
 Assert.That(doc3, Is.Null);
 ```
 
@@ -151,5 +151,5 @@ Assert.That(doc3, Is.Null);
 ```csharp
 RedisEntity<Document>.Factory = () => reDoc;
 
-RedisEntity.Factory = factory;
+RedisEntity.Config = config;
 ```
