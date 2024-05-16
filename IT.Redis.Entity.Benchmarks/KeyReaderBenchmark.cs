@@ -236,8 +236,8 @@ public class KeyReaderBenchmark
         return redisKey;
     }
 
-    [Benchmark]
-    public RedisKey Build_Auto()
+    //[Benchmark]
+    public RedisKey ReadKey_Auto()
     {
         var re = RedisEntity<Doc_Build_Auto>.Default;
         var doc = new Doc_Build_Auto(1, "Ber");
@@ -249,8 +249,8 @@ public class KeyReaderBenchmark
         return redisKey;
     }
 
-    [Benchmark]
-    public RedisKey Build_Interface()
+    //[Benchmark]
+    public RedisKey ReadKey_Interface()
     {
         var re = RedisEntity<Doc_Build_Interface>.Default;
         var doc = new Doc_Build_Interface(1, "Ber");
@@ -262,8 +262,8 @@ public class KeyReaderBenchmark
         return redisKey;
     }
 
-    [Benchmark]
-    public RedisKey Build_Static()
+    //[Benchmark]
+    public RedisKey ReadKey_Static()
     {
         var re = RedisEntity<Doc_Build_Static>.Default;
         var doc = new Doc_Build_Static(1, "Ber");
