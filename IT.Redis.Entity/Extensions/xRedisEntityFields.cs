@@ -55,9 +55,9 @@ public static class xRedisEntityFields
         var array = fields.Array;
         if (values.Length < array.Length * 2 + offset) throw new ArgumentOutOfRangeException(nameof(values));
         offset++;
-        for (int i = 0; i < array.Length; i++)
+        for (int i = 0; i < array.Length; i++, offset += 2)
         {
-            values[offset += 2] = array[i].Read(entity);
+            values[offset] = array[i].Read(entity);
         }
     }
 
@@ -112,9 +112,9 @@ public static class xRedisEntityFields
 
         var values = new RedisValue[array.Length * 2 + offset];
 
-        for (int i = 0; i < array.Length; i++)
+        for (int i = 0; i < array.Length; i++, offset += 2)
         {
-            values[offset += 2] = array[i].ForRedis;
+            values[offset] = array[i].ForRedis;
         }
 
         return values;

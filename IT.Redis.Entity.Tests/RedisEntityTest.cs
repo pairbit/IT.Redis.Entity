@@ -273,4 +273,41 @@ public class RedisEntityTest
             _db.KeyDelete(Key);
         }
     }
+    
+    [Test]
+    public void HSET_Multi() 
+    {
+        var re = _re;
+        var fields = re.Fields;
+        var doc = new Document();
+        var keys = new RedisKey[100];
+        var values = fields.GetEvenFields();
+        try
+        {
+            for (int i = 0; i < keys.Length; i++)
+            {
+                var key = KeyPrefix.Append(i.ToString());
+
+                Document.New(doc, i);
+
+                fields.ReadOddValues(values, doc);
+
+                HSET(key, values);
+
+                Assert.That(_db.EntityGet(key, re), Is.EqualTo(doc));
+
+                keys[i] = key;
+            }
+        }
+        finally
+        {
+            _db.KeyDelete(keys);
+        }
+    }
+
+    private int HSET(RedisKey key, RedisValue[] values)
+    {
+        return (int)_db.ScriptEvaluate("redis.call('hset', KEYS[1], unpack(ARGV))", 
+            [key], values);
+    }
 }
