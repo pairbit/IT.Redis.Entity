@@ -329,48 +329,6 @@ internal class EntityKeyRebuilder : IKeyRebuilder
         return key;
     }
 
-    private IUtf8Formatter<TKey> GetFormatter<TKey>(int index)
-    {
-        KeyInfo key;
-
-        try
-        {
-            key = _keys[index];
-        }
-        catch (ArgumentOutOfRangeException)
-        {
-            throw Ex.InvalidKeyCount(_entityType, _keys);
-        }
-
-        try
-        {
-            return (IUtf8Formatter<TKey>)key.Utf8Formatter;
-        }
-        catch (InvalidCastException)
-        {
-            throw Ex.InvalidKeyType(typeof(TKey), key.Property);
-        }
-    }
-
-    private static byte[] GetPrefix(string? prefix)
-    {
-        if (prefix == null) return Array.Empty<byte>();
-
-        var encoding = Encoding.UTF8;
-        var length = prefix.Length;
-
-        if (prefix[length - 1] == _separatorChar)
-            return encoding.GetBytes(prefix);
-
-        var bytes = new byte[length + 1];
-
-        encoding.GetBytes(prefix, bytes);
-
-        bytes[length] = _separator;
-
-        return bytes;
-    }
-
     public byte[] BuildKey<TKey1>(in TKey1 key1)
     {
         var f1 = GetFormatter<TKey1>(0);
@@ -528,5 +486,47 @@ internal class EntityKeyRebuilder : IKeyRebuilder
         offset += f7.Format(in key7, key.AsSpan(offset)); key[offset++] = sep;
         f8.Format(in key8, key.AsSpan(offset));
         return key;
+    }
+
+    private IUtf8Formatter<TKey> GetFormatter<TKey>(int index)
+    {
+        KeyInfo key;
+
+        try
+        {
+            key = _keys[index];
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            throw Ex.InvalidKeyCount(_entityType, _keys);
+        }
+
+        try
+        {
+            return (IUtf8Formatter<TKey>)key.Utf8Formatter;
+        }
+        catch (InvalidCastException)
+        {
+            throw Ex.InvalidKeyType(typeof(TKey), key.Property);
+        }
+    }
+
+    private static byte[] GetPrefix(string? prefix)
+    {
+        if (prefix == null) return Array.Empty<byte>();
+
+        var encoding = Encoding.UTF8;
+        var length = prefix.Length;
+
+        if (prefix[length - 1] == _separatorChar)
+            return encoding.GetBytes(prefix);
+
+        var bytes = new byte[length + 1];
+
+        encoding.GetBytes(prefix, bytes);
+
+        bytes[length] = _separator;
+
+        return bytes;
     }
 }
