@@ -75,13 +75,23 @@ public static class xIDatabase
         return fields.GetEntity<TEntity, TEntity>(db.HashGet(key, fields.ForRedis, flags));
     }
 
-    //public static ExistsValue<TField?> EntityGetField<TEntity, TField>(this IDatabase db, in RedisKey key, RedisEntityField<TEntity> field, CommandFlags flags = CommandFlags.None)
-    //{
-    //    var redisValue = db.HashGet(key, field.ForRedis, flags);
-    //    if (redisValue.IsNull) return default;
+    public static TField? EntityGetField<TEntity, TField>(this IDatabase db, in RedisKey key, RedisEntityField<TEntity> field, TField? defaultValue = default, CommandFlags flags = CommandFlags.None)
+    {
+        var redisValue = db.HashGet(key, field.ForRedis, flags);
+        if (redisValue.IsNull) return defaultValue;
 
-    //    TField? value = default;
-    //    field.GetFormatter<TField>().Deserialize(in redisValue, ref value);
-    //    return new(value);
-    //}
+        TField? value = default;
+        field.GetFormatter<TField>().Deserialize(in redisValue, ref value);
+        return value;
+    }
+
+    public static TField? EntityGetField<TEntity, TField>(this IDatabase db, in RedisKey key, RedisEntityField<TEntity> field, Func<TField?> getDefaultValue, CommandFlags flags = CommandFlags.None)
+    {
+        var redisValue = db.HashGet(key, field.ForRedis, flags);
+        if (redisValue.IsNull) return getDefaultValue();
+
+        TField? value = default;
+        field.GetFormatter<TField>().Deserialize(in redisValue, ref value);
+        return value;
+    }
 }

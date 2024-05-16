@@ -260,13 +260,8 @@ public class RedisEntityTest
             Assert.That(_db.EntityLoadField(in Key, ref price2, fieldPrice), Is.True);
             Assert.That(price2, Is.EqualTo(price));
 
-            //var existsValue = _db.EntityGetField<Document, long>(in NFKey, fieldPrice);
-            //Assert.That(existsValue.Exists, Is.False);
-            //Assert.That(existsValue.Value, Is.Default);
-
-            //existsValue = _db.EntityGetField<Document, long>(in Key, fieldPrice);
-            //Assert.That(existsValue.Exists, Is.True);
-            //Assert.That(existsValue.Value, Is.EqualTo(price));
+            Assert.That(_db.EntityGetField<Document, long>(in NFKey, fieldPrice, defaultValue: -1), Is.EqualTo(-1));
+            Assert.That(_db.EntityGetField<Document, long>(in Key, fieldPrice), Is.EqualTo(price));
         }
         finally
         {
