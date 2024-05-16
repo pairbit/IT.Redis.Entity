@@ -37,7 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Publish IT.Redis.Entity
-        uses: pairbit/publish-nuget@v2.6.0
+        uses: pairbit/publish-nuget@v2.6.1
         with:
             PROJECT_FILE_PATH: IT.Redis.Entity/IT.Redis.Entity.csproj
             NUGET_KEY: ${{secrets.NUGET}}
