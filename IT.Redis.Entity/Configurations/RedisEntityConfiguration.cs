@@ -26,6 +26,9 @@ public class RedisEntityConfiguration : IRedisEntityConfiguration
     public BindingFlags GetBindingFlags(Type type)
         => BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
+    public IKeyRebuilder? GetKeyBuilder(Type type) 
+        => _types != null && _types.TryGetValue(type, out var typeInfo) ? typeInfo.KeyBuilder : null;
+
     public bool IsKey(PropertyInfo property)
         => _fields.TryGetValue(property, out var fieldInfo) && fieldInfo.HasKey;
 

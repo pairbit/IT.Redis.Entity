@@ -6,6 +6,8 @@ internal class RedisTypeInfo : ICloneable
 
     public Delegate? KeyReader { get; set; }
 
+    public IKeyRebuilder? KeyBuilder { get; set; }
+
     public RedisTypeInfo Clone() => (RedisTypeInfo)MemberwiseClone();
 
     object ICloneable.Clone() => MemberwiseClone();

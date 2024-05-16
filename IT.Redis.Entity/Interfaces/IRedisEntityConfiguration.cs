@@ -8,6 +8,8 @@ public interface IRedisEntityConfiguration
 
     BindingFlags GetBindingFlags(Type type);
 
+    IKeyRebuilder? GetKeyBuilder(Type type);
+
     KeyReader<TEntity>? GetKeyReader<TEntity>();
 
     bool IsIgnore(PropertyInfo property);

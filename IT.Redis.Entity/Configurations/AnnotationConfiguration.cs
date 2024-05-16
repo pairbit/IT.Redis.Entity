@@ -41,6 +41,8 @@ public class AnnotationConfiguration : IRedisEntityConfiguration
     public BindingFlags GetBindingFlags(Type type)
         => BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
+    public IKeyRebuilder? GetKeyBuilder(Type type) => null;
+
     public KeyReader<TEntity>? GetKeyReader<TEntity>() => null;
 
     public virtual object GetUtf8Formatter(PropertyInfo property)

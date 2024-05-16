@@ -23,6 +23,8 @@ public class RedisEntityField<TEntity>
 
     public RedisValue ForRedis => _redisField;
 
+    public IKeyRebuilder KeyBuilder => _keyBuilder;
+
     public bool CanReadKey => _keyReader != null;
 
     public bool CanRead => _reader != null;

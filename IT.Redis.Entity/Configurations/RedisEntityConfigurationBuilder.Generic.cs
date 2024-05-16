@@ -127,6 +127,15 @@ public class RedisEntityConfigurationBuilder<TEntity>
         return this;
     }
 
+    public RedisEntityConfigurationBuilder<TEntity> HasKeyBuilder(IKeyRebuilder keyBuilder)
+    {
+        if (keyBuilder == null) throw new ArgumentNullException(nameof(keyBuilder));
+
+        _types.GetOrAdd(typeof(TEntity)).KeyBuilder = keyBuilder;
+
+        return this;
+    }
+
     private static PropertyInfo GetProperty(LambdaExpression propertySelector)
     {
         if (propertySelector == null) throw new ArgumentNullException(nameof(propertySelector));

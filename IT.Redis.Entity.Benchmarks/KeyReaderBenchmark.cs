@@ -277,9 +277,9 @@ public class KeyReaderBenchmark
 
     public void Validate()
     {
-        if (Build_Auto() != "ba:1") throw new InvalidOperationException();
-        if (Build_Interface() != "bi:1") throw new InvalidOperationException();
-        if (Build_Static() != "bs:1") throw new InvalidOperationException();
+        if (ReadKey_Auto() != "ba:1") throw new InvalidOperationException();
+        if (ReadKey_Interface() != "bi:1") throw new InvalidOperationException();
+        if (ReadKey_Static() != "bs:1") throw new InvalidOperationException();
         if (Rebuild_Auto() != "ra:1") throw new InvalidOperationException();
         if (Rebuild_Interface() != "ri:1") throw new InvalidOperationException();
         if (Rebuild_Static() != "rs:1") throw new InvalidOperationException();

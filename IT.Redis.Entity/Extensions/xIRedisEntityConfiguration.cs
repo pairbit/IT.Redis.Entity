@@ -68,13 +68,16 @@ public static class xIRedisEntityConfiguration
 
     private static IKeyRebuilder GetKeyBuilder(this IRedisEntityConfiguration configuration, Type entityType, PropertyInfo[] keys)
     {
+        var keyBuilder = configuration.GetKeyBuilder(entityType);
+        if (keyBuilder != null) return keyBuilder;
+
         //TODO: keys.length == 0 ??
-        var keyBuilder = new EntityKeyRebuilder(entityType, configuration.GetKeyPrefix(entityType));
+        var entityKeyBuilder = new EntityKeyRebuilder(entityType, configuration.GetKeyPrefix(entityType));
         foreach (var key in keys)
         {
-            keyBuilder.AddKeyInfo(key, configuration.GetUtf8Formatter(key));
+            entityKeyBuilder.AddKeyInfo(key, configuration.GetUtf8Formatter(key));
         }
-        return keyBuilder;
+        return entityKeyBuilder;
     }
 
     private static KeyReader<TEntity>? GetKeyReader<TEntity>(this IRedisEntityConfiguration configuration, PropertyInfo[] keys)
