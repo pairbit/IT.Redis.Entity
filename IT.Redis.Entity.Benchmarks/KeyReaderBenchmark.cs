@@ -14,8 +14,14 @@ public class KeyReaderBenchmark
     class Doc_Rebuild_Auto
     {
         private int _id;
-        internal byte[]? _redisKey;
+#pragma warning disable IDE0044 // Add readonly modifier
+#pragma warning disable IDE0051 // Remove unused private members
+        private byte[]? _redisKey;
+#pragma warning restore IDE0051 // Remove unused private members
+#pragma warning restore IDE0044 // Add readonly modifier
+#pragma warning disable IDE0052 // Remove unread private members
         private byte _redisKeyBits;
+#pragma warning restore IDE0052 // Remove unread private members
 
         public int Id
         {
@@ -36,7 +42,7 @@ public class KeyReaderBenchmark
     class Doc_Rebuild_Interface : IKeyReader
     {
         private int _id;
-        internal byte[]? _redisKey;
+        private byte[]? _redisKey;
         private byte _redisKeyBits;
 
         public int Id
@@ -70,7 +76,7 @@ public class KeyReaderBenchmark
     class Doc_Rebuild_Static
     {
         private int _id;
-        internal byte[]? _redisKey;
+        private byte[]? _redisKey;
         private byte _redisKeyBits;
 
         public int Id
@@ -103,7 +109,11 @@ public class KeyReaderBenchmark
 
     class Doc_Build_Auto
     {
-        internal byte[]? _redisKey;
+#pragma warning disable IDE0044 // Add readonly modifier
+#pragma warning disable IDE0051 // Remove unused private members
+        private byte[]? _redisKey;
+#pragma warning restore IDE0051 // Remove unused private members
+#pragma warning restore IDE0044 // Add readonly modifier
         private readonly int _id;
 
         public int Id => _id;
@@ -119,7 +129,7 @@ public class KeyReaderBenchmark
 
     class Doc_Build_Interface : IKeyReader
     {
-        internal byte[]? _redisKey;
+        private byte[]? _redisKey;
         private readonly int _id;
 
         public int Id => _id;
@@ -140,7 +150,7 @@ public class KeyReaderBenchmark
 
     class Doc_Build_Static
     {
-        internal byte[]? _redisKey;
+        private byte[]? _redisKey;
         private readonly int _id;
 
         public int Id => _id;
