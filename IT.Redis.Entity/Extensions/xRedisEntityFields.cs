@@ -155,30 +155,7 @@ public static class xRedisEntityFields
         => fields.GetEntity<TEntity, TEntity>(values, newEntity, offset);
 
     public static TEntity? GetEntity<TEntity, IEntity>(this RedisEntityField<IEntity>[] fields, RedisValue[] values, int offset = 0) where TEntity : IEntity, new()
-    {
-        if (values.Length < fields.Length + offset) throw new ArgumentOutOfRangeException(nameof(values));
-
-        int i = 0;
-        RedisValue value;
-
-        for (; i < fields.Length; i++)
-        {
-            value = values[offset++];
-            if (!value.IsNull) goto write;
-        }
-        return default;
-    write:
-        var entity = new TEntity();
-
-        fields[i++].Write(entity, in value);
-
-        for (; i < fields.Length; i++)
-        {
-            value = values[offset++];
-            if (!value.IsNull) fields[i].Write(entity, in value);
-        }
-        return entity;
-    }
+        => fields.GetEntity(values, static () => new TEntity(), offset);
 
     public static TEntity? GetEntity<TEntity>(this RedisEntityField<TEntity>[] fields, RedisValue[] values, int offset = 0) where TEntity : new()
         => fields.GetEntity<TEntity, TEntity>(values, offset);
