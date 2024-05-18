@@ -19,13 +19,13 @@ public class EntityBenchmark
     private static readonly RedisEntity<Document> _re_manual = GetConfig().NewEntity<Document>();
 
     private static readonly Document Data = Document.Data;
-    private static readonly RedisValue[] Values = _re.Fields.GetValues(Data);
+    private static readonly RedisValue[] Values = _re.Fields.Array.GetValues(Data);
 
     [Benchmark]
-    public HashEntry[] GetEntries() => _re.Fields.GetEntries(Data);
+    public HashEntry[] GetEntries() => _re.Fields.Array.GetEntries(Data);
 
     [Benchmark]
-    public HashEntry[] GetEntries_Manual() => _re_manual.Fields.GetEntries(Data);
+    public HashEntry[] GetEntries_Manual() => _re_manual.Fields.Array.GetEntries(Data);
 
     [Benchmark]
     public HashEntry[] GetEntries_Etalon()
@@ -48,10 +48,10 @@ public class EntityBenchmark
     }
 
     [Benchmark]
-    public RedisValue[] GetValues() => _re.Fields.GetValues(Data);
+    public RedisValue[] GetValues() => _re.Fields.Array.GetValues(Data);
 
     [Benchmark]
-    public RedisValue[] GetValues_Manual() => _re_manual.Fields.GetValues(Data);
+    public RedisValue[] GetValues_Manual() => _re_manual.Fields.Array.GetValues(Data);
 
     [Benchmark]
     public RedisValue[] GetValues_Etalon()
@@ -74,10 +74,10 @@ public class EntityBenchmark
     }
 
     [Benchmark]
-    public Document? GetEntity() => _re.Fields.GetEntity(Values);
+    public Document? GetEntity() => _re.Fields.Array.GetEntity(Values);
 
     [Benchmark]
-    public Document? GetEntity_Manual() => _re_manual.Fields.GetEntity(Values);
+    public Document? GetEntity_Manual() => _re_manual.Fields.Array.GetEntity(Values);
 
     [Benchmark]
     public Document? GetEntity_Etalon()
