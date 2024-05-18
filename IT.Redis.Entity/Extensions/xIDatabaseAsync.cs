@@ -46,7 +46,7 @@ public static class xIDatabaseAsync
 
     /*public static bool EntityLoadField<TEntity, TField>(this IDatabase db, in RedisKey key, ref TField? value, RedisEntityField<TEntity> field, CommandFlags flags = CommandFlags.None)
     {
-        var redisValue = db.HashGet(key, field.ForRedis, flags);
+        var redisValue = db.HashGet(key, field.RedisValue, flags);
 
         if (redisValue.IsNull) return false;
 
