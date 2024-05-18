@@ -7,7 +7,7 @@ public class RedisEntityFields<TEntity>
 
     public RedisEntityField<TEntity>[] Array { get; }
 
-    public RedisValue[] ForRedis { get; }
+    public RedisValue[] RedisValues { get; }
 
     public int Count => _dictionary.Count;
 
@@ -19,7 +19,7 @@ public class RedisEntityFields<TEntity>
         var array = dictionary.Values.ToArray();
 
         Array = array;
-        ForRedis = array.Select(x => x.ForRedis).ToArray();
+        RedisValues = array.Select(x => x.RedisValue).ToArray();
         _dictionary = dictionary;
     }
 
@@ -27,7 +27,7 @@ public class RedisEntityFields<TEntity>
     {
         _dictionary = new Dictionary<string, RedisEntityField<TEntity>>(0);
         Array = [];
-        ForRedis = [];
+        RedisValues = [];
     }
 
     public RedisEntityFields<TEntity> Sub(params string[] propertyNames)

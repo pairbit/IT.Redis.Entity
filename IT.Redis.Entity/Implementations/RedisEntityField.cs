@@ -6,7 +6,7 @@ namespace IT.Redis.Entity;
 public class RedisEntityField<TEntity>
 {
     private readonly PropertyInfo _propertyInfo;
-    private readonly RedisValue _redisField;
+    private readonly RedisValue _redisValue;
 
     private readonly object _formatterGeneric;
 
@@ -21,7 +21,7 @@ public class RedisEntityField<TEntity>
 
     public PropertyInfo Property => _propertyInfo;
 
-    public RedisValue ForRedis => _redisField;
+    public RedisValue RedisValue => _redisValue;
 
     public IKeyRebuilder KeyBuilder => _keyBuilder;
 
@@ -31,14 +31,14 @@ public class RedisEntityField<TEntity>
 
     public bool CanWrite => _writer != null;
 
-    internal RedisEntityField(PropertyInfo propertyInfo, RedisValue redisField,
+    internal RedisEntityField(PropertyInfo propertyInfo, RedisValue redisValue,
         RedisValueWriter<TEntity>? writer,
         RedisValueReader<TEntity>? reader,
         IRedisValueFormatter formatter,
         IKeyRebuilder keyBuilder, KeyReader<TEntity>? keyReader)
     {
         _propertyInfo = propertyInfo;
-        _redisField = redisField;
+        _redisValue = redisValue;
         _formatterGeneric = RedisValueFormatterProxy.GetFormatterGeneric(propertyInfo.PropertyType, formatter);
         _keyBuilder = keyBuilder;
         _keyReader = keyReader;
@@ -86,8 +86,8 @@ public class RedisEntityField<TEntity>
         if (!canRead && canWrite) prefix = "[W] ";
 
         var prop = _propertyInfo.Name;
-        var redis = (string)_redisField!;
+        var redisValue = (string)_redisValue!;
 
-        return prop.Equals(redis) ? $"{prefix}{prop}" : $"{prefix}{prop} -> {redis}";
+        return prop.Equals(redisValue) ? $"{prefix}{prop}" : $"{prefix}{prop} -> {redisValue}";
     }
 }

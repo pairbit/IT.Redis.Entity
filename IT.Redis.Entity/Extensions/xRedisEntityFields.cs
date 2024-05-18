@@ -12,7 +12,7 @@ public static class xRedisEntityFields
         for (int i = 0; i < fields.Length; i++)
         {
             var field = fields[i];
-            entries[offset++] = new HashEntry(field.ForRedis, field.Read(entity));
+            entries[offset++] = new HashEntry(field.RedisValue, field.Read(entity));
         }
     }
 
@@ -26,7 +26,7 @@ public static class xRedisEntityFields
         for (int i = 0; i < fields.Length; i++)
         {
             var field = fields[i];
-            values[offset++] = field.ForRedis;
+            values[offset++] = field.RedisValue;
             values[offset++] = field.Read(entity);
         }
     }
@@ -64,7 +64,7 @@ public static class xRedisEntityFields
         for (int i = 0; i < fields.Length; i++)
         {
             var field = fields[i];
-            entries[offset++] = new HashEntry(field.ForRedis, field.Read(entity));
+            entries[offset++] = new HashEntry(field.RedisValue, field.Read(entity));
         }
 
         return entries;
@@ -77,7 +77,7 @@ public static class xRedisEntityFields
         for (int i = 0; i < fields.Length; i++)
         {
             var field = fields[i];
-            values[offset++] = field.ForRedis;
+            values[offset++] = field.RedisValue;
             values[offset++] = field.Read(entity);
         }
 
@@ -102,7 +102,7 @@ public static class xRedisEntityFields
 
         for (int i = 0; i < fields.Length; i++, offset += 2)
         {
-            values[offset] = fields[i].ForRedis;
+            values[offset] = fields[i].RedisValue;
         }
 
         return values;

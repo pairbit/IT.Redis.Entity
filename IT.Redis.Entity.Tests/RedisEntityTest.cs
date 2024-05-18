@@ -34,7 +34,7 @@ public class RedisEntityTest
     {
         var re = _re;
         var fields = re.Fields.Array;
-        var redisFields = re.Fields.ForRedis;
+        var redisFields = re.Fields.RedisValues;
         var entries = new HashEntry[fields.Length];
         var document = new Document();
         var keys = new RedisKey[100];
@@ -67,7 +67,7 @@ public class RedisEntityTest
     {
         var re = _re;
         var fields = re.Fields.Array;
-        var redisFields = re.Fields.ForRedis;
+        var redisFields = re.Fields.RedisValues;
         try
         {
             _db.EntitySet(Key, Document.Data, re);
@@ -107,13 +107,13 @@ public class RedisEntityTest
 
         var Field_IsDeleted = fields[nameof(Document.IsDeleted)];
 
-        Assert.That(fields.Array.GetEntity(_db.HashGet(Key, fields.ForRedis)), Is.Null);
-        Assert.That(EndDate_Modified.Array.GetEntity(_db.HashGet(Key, EndDate_Modified.ForRedis)), Is.Null);
+        Assert.That(fields.Array.GetEntity(_db.HashGet(Key, fields.RedisValues)), Is.Null);
+        Assert.That(EndDate_Modified.Array.GetEntity(_db.HashGet(Key, EndDate_Modified.RedisValues)), Is.Null);
 
         var doc2 = new Document();
 
-        Assert.That(EndDate_Modified.Array.Write(doc2, _db.HashGet(Key, EndDate_Modified.ForRedis)), Is.False);
-        Assert.That(Field_IsDeleted.Write(doc2, _db.HashGet(Key, Field_IsDeleted.ForRedis)), Is.False);
+        Assert.That(EndDate_Modified.Array.Write(doc2, _db.HashGet(Key, EndDate_Modified.RedisValues)), Is.False);
+        Assert.That(Field_IsDeleted.Write(doc2, _db.HashGet(Key, Field_IsDeleted.RedisValue)), Is.False);
 
         Assert.That(doc2, Is.EqualTo(Document.Empty));
 
@@ -121,10 +121,10 @@ public class RedisEntityTest
         {
             _db.HashSet(Key, fields.Array.GetEntries(Document.Data));
 
-            Assert.That(fields.Array.Write(doc2, _db.HashGet(Key, fields.ForRedis)), Is.True);
+            Assert.That(fields.Array.Write(doc2, _db.HashGet(Key, fields.RedisValues)), Is.True);
 
             Assert.That(doc2, Is.EqualTo(Document.Data));
-            Assert.That(fields.Array.GetEntity(_db.HashGet(Key, fields.ForRedis)), Is.EqualTo(Document.Data));
+            Assert.That(fields.Array.GetEntity(_db.HashGet(Key, fields.RedisValues)), Is.EqualTo(Document.Data));
 #if NET6_0_OR_GREATER
             doc2.EndDate = new DateOnly(2022, 03, 20);
 #endif
@@ -134,7 +134,7 @@ public class RedisEntityTest
 
             var doc3 = new Document();
 
-            Assert.That(EndDate_Modified.Array.Write(doc3, _db.HashGet(Key, EndDate_Modified.ForRedis)), Is.True);
+            Assert.That(EndDate_Modified.Array.Write(doc3, _db.HashGet(Key, EndDate_Modified.RedisValues)), Is.True);
 
             Assert.That(doc2, Is.Not.EqualTo(doc3));
 #if NET6_0_OR_GREATER
@@ -142,7 +142,7 @@ public class RedisEntityTest
 #endif
             Assert.That(doc2.Modified, Is.EqualTo(doc3.Modified));
 
-            Assert.That(fields.Array.Write(doc3, _db.HashGet(Key, fields.ForRedis)), Is.True);
+            Assert.That(fields.Array.Write(doc3, _db.HashGet(Key, fields.RedisValues)), Is.True);
 
             Assert.That(doc2, Is.EqualTo(doc3));
 
@@ -150,13 +150,13 @@ public class RedisEntityTest
 
             Assert.That(doc2, Is.Not.EqualTo(doc3));
 
-            Assert.That(_db.HashSet(Key, Field_IsDeleted.ForRedis, Field_IsDeleted.Read(doc2)), Is.False);
+            Assert.That(_db.HashSet(Key, Field_IsDeleted.RedisValue, Field_IsDeleted.Read(doc2)), Is.False);
 
-            Assert.That(Field_IsDeleted.Write(doc3, _db.HashGet(Key, Field_IsDeleted.ForRedis)), Is.True);
+            Assert.That(Field_IsDeleted.Write(doc3, _db.HashGet(Key, Field_IsDeleted.RedisValue)), Is.True);
 
             Assert.That(doc2, Is.EqualTo(doc3));
 
-            Assert.That(Field_IsDeleted.GetEntity(_db.HashGet(Key, Field_IsDeleted.ForRedis)), Is.EqualTo(Document.Deleted));
+            Assert.That(Field_IsDeleted.GetEntity(_db.HashGet(Key, Field_IsDeleted.RedisValue)), Is.EqualTo(Document.Deleted));
 
         }
         finally
