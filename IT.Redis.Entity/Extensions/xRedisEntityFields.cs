@@ -21,7 +21,7 @@ public static class xRedisEntityFields
         if (fields == null) throw new ArgumentNullException(nameof(fields));
         if (values == null) throw new ArgumentNullException(nameof(values));
         if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
-        if (values.Length < fields.Length * 2 + offset) throw new ArgumentOutOfRangeException(nameof(values));
+        if (values.Length < (fields.Length << 1) + offset) throw new ArgumentOutOfRangeException(nameof(values));
 
         for (int i = 0; i < fields.Length; i++)
         {
@@ -49,7 +49,7 @@ public static class xRedisEntityFields
         if (fields == null) throw new ArgumentNullException(nameof(fields));
         if (values == null) throw new ArgumentNullException(nameof(values));
         if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
-        if (values.Length < fields.Length * 2 + offset) throw new ArgumentOutOfRangeException(nameof(values));
+        if (values.Length < (fields.Length << 1) + offset) throw new ArgumentOutOfRangeException(nameof(values));
         offset++;
         for (int i = 0; i < fields.Length; i++, offset += 2)
         {
@@ -72,7 +72,7 @@ public static class xRedisEntityFields
 
     public static RedisValue[] GetFieldsAndValues<TEntity>(this RedisEntityField<TEntity>[] fields, TEntity entity, int offset = 0)
     {
-        var values = new RedisValue[fields.Length * 2 + offset];
+        var values = new RedisValue[(fields.Length << 1) + offset];
 
         for (int i = 0; i < fields.Length; i++)
         {
@@ -98,7 +98,7 @@ public static class xRedisEntityFields
 
     public static RedisValue[] GetEvenFields<TEntity>(this RedisEntityField<TEntity>[] fields, int offset = 0)
     {
-        var values = new RedisValue[fields.Length * 2 + offset];
+        var values = new RedisValue[(fields.Length << 1) + offset];
 
         for (int i = 0; i < fields.Length; i++, offset += 2)
         {
