@@ -84,7 +84,7 @@ public static class xRedisEntityFields
         return values;
     }
 
-    public static RedisValue[] GetFieldsAndValues<TEntity>(this RedisEntityField<TEntity>[] fields, TEntity[] entities, int offset = 0)
+    public static RedisValue[] GetCountAndFieldsAndValues<TEntity>(this RedisEntityField<TEntity>[] fields, TEntity[] entities, int offset = 0)
     {
         var values = new RedisValue[entities.Length * fields.Length + fields.Length + 1 + offset];
         values[offset++] = fields.Length;
