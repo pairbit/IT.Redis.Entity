@@ -86,21 +86,40 @@ public static class xRedisEntityFields
 
     public static RedisValue[] GetFieldsAndValues<TEntity>(this RedisEntityField<TEntity>[] fields, TEntity[] entities, int offset = 0)
     {
-        var count = fields.Length << 1;
-        var values = new RedisValue[count * entities.Length + entities.Length + offset];
+        var values = new RedisValue[entities.Length * fields.Length + fields.Length + 1 + offset];
+        values[offset++] = fields.Length;
+        for (var i = 0; i < fields.Length; i++)
+        {
+            values[offset++] = fields[i].RedisValue;
+        }
         for (int e = 0; e < entities.Length; e++)
         {
             var entity = entities[e];
-            values[offset++] = count;
             for (int f = 0; f < fields.Length; f++)
             {
-                var field = fields[f];
-                values[offset++] = field.RedisValue;
-                values[offset++] = field.Read(entity);
+                values[offset++] = fields[f].Read(entity);
             }
         }
         return values;
     }
+
+    //public static RedisValue[] GetFieldsAndValues<TEntity>(this RedisEntityField<TEntity>[] fields, TEntity[] entities, int offset = 0)
+    //{
+    //    var count = fields.Length << 1;
+    //    var values = new RedisValue[count * entities.Length + entities.Length + offset];
+    //    for (int e = 0; e < entities.Length; e++)
+    //    {
+    //        var entity = entities[e];
+    //        values[offset++] = count;
+    //        for (int f = 0; f < fields.Length; f++)
+    //        {
+    //            var field = fields[f];
+    //            values[offset++] = field.RedisValue;
+    //            values[offset++] = field.Read(entity);
+    //        }
+    //    }
+    //    return values;
+    //}
 
     public static RedisValue[] GetValues<TEntity>(this RedisEntityField<TEntity>[] fields, TEntity entity, int offset = 0)
     {
