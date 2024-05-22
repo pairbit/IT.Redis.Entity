@@ -84,11 +84,11 @@ public static class xRedisEntityFields
         return values;
     }
 
-    public static RedisValue[] GetFieldsAndValues<TEntity>(this RedisEntityField<TEntity>[] fields, IReadOnlyList<TEntity> entities, int offset = 0)
+    public static RedisValue[] GetFieldsAndValues<TEntity>(this RedisEntityField<TEntity>[] fields, TEntity[] entities, int offset = 0)
     {
         var count = fields.Length << 1;
-        var values = new RedisValue[count * entities.Count + entities.Count + offset];
-        for (int e = 0; e < entities.Count; e++)
+        var values = new RedisValue[count * entities.Length + entities.Length + offset];
+        for (int e = 0; e < entities.Length; e++)
         {
             var entity = entities[e];
             values[offset++] = count;
