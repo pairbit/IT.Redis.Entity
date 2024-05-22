@@ -39,8 +39,7 @@ public static class xIDatabase
 
     public static bool EntityLoad<TEntity>(this IDatabase db, in RedisKey key, TEntity entity, RedisEntity<TEntity>? re = null, CommandFlags flags = CommandFlags.None)
     {
-        re ??= RedisEntity<TEntity>.Default;
-        var fields = re.WriteFields;
+        var fields = (re ?? RedisEntity<TEntity>.Default).WriteFields;
         return fields.Array.Write(entity, db.HashGet(key, fields.RedisValues, flags));
     }
 
@@ -60,8 +59,7 @@ public static class xIDatabase
 
     public static TEntity? EntityGet<TEntity, IEntity>(this IDatabase db, in RedisKey key, RedisEntity<IEntity>? re = null, CommandFlags flags = CommandFlags.None) where TEntity : IEntity, new()
     {
-        re ??= RedisEntity<IEntity>.Default;
-        var fields = re.WriteFields;
+        var fields = (re ?? RedisEntity<IEntity>.Default).WriteFields;
         return fields.Array.GetEntity<TEntity, IEntity>(db.HashGet(key, fields.RedisValues, flags));
     }
 
@@ -70,8 +68,7 @@ public static class xIDatabase
 
     public static TEntity? EntityGet<TEntity>(this IDatabase db, in RedisKey key, RedisEntity<TEntity>? re = null, CommandFlags flags = CommandFlags.None) where TEntity : new()
     {
-        re ??= RedisEntity<TEntity>.Default;
-        var fields = re.WriteFields;
+        var fields = (re ?? RedisEntity<TEntity>.Default).WriteFields;
         return fields.Array.GetEntity<TEntity, TEntity>(db.HashGet(key, fields.RedisValues, flags));
     }
 
