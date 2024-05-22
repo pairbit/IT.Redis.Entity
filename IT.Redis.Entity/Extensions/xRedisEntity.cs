@@ -2,7 +2,7 @@
 
 public static class xRedisEntity
 {
-    public static RedisValue[] GetFieldsAndValues<TEntity>(this RedisEntity<TEntity>[] redisEntities, TEntity[] entities, int offset = 0)
+    public static RedisValue[] GetCountAndFieldsAndValues<TEntity>(this RedisEntity<TEntity>[] redisEntities, TEntity[] entities, int offset = 0)
     {
         if (redisEntities.Length != entities.Length) throw new ArgumentOutOfRangeException(nameof(entities));
         //TODO: calc length??
@@ -43,7 +43,7 @@ public static class xRedisEntity
         return [.. values];
     }
 
-    public static TEntity?[] GetEntities<TEntity, IEntity>(this RedisEntity<IEntity>[] redisEntities, RedisValue[] values, int offset = 0) where TEntity : IEntity, new()
+    public static TEntity?[] GetEntities<TEntity, IEntity>(this RedisEntity<IEntity>[] redisEntities, RedisValue[] values, Func<TEntity> newEntity, int offset = 0) where TEntity : IEntity
     {
         if (redisEntities.Length == 0) return [];
         var entities = new TEntity?[redisEntities.Length];
@@ -51,10 +51,19 @@ public static class xRedisEntity
         for (int i = 0; i < entities.Length; i++)
         {
             var fields = redisEntities[i].WriteFields.Array;
-            entities[i] = fields.GetEntity<TEntity, IEntity>(values, offset);
+            entities[i] = fields.GetEntity(values, newEntity, offset);
             offset += fields.Length;
         }
 
         return entities;
     }
+
+    public static TEntity?[] GetEntities<TEntity>(this RedisEntity<TEntity>[] redisEntities, RedisValue[] values, Func<TEntity> newEntity, int offset = 0)
+        => redisEntities.GetEntities<TEntity, TEntity>(values, newEntity, offset);
+
+    public static TEntity?[] GetEntities<TEntity, IEntity>(this RedisEntity<IEntity>[] redisEntities, RedisValue[] values, int offset = 0) where TEntity : IEntity, new()
+        => redisEntities.GetEntities(values, static () => new TEntity(), offset);
+
+    public static TEntity?[] GetEntities<TEntity>(this RedisEntity<TEntity>[] redisEntities, RedisValue[] values, int offset = 0) where TEntity : new()
+        => redisEntities.GetEntities<TEntity, TEntity>(values, offset);
 }
