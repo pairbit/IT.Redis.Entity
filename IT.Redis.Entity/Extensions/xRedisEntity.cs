@@ -36,7 +36,7 @@ public static class xRedisEntity
         }
         for (int i = 0; i < redisEntities.Length; i++)
         {
-            var fields = redisEntities[i].ReadFields.RedisValues;
+            var fields = redisEntities[i].WriteFields.RedisValues;
             values.Add(fields.Length);
             values.AddRange(fields);
         }
