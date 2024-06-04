@@ -60,7 +60,7 @@ jobs:
         run: dotnet build IT.Redis.Entity.sln --configuration Release --no-restore 
     
       - name: Test
-        run: dotnet test IT.Redis.Entity.Tests/IT.Redis.Entity.Tests.csproj --no-restore
+        run: dotnet test IT.Redis.Entity.Tests/IT.Redis.Entity.Tests.csproj --configuration Release --no-restore
 
   publish:
     needs: [build, test]
