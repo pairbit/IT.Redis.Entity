@@ -8,12 +8,11 @@ on:
 
 jobs:
   build:
-    name: test
+    name: build
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-
     steps:
       - uses: actions/checkout@v4
       - name: Setup
@@ -31,8 +30,38 @@ jobs:
       - name: Build
         run: dotnet build IT.Redis.Entity.sln --configuration Release --no-restore 
 
-  publish:
+  test:
     needs: [build]
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            3.1.x
+            6.0.x
+            7.0.x
+            8.0.x
+    
+      - name: Restore
+        run: dotnet restore IT.Redis.Entity.sln
+    
+      - name: Test
+        run: dotnet test IT.Redis.Entity.Tests/IT.Redis.Entity.Tests.csproj --no-restore
+
+  publish:
+    needs: [test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
