@@ -43,6 +43,22 @@ jobs:
           --health-retries 5
         ports:
           - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            3.1.x
+            6.0.x
+            7.0.x
+            8.0.x
+    
+      - name: Restore
+        run: dotnet restore IT.Redis.Entity.sln
+    
+      - name: Test
+        run: dotnet test IT.Redis.Entity.Tests/IT.Redis.Entity.Tests.csproj --no-restore
 
   publish:
     needs: [test]
