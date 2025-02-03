@@ -118,6 +118,33 @@ public class RedisEntityConfigurationBuilder<TEntity>
         return this;
     }
 
+    public RedisEntityConfigurationBuilder<TEntity> HasField<T>(Expression<Func<TEntity, T>> propertySelector,
+        byte fieldId, IRedisValueFormatter<T>? formatter = null, RedisValueWriter<TEntity>? writer = null, RedisValueReader<TEntity>? reader = null)
+    {
+        var field = _fields.GetOrAdd(GetProperty(propertySelector));
+        field.FieldId = fieldId;
+        if (formatter != null) field.Formatter = formatter;
+        if (writer != null) field.Writer = writer;
+        if (reader != null) field.Reader = reader;
+
+        return this;
+    }
+
+    public RedisEntityConfigurationBuilder<TEntity> HasField<T>(Expression<Func<TEntity, T>> propertySelector,
+        string fieldName, IRedisValueFormatter<T>? formatter = null, RedisValueWriter<TEntity>? writer = null, RedisValueReader<TEntity>? reader = null)
+    {
+        if (fieldName == null) throw new ArgumentNullException(nameof(fieldName));
+        if (fieldName.Length == 0) throw new ArgumentException("Field name is empty", nameof(fieldName));
+
+        var field = _fields.GetOrAdd(GetProperty(propertySelector));
+        field.FieldName = fieldName;
+        if (formatter != null) field.Formatter = formatter;
+        if (writer != null) field.Writer = writer;
+        if (reader != null) field.Reader = reader;
+
+        return this;
+    }
+
     public RedisEntityConfigurationBuilder<TEntity> HasKeyReader(KeyReader<TEntity> keyReader)
     {
         if (keyReader == null) throw new ArgumentNullException(nameof(keyReader));
