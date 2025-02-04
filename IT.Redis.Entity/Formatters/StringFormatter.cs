@@ -1,6 +1,6 @@
 ﻿namespace IT.Redis.Entity.Formatters;
 
-public class StringFormatter : IRedisValueFormatter<string>
+public class StringFormatter : IRedisValueFormatter<string?>
 {
     public static readonly StringFormatter Default = new();
 

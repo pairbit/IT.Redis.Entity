@@ -1,6 +1,6 @@
 ﻿namespace IT.Redis.Entity.Formatters;
 
-public class ByteArrayFormatter : IRedisValueFormatter<byte[]>
+public class ByteArrayFormatter : IRedisValueFormatter<byte[]?>
 {
     public static readonly ByteArrayFormatter Default = new();
 
