@@ -143,7 +143,7 @@ public class DocumentDependTest
             _db.EntitySet(doc, re.Fields[nameof(DocumentWithReadOnlyKeys.Data1)]);
 
             Assert.That(doc.RedisKey, Is.Not.Null);
-            Assert.That(doc.RedisKey.Length, Is.EqualTo(length));
+            Assert.That(doc.RedisKey!.Length, Is.EqualTo(length));
             Assert.That(doc.RedisKey.SequenceEqual(Encoding.UTF8.GetBytes(redisKey)), Is.True);
 
             doc.Data2 = "test-data2";
