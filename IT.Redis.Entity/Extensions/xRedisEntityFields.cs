@@ -144,7 +144,7 @@ public static class xRedisEntityFields
         return writen;
     }
 
-    public static TEntity? GetEntity<TEntity, IEntity>(this RedisEntityField<IEntity>[] fields, RedisValue[] values, Func<TEntity> newEntity, int offset = 0) where TEntity : IEntity
+    public static TEntity? GetEntity<TEntity, IEntity>(this RedisEntityField<IEntity>[] fields, RedisValue[] values, Func<TEntity> getEntity, int offset = 0) where TEntity : IEntity
     {
         if (values.Length < fields.Length + offset) throw new ArgumentOutOfRangeException(nameof(values));
 
@@ -158,7 +158,7 @@ public static class xRedisEntityFields
         }
         return default;
     write:
-        var entity = newEntity();
+        var entity = getEntity();
 
         fields[i++].Write(entity, in value);
 
@@ -170,8 +170,8 @@ public static class xRedisEntityFields
         return entity;
     }
 
-    public static TEntity? GetEntity<TEntity>(this RedisEntityField<TEntity>[] fields, RedisValue[] values, Func<TEntity> newEntity, int offset = 0)
-        => fields.GetEntity<TEntity, TEntity>(values, newEntity, offset);
+    public static TEntity? GetEntity<TEntity>(this RedisEntityField<TEntity>[] fields, RedisValue[] values, Func<TEntity> getEntity, int offset = 0)
+        => fields.GetEntity<TEntity, TEntity>(values, getEntity, offset);
 
     public static TEntity? GetEntity<TEntity, IEntity>(this RedisEntityField<IEntity>[] fields, RedisValue[] values, int offset = 0) where TEntity : IEntity, new()
         => fields.GetEntity(values, static () => new TEntity(), offset);
@@ -179,7 +179,7 @@ public static class xRedisEntityFields
     public static TEntity? GetEntity<TEntity>(this RedisEntityField<TEntity>[] fields, RedisValue[] values, int offset = 0) where TEntity : new()
         => fields.GetEntity<TEntity, TEntity>(values, offset);
 
-    public static TEntity?[] GetEntities<TEntity, IEntity>(this RedisEntityField<IEntity>[] fields, RedisValue[] values, Func<TEntity> newEntity, int offset = 0) where TEntity : IEntity
+    public static TEntity?[] GetEntities<TEntity, IEntity>(this RedisEntityField<IEntity>[] fields, RedisValue[] values, Func<TEntity> getEntity, int offset = 0) where TEntity : IEntity
     {
         if (values.Length % fields.Length != 0) throw new ArgumentOutOfRangeException(nameof(values));
 
@@ -190,14 +190,14 @@ public static class xRedisEntityFields
 
         for (int i = 0; i < entities.Length; i++, offset += fields.Length)
         {
-            entities[i] = fields.GetEntity(values, newEntity, offset);
+            entities[i] = fields.GetEntity(values, getEntity, offset);
         }
 
         return entities;
     }
 
-    public static TEntity?[] GetEntities<TEntity>(this RedisEntityField<TEntity>[] fields, RedisValue[] values, Func<TEntity> newEntity, int offset = 0)
-        => fields.GetEntities<TEntity, TEntity>(values, newEntity, offset);
+    public static TEntity?[] GetEntities<TEntity>(this RedisEntityField<TEntity>[] fields, RedisValue[] values, Func<TEntity> getEntity, int offset = 0)
+        => fields.GetEntities<TEntity, TEntity>(values, getEntity, offset);
 
     public static TEntity?[] GetEntities<TEntity, IEntity>(this RedisEntityField<IEntity>[] fields, RedisValue[] values, int offset = 0) where TEntity : IEntity, new()
         => fields.GetEntities(values, static () => new TEntity(), offset);
