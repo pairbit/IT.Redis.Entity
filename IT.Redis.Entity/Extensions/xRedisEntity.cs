@@ -1,4 +1,6 @@
-﻿namespace IT.Redis.Entity.Extensions;
+﻿using System.Buffers;
+
+namespace IT.Redis.Entity.Extensions;
 
 public static class xRedisEntity
 {
@@ -66,4 +68,33 @@ public static class xRedisEntity
 
     public static TEntity?[] GetEntities<TEntity>(this RedisEntity<TEntity>[] redisEntities, RedisValue[] values, int offset = 0) where TEntity : new()
         => redisEntities.GetEntities<TEntity, TEntity>(values, offset);
+
+    #region Rent
+
+    public static ArraySegment<TEntity?> RentEntities<TEntity, IEntity>(this RedisEntity<IEntity>[] redisEntities, RedisValue[] values, Func<TEntity> getEntity, int offset = 0, ArrayPool<TEntity?>? pool = null) where TEntity : IEntity
+    {
+        var count = redisEntities.Length;
+        if (count == 0) return new([]);
+        var entities = pool == null ? ArrayPool<TEntity?>.Shared.Rent(count) : pool.Rent(count);
+
+        for (int i = 0; i < count; i++)
+        {
+            var fields = redisEntities[i].WriteFields.Array;
+            entities[i] = fields.GetEntity(values, getEntity, offset);
+            offset += fields.Length;
+        }
+
+        return new(entities, 0, count);
+    }
+
+    public static ArraySegment<TEntity?> RentEntities<TEntity>(this RedisEntity<TEntity>[] redisEntities, RedisValue[] values, Func<TEntity> getEntity, int offset = 0, ArrayPool<TEntity?>? pool = null)
+        => redisEntities.RentEntities<TEntity, TEntity>(values, getEntity, offset, pool);
+
+    public static ArraySegment<TEntity?> RentEntities<TEntity, IEntity>(this RedisEntity<IEntity>[] redisEntities, RedisValue[] values, int offset = 0, ArrayPool<TEntity?>? pool = null) where TEntity : IEntity, new()
+        => redisEntities.RentEntities(values, static () => new TEntity(), offset, pool);
+
+    public static ArraySegment<TEntity?> RentEntities<TEntity>(this RedisEntity<TEntity>[] redisEntities, RedisValue[] values, int offset = 0, ArrayPool<TEntity?>? pool = null) where TEntity : new()
+        => redisEntities.RentEntities<TEntity, TEntity>(values, offset, pool);
+
+    #endregion Rent
 }
