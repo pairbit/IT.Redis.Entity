@@ -58,11 +58,12 @@ public class RedisEntityConfigurationBuilder<TEntity>
         return this;
     }
 
-    public RedisEntityConfigurationBuilder<TEntity> HasKey<T>(Expression<Func<TEntity, T>> propertySelector, IUtf8Formatter<T>? utf8Formatter = null)
+    public RedisEntityConfigurationBuilder<TEntity> HasKey<T>(Expression<Func<TEntity, T>> propertySelector,
+        IUtf8Formatter<T>? utf8Formatter = null)
     {
         var fieldInfo = _fields.GetOrAdd(GetProperty(propertySelector));
         fieldInfo.HasKey = true;
-        fieldInfo.Utf8Formatter = utf8Formatter;
+        if (utf8Formatter != null) fieldInfo.Utf8Formatter = utf8Formatter;
 
         return this;
     }

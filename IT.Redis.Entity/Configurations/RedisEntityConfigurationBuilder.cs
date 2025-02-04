@@ -56,7 +56,7 @@ public class RedisEntityConfigurationBuilder
 
         var fieldInfo = _fields.GetOrAdd(property);
         fieldInfo.HasKey = true;
-        fieldInfo.Utf8Formatter = utf8Formatter;
+        if (utf8Formatter != null) fieldInfo.Utf8Formatter = utf8Formatter;
 
         return this;
     }
