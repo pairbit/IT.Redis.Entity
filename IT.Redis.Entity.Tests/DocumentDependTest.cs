@@ -96,6 +96,20 @@ public class DocumentDependTest
             Assert.That(doc.Bits!.Cast<bool>().SequenceEqual(doc2.Bits!.Cast<bool>()), Is.True);
             doc.Bits = doc2.Bits;
 
+            var redisValNullable = doc2.RedisValNullable!.Value;
+            Assert.That(!redisValNullable.IsNull && redisValNullable.IsNullOrEmpty, Is.True);
+            doc2.RedisValNullable = null;
+
+            var redisValNull = doc2.RedisValNull;
+            Assert.That(!redisValNullable.IsNull && redisValNullable.IsNullOrEmpty, Is.True);
+            doc2.RedisValNull = RedisValue.Null;
+
+            Assert.That(doc2.Name!.Length == 0, Is.True);
+            doc2.Name = null;
+
+            Assert.That(doc2.MemoryBytesNull!.Value.Length == 0, Is.True);
+            doc2.MemoryBytesNull = null;
+
             Assert.That(doc, Is.EqualTo(doc2));
         }
         finally

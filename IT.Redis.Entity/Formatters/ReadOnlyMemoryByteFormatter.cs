@@ -1,19 +1,17 @@
-﻿using IT.Redis.Entity.Internal;
+﻿namespace IT.Redis.Entity.Formatters;
 
-namespace IT.Redis.Entity.Formatters;
-
-public class ReadOnlyMemoryByteFormatter : IStructFormatter<ReadOnlyMemory<Byte>>
+public class ReadOnlyMemoryByteFormatter : IStructFormatter<ReadOnlyMemory<byte>>
 {
     public static readonly ReadOnlyMemoryByteFormatter Default = new();
 
-    public void Deserialize(in RedisValue redisValue, ref ReadOnlyMemory<Byte> value)
-        => value = redisValue == RedisValues.Zero ? ReadOnlyMemory<byte>.Empty : redisValue;
+    public void Deserialize(in RedisValue redisValue, ref ReadOnlyMemory<byte> value)
+        => value = redisValue;
 
-    public RedisValue Serialize(in ReadOnlyMemory<Byte> value) => value;
+    public RedisValue Serialize(in ReadOnlyMemory<byte> value) => value;
 
     public void Deserialize(in RedisValue redisValue, ref ReadOnlyMemory<byte>? value)
-        => value = redisValue == RedisValues.Zero ? (ReadOnlyMemory<byte>?)null : redisValue;
+        => value = redisValue;
 
     public RedisValue Serialize(in ReadOnlyMemory<byte>? value)
-        => value == null ? RedisValues.Zero : value.Value;
+        => value == null ? RedisValue.EmptyString : value.Value;
 }
