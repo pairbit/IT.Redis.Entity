@@ -4,8 +4,6 @@ namespace IT.Redis.Entity.Tests;
 
 public class ReadmeTest
 {
-    private readonly IDatabase _db;
-
     //Declaring an entity class with mutable keys
     class Document : IKeyReader
     {
@@ -132,12 +130,6 @@ public class ReadmeTest
         }
     }
 
-    public ReadmeTest()
-    {
-        var connection = ConnectionMultiplexer.Connect(Const.Connection);
-        _db = connection.GetDatabase()!;
-    }
-
 #if NETCOREAPP3_1_OR_GREATER
 
     [Test]
@@ -176,21 +168,21 @@ public class ReadmeTest
             Index = 1,
             Name = "doc1"
         };
-
-        _db.EntitySet(doc, reDoc);
+        var db = Shared.Db;
+        db.EntitySet(doc, reDoc);
 
         doc.Index = 2;
         doc.Name = "doc2";
 
-        _db.EntitySet(doc, reDoc);
-        Assert.That(_db.KeyDelete(doc.RedisKey), Is.True);
+        db.EntitySet(doc, reDoc);
+        Assert.That(db.KeyDelete(doc.RedisKey), Is.True);
 
         doc.Index = 3;
-        Assert.That(_db.EntityLoad(doc, reDoc), Is.False);
+        Assert.That(db.EntityLoad(doc, reDoc), Is.False);
         Assert.That(doc.Name, Is.EqualTo("doc2"));
 
         doc.Index = 1;
-        Assert.That(_db.EntityLoad(doc, reDoc), Is.True);
+        Assert.That(db.EntityLoad(doc, reDoc), Is.True);
         Assert.That(doc.Name, Is.EqualTo("doc1"));
 
         var redisKey = reDoc.KeyBuilder.BuildKey(guid, 1);
@@ -199,25 +191,25 @@ public class ReadmeTest
         var redisKey2 = KeyRebuilder.Default.BuildKey("app:docs", guid, 1);
         Assert.That(redisKey2, Is.EqualTo(redisKey));
 
-        var doc1 = _db.EntityGet(redisKey, reDoc);
+        var doc1 = db.EntityGet(redisKey, reDoc);
         Assert.That(doc1, Is.Not.Null);
         Assert.That(doc1.Guid, Is.Default);
         Assert.That(doc1.Name, Is.EqualTo("doc1"));
-        Assert.That(_db.KeyDelete(doc.RedisKey), Is.True);
+        Assert.That(db.KeyDelete(doc.RedisKey), Is.True);
 
         var redisKey3 = reDoc.KeyBuilder.BuildKey(guid, 3);
-        var doc3 = _db.EntityGet(redisKey3, reDoc);
+        var doc3 = db.EntityGet(redisKey3, reDoc);
         Assert.That(doc3, Is.Null);
 
         var rep = config.NewEntity<Person>();
 
         var person = new Person(12) { Name = "John" };
 
-        _db.EntitySet(person, rep);
+        db.EntitySet(person, rep);
 
         var person2 = new Person(12);
 
-        Assert.That(_db.EntityLoad(person2, rep), Is.True);
+        Assert.That(db.EntityLoad(person2, rep), Is.True);
 
         Assert.That(person.Name, Is.EqualTo(person2.Name));
 
@@ -229,7 +221,7 @@ public class ReadmeTest
 
         Assert.That(redisKey2, Is.EqualTo(redisKey));
 
-        Assert.That(_db.KeyDelete(person.RedisKey), Is.True);
+        Assert.That(db.KeyDelete(person.RedisKey), Is.True);
 
         var rem = config.NewEntity<Manual>();
 
@@ -237,8 +229,8 @@ public class ReadmeTest
 
         manual.SetKey(KeyBuilder.Default.BuildKey("app:manuals", 1));
 
-        _db.EntitySet(manual, rem);
+        db.EntitySet(manual, rem);
 
-        Assert.That(_db.KeyDelete(manual.RedisKey), Is.True);
+        Assert.That(db.KeyDelete(manual.RedisKey), Is.True);
     }
 }

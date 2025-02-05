@@ -14,11 +14,11 @@ public class KeyRebuilderTest
         var exception = Ex.Utf8FormatterNotFound(typeof(MyTypeId));
 
         Assert.That(Assert.Throws<ArgumentException>(() =>
-            KeyRebuilder.Default.RebuildKey(null, 0, default(MyTypeId))).Message,
+            KeyRebuilder.Default.RebuildKey(null, 0, default(MyTypeId)))!.Message,
             Is.EqualTo(exception.Message));
 
         Assert.That(Assert.Throws<ArgumentException>(() =>
-            KeyRebuilder.Fixed.RebuildKey(null, 0, default(MyTypeId))).Message,
+            KeyRebuilder.Fixed.RebuildKey(null, 0, default(MyTypeId)))!.Message,
             Is.EqualTo(exception.Message));
     }
 

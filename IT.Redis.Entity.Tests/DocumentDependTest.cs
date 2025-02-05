@@ -6,8 +6,6 @@ namespace IT.Redis.Entity.Tests;
 
 public class DocumentDependTest
 {
-    private readonly IDatabase _db;
-
     private static readonly RedisKey KeyPrefix = "doc:";
     private static readonly RedisKey Key = KeyPrefix.Append("1");
 
@@ -16,28 +14,23 @@ public class DocumentDependTest
         RedisEntity.Config = new AnnotationConfiguration(RedisValueFormatterRegistry.Default);
     }
 
-    public DocumentDependTest()
-    {
-        var connection = ConnectionMultiplexer.Connect(Const.Connection);
-        _db = connection.GetDatabase()!;
-    }
-
     [Test]
     public void Nullable_NotNullable()
     {
+        var db = Shared.Db;
         try
         {
-            _db.EntitySet(Key, new DocumentNullable());
+            db.EntitySet(Key, new DocumentNullable());
 
-            var doc2 = _db.EntityGet<DocumentNotNullable>(Key)!;
+            var doc2 = db.EntityGet<DocumentNotNullable>(Key)!;
 
-            _db.EntitySet(Key, doc2);
+            db.EntitySet(Key, doc2);
 
-            var doc = _db.EntityGet<DocumentNullable>(Key)!;
+            var doc = db.EntityGet<DocumentNullable>(Key)!;
         }
         finally
         {
-            _db.KeyDelete(Key);
+            db.KeyDelete(Key);
         }
     }
     
@@ -59,17 +52,18 @@ public class DocumentDependTest
     [Test]
     public void DependData()
     {
+        var db = Shared.Db;
         try
         {
             var doc = new DocumentDepend();
             DocumentDepend.New(doc, 1);
 
-            _db.EntitySet(Key, doc);
+            db.EntitySet(Key, doc);
 
             var doc2 = new DocumentDepend();
             doc2.NumCollection = new List<int>() { 4};
             
-            _db.EntityLoad(Key, doc2);
+            db.EntityLoad(Key, doc2);
 
             if (doc.Content != null && doc2.Content != null)
             {
@@ -114,7 +108,7 @@ public class DocumentDependTest
         }
         finally
         {
-            _db.KeyDelete(Key);
+            db.KeyDelete(Key);
         }
     }
 
@@ -137,10 +131,10 @@ public class DocumentDependTest
         var re = RedisEntity<DocumentWithReadOnlyKeys>.Default;
 
         Assert.That(doc.RedisKey, Is.Null);
-
+        var db = Shared.Db;
         try
         {
-            _db.EntitySet(doc, re.Fields[nameof(DocumentWithReadOnlyKeys.Data1)]);
+            db.EntitySet(doc, re.Fields[nameof(DocumentWithReadOnlyKeys.Data1)]);
 
             Assert.That(doc.RedisKey, Is.Not.Null);
             Assert.That(doc.RedisKey!.Length, Is.EqualTo(length));
@@ -148,11 +142,11 @@ public class DocumentDependTest
 
             doc.Data2 = "test-data2";
 
-            _db.EntitySet(doc, re.Fields[nameof(DocumentWithReadOnlyKeys.Data2)]);
+            db.EntitySet(doc, re.Fields[nameof(DocumentWithReadOnlyKeys.Data2)]);
         }
         finally
         {
-            _db.KeyDelete(doc.RedisKey);
+            db.KeyDelete(doc.RedisKey);
         }
     }
 }

@@ -14,8 +14,6 @@ namespace IT.Redis.Entity.Tests;
 
 public class DocumentTest
 {
-    private readonly IDatabase _db;
-
     private static readonly RedisKey KeyPrefix = "doc:";
     private static readonly RedisKey Key = KeyPrefix.Append("1");
 
@@ -26,9 +24,6 @@ public class DocumentTest
 
     public DocumentTest()
     {
-        var connection = ConnectionMultiplexer.Connect(Const.Connection);
-        _db = connection.GetDatabase()!;
-
         //RedisValueFormatterRegistry.RegisterEnumerableFactory(LinkedListFactory.Default, typeof(IReadOnlyCollection<>));
         //RedisValueFormatterRegistry.RegisterEnumerableFactory(StackFactory.Default, typeof(IEnumerable<>), typeof(IReadOnlyCollection<>));
         RedisValueFormatterRegistry.EnumerableFactoryRegistry.RegisterFactoriesEquatable(RegistrationBehavior.OverwriteExisting);
@@ -41,31 +36,33 @@ public class DocumentTest
     [Test]
     public void IReadOnlyDocument_SetTest()
     {
+        var db = Shared.Db;
         var doc = DocumentGenerator.New<DocumentPOCO>();
         try
         {
-            _db.EntitySet<IReadOnlyDocument>(Key, doc);
+            db.EntitySet<IReadOnlyDocument>(Key, doc);
 
-            var doc2 = _db.EntityGet<DocumentPOCO, IDocument>(Key);
+            var doc2 = db.EntityGet<DocumentPOCO, IDocument>(Key);
 
             Assert.That(ReferenceEquals(doc, doc2), Is.False);
             Assert.That(DocumentEqualityComparer.Default.Equals(doc, doc2), Is.True);
         }
         finally
         {
-            _db.KeyDelete(Key);
+            db.KeyDelete(Key);
         }
     }
 
     [Test]
     public void ReadOnlyDocument_SetTest()
     {
+        var db = Shared.Db;
         var doc = DocumentGenerator.New<DocumentPOCO>();
         try
         {
-            _db.EntitySet<IReadOnlyDocument>(Key, new ReadOnlyDocument(doc));
+            db.EntitySet<IReadOnlyDocument>(Key, new ReadOnlyDocument(doc));
 
-            var doc2 = _db.EntityGet<DocumentPOCO, IDocument>(Key);
+            var doc2 = db.EntityGet<DocumentPOCO, IDocument>(Key);
 
             Assert.That(ReferenceEquals(doc, doc2), Is.False);
             Assert.That(doc2!.TagIds!.Equals(doc!.TagIds), Is.True);
@@ -73,17 +70,18 @@ public class DocumentTest
         }
         finally
         {
-            _db.KeyDelete(Key);
+            db.KeyDelete(Key);
         }
     }
 
     [Test]
     public void ReadOnlyDocument_LoadTest()
     {
+        var db = Shared.Db;
         var doc = DocumentGenerator.New<DocumentPOCO>();
         try
         {
-            _db.EntitySet<IReadOnlyDocument>(Key, new ReadOnlyDocument(doc));
+            db.EntitySet<IReadOnlyDocument>(Key, new ReadOnlyDocument(doc));
 
             var doc2 = new DocumentPOCO();
             doc2.IntArray = new int[4];
@@ -97,7 +95,7 @@ public class DocumentTest
             //doc2.Decimals = new Queue<decimal?>(new decimal?[] { 4534 });
             doc2.Decimals = new Stack<decimal?>(new decimal?[] { 4534 });
             doc2.Chars = new Stack<char>(new char[] { '0' });
-            _db.EntityLoad<IDocument>(Key, doc2);
+            db.EntityLoad<IDocument>(Key, doc2);
 
             Assert.That(ReferenceEquals(doc, doc2), Is.False);
             Assert.That(doc2!.TagIds!.Equals(doc!.TagIds), Is.True);
@@ -105,7 +103,7 @@ public class DocumentTest
         }
         finally
         {
-            _db.KeyDelete(Key);
+            db.KeyDelete(Key);
         }
     }
 
@@ -142,9 +140,10 @@ public class DocumentTest
             NullableTuple = (null, -1),
 #endif
         };
+        var db = Shared.Db;
         try
         {
-            _db.EntitySet(Key, entity);
+            db.EntitySet(Key, entity);
 
             var entity2 = new SimpleRecord();
             entity2.StringCollection = new Stack<string?>();
@@ -155,7 +154,7 @@ public class DocumentTest
             entity2.BlockingCollection = new BlockingCollection<string?>();
             entity2.StringPairs = new List<KeyValuePair<string, string>>();
             entity2.StringDictionary = new Dictionary<string, string>() { { "4", "5" } };
-            _db.EntityLoad(Key, entity2);
+            db.EntityLoad(Key, entity2);
 
 #if NETCOREAPP3_1_OR_GREATER
             Assert.That(entity.ImmutableList!.Cast<int?>().SequenceEqual(entity2.ImmutableList!), Is.True);
@@ -189,7 +188,7 @@ public class DocumentTest
         }
         finally
         {
-            _db.KeyDelete(Key);
+            db.KeyDelete(Key);
         }
     }
 
@@ -202,7 +201,7 @@ public class DocumentTest
     public void Int32Test()
     {
         var doc = new MyRecInt { MyInt = int.MinValue };
-
+        var db = Shared.Db;
         var re = RedisEntity<MyRecInt>.Default;
         Assert.That(ReferenceEquals(re.Fields, re.AllFields));
         Assert.That(ReferenceEquals(re.ReadFields, re.AllFields));
@@ -210,13 +209,13 @@ public class DocumentTest
         Assert.That(re.Fields.Count, Is.EqualTo(1));
         try
         {
-            _db.EntitySet(Key, doc);
+            db.EntitySet(Key, doc);
 
-            var doc2 = _db.EntityGet<MyRecInt>(Key);
+            var doc2 = db.EntityGet<MyRecInt>(Key);
         }
         finally
         {
-            _db.KeyDelete(Key);
+            db.KeyDelete(Key);
         }
     }
 
@@ -260,15 +259,15 @@ public class DocumentTest
         var readOnlyField = re.AllFields[nameof(ClassFieldsTest.ReadOnlyField)];
         Assert.That(readOnlyField.CanWrite, Is.False);
         Assert.That(readOnlyField.CanRead, Is.True);
-
+        var db = Shared.Db;
         var key = "fieldClass";
         try
         {
-            _db.EntitySet(key, fieldClass);
+            db.EntitySet(key, fieldClass);
         }
         finally
         {
-            _db.KeyDelete(key);
+            db.KeyDelete(key);
         }
     }
 
@@ -298,13 +297,13 @@ public class DocumentTest
         };
         var idempty = U8($"app:doc:{Guid.Empty:N}");
         var idbytes = U8($"app:doc:{id:N}");
-
+        var db = Shared.Db;
         try
         {
             Assert.That(doc.RedisKeyBits, Is.EqualTo(1));
             Assert.That(doc.RedisKey, Is.Null);
 
-            Assert.That(_db.EntitySet(doc, fields[nameof(DocumentAnnotation.AttachmentIds)]), Is.True);
+            Assert.That(db.EntitySet(doc, fields[nameof(DocumentAnnotation.AttachmentIds)]), Is.True);
 
             Assert.That(doc.RedisKeyBits, Is.EqualTo(0));
             Assert.That(doc.RedisKey, Is.Not.Null);
@@ -314,7 +313,7 @@ public class DocumentTest
             Assert.That(doc2.RedisKey, Is.Null);
             Assert.That(doc2.RedisKeyBits, Is.EqualTo(0));
 
-            Assert.That(_db.EntityLoad(doc2, re), Is.False);
+            Assert.That(db.EntityLoad(doc2, re), Is.False);
 
             Assert.That(doc2.RedisKeyBits, Is.EqualTo(0));
             Assert.That(doc2.RedisKey, Is.Not.Null);
@@ -323,16 +322,16 @@ public class DocumentTest
             Assert.That(doc2.RedisKeyBits, Is.EqualTo(1));
             Assert.That(doc2.RedisKey.SequenceEqual(idempty), Is.True);
 
-            Assert.That(_db.EntityLoad(doc2, re), Is.True);
+            Assert.That(db.EntityLoad(doc2, re), Is.True);
 
             Assert.That(doc2.RedisKeyBits, Is.EqualTo(0));
             Assert.That(doc2.RedisKey.SequenceEqual(idbytes), Is.True);
             Assert.That(doc2.AttachmentIds, Is.EqualTo(doc.AttachmentIds));
             Assert.That(doc2.Name, Is.Null);
 
-            Assert.That(_db.EntitySet(doc, re.Fields[nameof(DocumentAnnotation.Name)]), Is.True);
+            Assert.That(db.EntitySet(doc, re.Fields[nameof(DocumentAnnotation.Name)]), Is.True);
 
-            var doc3 = _db.EntityGet<DocumentAnnotation>(doc2.RedisKey, re);
+            var doc3 = db.EntityGet<DocumentAnnotation>(doc2.RedisKey, re);
 
             Assert.That(doc3, Is.Not.Null);
             Assert.That(doc3.Id, Is.EqualTo(Guid.Empty));
@@ -346,7 +345,7 @@ public class DocumentTest
         finally
         {
             if (doc.RedisKey != null)
-                _db.KeyDelete(doc.RedisKey);
+                db.KeyDelete(doc.RedisKey);
         }
     }
 
@@ -360,13 +359,13 @@ public class DocumentTest
         };
 
         var idbase64 = Convert.ToBase64String(doc.Id.ToByteArray()).Substring(0, 22);
-
+        var db = Shared.Db;
         try
         {
             Assert.That(doc.RedisKey, Is.Null);
             doc.RedisKeyBits = 1;
 
-            _db.EntitySet(doc, readerWriter);
+            db.EntitySet(doc, readerWriter);
 
             Assert.That(doc.RedisKey, Is.Not.Null);
             Assert.That(doc.RedisKey.SequenceEqual(U8("app:doc:" + idbase64)), Is.True);
@@ -375,7 +374,7 @@ public class DocumentTest
         finally
         {
             if (doc.RedisKey != null)
-                _db.KeyDelete(doc.RedisKey);
+                db.KeyDelete(doc.RedisKey);
         }
     }
 
