@@ -1,6 +1,6 @@
 ﻿namespace IT.Redis.Entity.Formatters;
 
-public class UriFormatter : IRedisValueFormatter<Uri>
+public class UriFormatter : IRedisValueFormatter<Uri?>
 {
     public static readonly UriFormatter Default = new();
 

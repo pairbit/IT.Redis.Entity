@@ -36,18 +36,18 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
 
             if (formatter == null)
             {
-                Cache<T>._formatter = (IRedisValueFormatter<T>)Activator.CreateInstance(RedisValueFormatterDefaultType.MakeGenericType(type))!;
+                _formatter = (IRedisValueFormatter<T>)Activator.CreateInstance(RedisValueFormatterDefaultType.MakeGenericType(type))!;
             }
             else
             {
-                Cache<T>._formatter = formatter;
+                _formatter = formatter;
                 Check<T>._registered = true;
             }
         }
     }
 
     static readonly Type RedisValueFormatterDefaultType = typeof(RedisValueFormatterDefault<>);
-    static readonly Type EnumFormatterType = typeof(EnumFormatter<,>);
+    static readonly Type EnumFormatterType = typeof(EnumFormatterRegistry<,>);
     static readonly Type UnmanagedFormatterType = typeof(UnmanagedFormatter<>);
 
     static readonly Type StringDictionaryFormatterType = typeof(StringDictionaryFormatter<>);

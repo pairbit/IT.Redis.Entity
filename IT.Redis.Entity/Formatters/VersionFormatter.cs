@@ -10,7 +10,7 @@ public class VersionFormatter : IRedisValueFormatter<Version>
 
     public void Deserialize(in RedisValue redisValue, ref Version? value)
     {
-        if (redisValue == RedisValue.EmptyString)
+        if (redisValue.IsNullOrEmpty)
         {
             value = null;
         }
