@@ -82,7 +82,7 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
         Register(UInt64Formatter.Default);
         Register(SingleFormatter.Default);
         Register(DoubleFormatter.Default);
-        Register(DecimalFormatter.Default);
+        Register(UnmanagedFormatter<decimal>.Default);
         Register(BigIntegerFormatter.Default);
 
         Register(CharFormatter.Default);
@@ -93,7 +93,7 @@ public class RedisValueFormatterRegistry : IRedisValueFormatter
         Register(DateTimeFormatter.Default);
         Register(DateTimeOffsetFormatter.Default);
         Register(TimeSpanFormatter.Default);
-        Register(GuidFormatter.Default);
+        Register(UnmanagedFormatter<Guid>.Default);
 
         Register(ReadOnlyMemoryByteFormatter.Default);
 #if NET6_0_OR_GREATER

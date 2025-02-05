@@ -6,6 +6,8 @@ namespace IT.Redis.Entity.Formatters;
 
 public class UnmanagedFormatter<T> : NullableFormatter<T> where T : unmanaged
 {
+    public static readonly UnmanagedFormatter<T> Default = new();
+
     public override void DeserializeNotNull(in RedisValue redisValue, ref T value)
     {
         var span = ((ReadOnlyMemory<byte>)redisValue).Span;
